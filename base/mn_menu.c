@@ -126,7 +126,6 @@ static int slamInTicks = 9;
 #endif
 
 boolean askforquit;
-boolean typeofask;
 static boolean FileMenuKeySteal;
 static boolean slottextloaded;
 static char SlotText[6][SLOTTEXTLEN+2];
@@ -136,6 +135,7 @@ static int slotptr;
 static int currentSlot;
 static int quicksave;
 static int quickload;
+static int typeofask;
 
 static MenuItem_t MainItems[] =
 {

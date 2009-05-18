@@ -129,6 +129,7 @@ SPR_AMP1,
 SPR_AMP2,
 SPR_AMB1,
 SPR_AMB2,
+SPR_NULL, /* for the terminator in sprnames[] */
 NUMSPRITES
 } spritenum_t;
 

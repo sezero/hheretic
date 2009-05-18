@@ -59,7 +59,10 @@ void		**lumpcache;
 void strupr (char *s)
 {
     while (*s)
-	*s++ = toupper(*s);
+    {
+	*s = toupper(*s);
+	s++;
+    }
 }
 
 /*

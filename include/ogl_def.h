@@ -177,5 +177,6 @@ typedef struct
 
 void R_RenderSky(int hemis);
 void R_SkyInit();
+void R_RenderSkyHemispheres(int hemis);
 
 #endif

@@ -856,6 +856,11 @@ boolean AM_clipMline(mline_t *ml, fline_t *fl)
       tmp.y = fl->a.y + (dy*(-fl->a.x))/dx;
       tmp.x = 0;
     }
+    else /* avoid compiler warning */
+    {
+      tmp.x = 0;
+      tmp.y = 0;
+    }
     if (outside == outcode1)
     {
       fl->a = tmp;

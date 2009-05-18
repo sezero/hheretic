@@ -653,8 +653,7 @@ void P_ConvexCarver(subsector_t *ssec, int num, divline_t *list)
                 // Add the new vertex. Also modify the sidelist.
                 edgepoints =
 (fvertex_t*)realloc(edgepoints,(++numedgepoints)*sizeof(fvertex_t));
-                if(numedgepoints >= MAX_CC_SIDES) I_Error("Too many points in
-carver.\n");
+                if(numedgepoints >= MAX_CC_SIDES) I_Error("Too many points in carver.\n");
 
                 // Make room for the new vertex.
                 memmove(edgepoints+endIdx+1, edgepoints+endIdx,

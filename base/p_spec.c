@@ -385,6 +385,9 @@ fixed_t	P_FindHighestFloorSurrounding(sector_t *sec)
 //	FIND NEXT HIGHEST FLOOR IN SURROUNDING SECTORS
 //
 //==================================================================
+
+#define MAX_ADJOINING_SECTORS	20	/* 20 adjoining sectors max! */
+
 fixed_t	P_FindNextHighestFloor(sector_t *sec,int currentheight)
 {
 	int			i;
@@ -393,9 +396,9 @@ fixed_t	P_FindNextHighestFloor(sector_t *sec,int currentheight)
 	line_t		*check;
 	sector_t	*other;
 	fixed_t		height = currentheight;
-	fixed_t		heightlist[20];		// 20 adjoining sectors max!
-	
-	for (i =0,h = 0 ;i < sec->linecount ; i++)
+	fixed_t		heightlist[MAX_ADJOINING_SECTORS];
+
+	for (i = 0, h = 0; i < sec->linecount; i++)
 	{
 		check = sec->lines[i];
 		other = getNextSector(check,sec);
@@ -403,16 +406,27 @@ fixed_t	P_FindNextHighestFloor(sector_t *sec,int currentheight)
 			continue;
 		if (other->floorheight > height)
 			heightlist[h++] = other->floorheight;
+		if (h >= MAX_ADJOINING_SECTORS)
+		{
+			printf("Sector with more than %d adjoining sectors\n",
+							MAX_ADJOINING_SECTORS);
+			break;
+		}
 	}
-	
+
 	//
 	// Find lowest height in list
 	//
+	if(!h)
+		return currentheight;
+
 	min = heightlist[0];
-	for (i = 1;i < h;i++)
+	for (i = 1; i < h; i++)
+	{
 		if (heightlist[i] < min)
 			min = heightlist[i];
-			
+	}
+
 	return min;
 }
 
@@ -1011,7 +1025,7 @@ int EV_DoDonut(line_t *line)
 		s2 = getNextSector(s1->lines[0],s1);
 		for (i = 0;i < s2->linecount;i++)
 		{
-			if ((!s2->lines[i]->flags & ML_TWOSIDED) ||
+			if (!(s2->lines[i]->flags & ML_TWOSIDED) ||
 				(s2->lines[i]->backsector == s1))
 				continue;
 			s3 = s2->lines[i]->backsector;

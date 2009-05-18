@@ -154,8 +154,8 @@ void *Z_Malloc (int size, int tag, void *user)
 // of sufficient size, throwing out any purgable blocks along the way
 //
 	size += sizeof(memblock_t);	// account for size of block header
-	
-	
+	size = (size + 7) & ~7;		// align to 8-byte boundary
+
 //
 // if there is a free block behind the rover, back up over them
 //

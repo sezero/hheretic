@@ -92,7 +92,8 @@ int eventtail;
 void D_PostEvent(event_t *ev)
 {
 	events[eventhead] = *ev;
-	eventhead = (++eventhead)&(MAXEVENTS-1);
+	eventhead++;
+	eventhead &= (MAXEVENTS - 1);
 }
 
 //---------------------------------------------------------------------------
@@ -107,18 +108,20 @@ void D_ProcessEvents(void)
 {
 	event_t *ev;
 
-	for(; eventtail != eventhead; eventtail = (++eventtail)&(MAXEVENTS-1))
+	while (eventtail != eventhead)
 	{
 		ev = &events[eventtail];
 		if(F_Responder(ev))
 		{
-			continue;
+			goto _next_ev;
 		}
 		if(MN_Responder(ev))
 		{
-			continue;
+			goto _next_ev;
 		}
 		G_Responder(ev);
+	_next_ev:
+		eventtail = (eventtail + 1) & (MAXEVENTS - 1);
 	}
 }
 

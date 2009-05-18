@@ -453,12 +453,12 @@ void CheckAbort (void)
 		I_StartTic ();
 
 	I_StartTic ();
-	for ( ; eventtail != eventhead
-	; eventtail = (++eventtail)&(MAXEVENTS-1) )
+	while (eventtail != eventhead)
 	{
 		ev = &events[eventtail];
 		if (ev->type == ev_keydown && ev->data1 == KEY_ESCAPE)
 			I_Error ("Network game synchronization aborted.");
+		eventtail = (eventtail + 1) & (MAXEVENTS - 1);
 	}
 }
 

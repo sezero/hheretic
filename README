@@ -1,0 +1,23 @@
+HHeretic v0.1 README
+
+Configuring
+-----------
+./configure for software.
+./configure --enable-gl for 3D accel.
+
+!!!IMPORTANT!!!
+You *MUST* do a 'make clean' between software and GL builds.
+
+HHeretic currently expects a heretic.wad in the dir it runs from.
+
+Send bugs to theoddone@quakefiles.com
+
+Known Bugs
+----------
+OpenGL:
+ - Some tall rooms can be seen through skies (ie. skies not clipped properly).
+
+Thanks
+------
+Jeff Mrochuk
+All who helped me test

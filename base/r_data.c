@@ -1,6 +1,7 @@
 
 // R_data.c
 
+#include <stdlib.h>
 #include "doomdef.h"
 #include "r_local.h"
 #include "p_local.h"

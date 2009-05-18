@@ -1,5 +1,6 @@
 // R_planes.c
 
+#include <stdlib.h>
 #include "doomdef.h"
 #include "r_local.h"
 
@@ -472,5 +473,5 @@ extern int columnofs[MAXWIDTH];
 		
 		Z_ChangeTag (tempSource, PU_CACHE);
 	}
-#endif !RENDER3D
+#endif /* !RENDER3D */
 }

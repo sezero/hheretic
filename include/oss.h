@@ -15,10 +15,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef OSS_H
-#define OSS_H
+
+#ifndef _SNDOSS_H
+#define _SNDOSS_H
 
 
+#include "config.h"
 #include "audio_plugin.h"
 
 
@@ -32,7 +34,5 @@ typedef struct
 }
 OSSConfig;
 
-extern OSSConfig oss_cfg;
+#endif	/* _SNDOSS_H */
 
-
-#endif

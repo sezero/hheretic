@@ -1,5 +1,7 @@
 
 // P_enemy.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

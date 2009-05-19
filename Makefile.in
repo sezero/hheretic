@@ -1,5 +1,5 @@
-# HHeretic Makefile $Revision$
-#
+# HHeretic Makefile
+# $Revision$
 #
 # svga			build Software (SVGALib) version
 # sdl			build Software (SDL) version

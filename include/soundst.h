@@ -1,5 +1,7 @@
 
 // soundst.h
+// $Revision$
+// $Date$
 
 #ifndef __SOUNDSTH__
 #define __SOUNDSTH__

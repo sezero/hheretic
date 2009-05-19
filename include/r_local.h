@@ -1,4 +1,6 @@
 // R_local.h
+// $Revision$
+// $Date$
 
 #ifndef __R_LOCAL__
 #define __R_LOCAL__

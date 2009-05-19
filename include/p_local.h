@@ -1,5 +1,7 @@
 
 // P_local.h
+// $Revision$
+// $Date$
 
 #ifndef __P_LOCAL__
 #define __P_LOCAL__

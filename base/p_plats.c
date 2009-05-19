@@ -1,5 +1,7 @@
 
 // P_plats.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

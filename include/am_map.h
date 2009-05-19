@@ -1,3 +1,7 @@
+// am_map.h
+// $Revision$
+// $Date$
+
 #ifndef __AMMAP_H__
 #define __AMMAP_H__
 

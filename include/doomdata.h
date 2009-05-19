@@ -1,4 +1,6 @@
 // DoomData.h
+// $Revision$
+// $Date$
 
 // all external data is defined here
 // most of the data is loaded into different structures at run time

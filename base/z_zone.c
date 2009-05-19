@@ -1,4 +1,6 @@
 // Z_zone.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

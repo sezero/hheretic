@@ -5,6 +5,9 @@
 //		actually, it wasn't modified, but rather we are currently using this
 // 	older version of D_NET.C, since the new one doesn't seem to work with
 //		ticdup set to greater than one.
+//
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

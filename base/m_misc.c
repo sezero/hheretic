@@ -1,5 +1,7 @@
 
 // M_misc.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include <sys/stat.h>

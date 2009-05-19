@@ -1,5 +1,7 @@
 
 // G_game.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

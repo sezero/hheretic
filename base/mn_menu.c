@@ -1,5 +1,7 @@
 
 // MN_menu.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include <ctype.h>

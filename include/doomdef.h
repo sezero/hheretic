@@ -1,5 +1,7 @@
 
 // DoomDef.h
+// $Revision$
+// $Date$
 
 #ifndef __DOOMDEF__
 #define __DOOMDEF__

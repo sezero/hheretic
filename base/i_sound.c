@@ -1,4 +1,6 @@
-// $Id$
+// i_sound.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include <math.h>	/* pow() */

@@ -5,6 +5,9 @@
 //**
 //** This version has the tall-sector-crossing-precision-bug fixed.
 //**
+//** $Revision$
+//** $Date$
+//**
 //**************************************************************************
 
 #include "h2stdinc.h"

@@ -1,3 +1,7 @@
+// i_sound.h
+// $Revision$
+// $Date$
+
 #ifndef __SOUND__
 #define __SOUND__
 

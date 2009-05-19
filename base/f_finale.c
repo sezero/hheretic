@@ -1,4 +1,6 @@
 // F_finale.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include <ctype.h>	// for toupper()

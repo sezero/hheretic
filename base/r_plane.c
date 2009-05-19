@@ -1,4 +1,6 @@
 // R_planes.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

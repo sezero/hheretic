@@ -1,5 +1,7 @@
 
 // SB_bar.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

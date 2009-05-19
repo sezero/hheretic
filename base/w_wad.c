@@ -1,4 +1,6 @@
 // W_wad.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include <fcntl.h>

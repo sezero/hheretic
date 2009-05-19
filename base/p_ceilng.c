@@ -1,3 +1,6 @@
+// p_ceilng.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

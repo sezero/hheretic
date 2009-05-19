@@ -1,4 +1,7 @@
 // R_things.c
+// $Revision$
+// $Date$
+
 #include "h2stdinc.h"
 #include <math.h>
 #include "doomdef.h"

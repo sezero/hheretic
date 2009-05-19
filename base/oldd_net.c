@@ -1,4 +1,6 @@
 // I_pcnet.m
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

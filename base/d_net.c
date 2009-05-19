@@ -1,6 +1,9 @@
 
 // d_net.c
 // This version has the fixed ticdup code
+//
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

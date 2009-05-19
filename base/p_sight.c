@@ -1,4 +1,6 @@
 // P_sight.c
+// $Revision$
+// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

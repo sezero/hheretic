@@ -6,7 +6,7 @@
 
 #include "h2stdinc.h"
 #include <sys/time.h>
-#include <SDL/SDL.h> 
+#include "SDL.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "doomdef.h"

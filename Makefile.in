@@ -121,7 +121,5 @@ clean:
 	$(RM) sdl/*.o
 
 %.o: %.c
-	$(CC) $< -o $@ -c $(CFLAGS) 
+	$(CC) $< -o $@ -c $(CFLAGS) $(SDLFLAGS)
 
-%.o: %.cpp
-	$(CXX) $< -o $@ -c $(CPPFLAGS)

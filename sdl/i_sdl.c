@@ -6,7 +6,7 @@
 
 #include "h2stdinc.h"
 #include <sys/time.h>
-#include <SDL/SDL.h> 
+#include "SDL.h"
 #include "doomdef.h"
 #include "r_local.h"
 #include "p_local.h"    // for P_AproxDistance

@@ -1,7 +1,14 @@
-# This Makefile understands the following targets:
+# HHeretic Makefile $Revision$
 #
-# sdl			build SDL (software) version
+#
+# svga			build Software (SVGALib) version
+# sdl			build Software (SDL) version
+# opengl		build OpenGL (SDL) version
 # clean:		remove all intermediate files
+#
+# It is ESSENTIAL that you run make clean between different
+# types of builds or different types of targets.
+#
 
 # Basic stuff
 SHELL = /bin/sh
@@ -13,21 +20,27 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 infodir = $(prefix)/info
-libdir = $(prefix)/lib/gnudl
+libdir = $(prefix)/lib
 mandir = $(prefix)/man/man1
 includedir = $(prefix)/include
 
 CC = @CC@
 DEFS = @DEFS@
-CPPFLAGS = @CPPFLAGS@ @CFLAGS@
-CFLAGS = $(CPPFLAGS) 
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
-BLIBS = @BASELIBS@
-GLLIBS = @GLLIBS@ -L/usr/X11R6/lib -lGL -lGLU
-SDLLIBS = @SDL_LIBS@ 
-SDLFLAGS = @SDL_CFLAGS@
+LIBS = @LIBS@
+BASELIBS = @LIBS@
+THREAD_LIBS = @THREAD_LIBS@
+X11_INC = @X11_INC@
+X11_LIB = @X11_LIB@
+GLLIBS = @GLLIBS@
+SVGALIBS = @SVGALIBS@
+SDL_LIBS = @SDL_LIBS@
+SDL_CFLAGS = @SDL_CFLAGS@
 GLHEXEN = @GLHEXEN@
-HAVE_SDL = @HAVESDL@
+SVGAHEXEN = @SVGAHEXEN@
+SND_MODULE= @SND_MODULE@
 
 # Directories
 
@@ -37,18 +50,42 @@ SRCDIR    = @srcdir@
 VPATH     = @srcdir@
 MODULE    = none
 
-INCSUBDIR = include
+INCSUBDIR = ./include
 
-CPPFLAGS += -I./include
+CPPFLAGS += -I$(INCSUBDIR)
+ifneq ($(SVGAHEXEN),true)
+ifneq ($(X11_INC),)
+CPPFLAGS += -I$(X11_INC)
+endif
+CPPFLAGS += $(SDL_CFLAGS)
+endif
+
+ifneq ($(X11_LIB),)
+GLLIBS := -L$(X11_LIB) $(GLLIBS)
+endif
 
 # Objects to build
 
-SDLOBJS = \
-	sdl/i_sdl.o
+OBJ_SYS  = base/i_linux.o
+OBJ_SVGA = svgalib/i_svgalib.o
+OBJ_SWSDL = sdl/i_sdl.o
+OBJ_GLSDL = sdl/i_sdlgl.o
+OBJ_OSS = base/oss.o base/i_sound.o
+OBJ_SDLAUDIO = sdl/i_sndsdl.o
+OBJ_SDLMIXER = base/mmus2mid.o sdl/i_sdlmixer.o
 
-GLBASE = @GLBASE@
+ifeq ($(SND_MODULE),oss)
+OBJ_SND:= $(OBJ_OSS)
+BASELIBS:=$(BASELIBS) $(THREAD_LIBS)
+endif
+ifeq ($(SND_MODULE),sdl)
+OBJ_SND:= $(OBJ_SDLAUDIO)
+endif
+ifeq ($(SND_MODULE),sdlmixer)
+OBJ_SND:= $(OBJ_SDLMIXER)
+endif
 
-GLOBJS = \
+OBJ_OPENGL = \
 	opengl/ogl_clip.o \
 	opengl/ogl_draw.o \
 	opengl/ogl_rend.o \
@@ -57,10 +94,7 @@ GLOBJS = \
 	opengl/ogl_tex.o \
 	opengl/m_bams.o
 
-BASEOBJS = \
-	base/i_linux.o \
-	base/oss.o \
-	base/i_sound.o \
+OBJ_BASE = \
 	base/am_map.o \
 	base/ct_chat.o \
 	base/d_net.o \
@@ -103,23 +137,26 @@ BASEOBJS = \
 	base/w_wad.o \
 	base/z_zone.o
 
-ifeq "$(GLHEXEN)" "true"
-opengl: $(GLBASE) $(GLOBJS) $(BASEOBJS)
-	$(CC) -o hheretic-gl $(GLBASE) $(GLOBJS) $(BASEOBJS) $(GLLIBS) $(SDLLIBS)
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
+
+
+ifeq ($(SVGAHEXEN),true)
+svga: $(OBJ_SYS) $(OBJ_SND) $(OBJ_SVGA) $(OBJ_BASE)
+	$(CC) $(LDFLAGS) $(OBJ_SYS) $(OBJ_SND) $(OBJ_SVGA) $(OBJ_BASE) -o hheretic-svga $(BASELIBS) $(SVGALIBS)
 else
-ifeq "$(HAVE_SDL)" "yes"
-sdl: $(SDLOBJS) $(BASEOBJS)
-	$(CC) -o hheretic-sdl $(SDLOBJS) $(BASEOBJS) $(SDLLIBS)
+
+ifeq ($(GLHEXEN),true)
+opengl: $(OBJ_SYS) $(OBJ_SND) $(OBJ_GLSDL) $(OBJ_OPENGL) $(OBJ_BASE)
+	$(CC) $(LDFLAGS) $(OBJ_SYS) $(OBJ_SND) $(OBJ_GLSDL) $(OBJ_OPENGL) $(OBJ_BASE) -o hheretic-gl $(BASELIBS) $(GLLIBS) $(SDL_LIBS)
+else
+sdl: $(OBJ_SYS) $(OBJ_SND) $(OBJ_SWSDL) $(OBJ_BASE)
+	$(CC) $(LDFLAGS) $(OBJ_SYS) $(OBJ_SND) $(OBJ_SWSDL) $(OBJ_BASE) -o hheretic-sdl $(BASELIBS) $(SDL_LIBS)
 endif
+
 endif
 
 clean:
-	$(RM) base/*.o
-	$(RM) x11/*.o
-	$(RM) svgalib/*.o
-	$(RM) opengl/*.o
-	$(RM) sdl/*.o
-
-%.o: %.c
-	$(CC) $< -o $@ -c $(CFLAGS) $(SDLFLAGS)
+	$(RM) base/*.o opengl/*.o sdl/*.o svgalib/*.o
 

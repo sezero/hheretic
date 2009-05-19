@@ -1,94 +1,146 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
-AC_INIT([hheretic], [0.1])
+AC_INIT([hheretic], [0.2])
 AC_REVISION($Revision$)
 AC_CONFIG_AUX_DIR([autotools])
 AC_CONFIG_SRCDIR(base/am_map.c)
 AC_CONFIG_HEADER(include/config.h)
 
-dnl **** Command-line arguments ****
-
+dnl ==================================================================
 dnl Default values
-GLHEXEN="false"
+dnl ==================================================================
+
+GLHEXEN="true"
+SVGAHEXEN="false"
+no_svga="yes"
+
+THREAD_LIBS=""
 GLLIBS=""
-BASELIBS=""
-LIBS="-L/usr/X11R6/lib"
-HAVEGL="no"
-BUILDNAMES=""
+SVGALIBS=""
+
+dnl ==================================================================
+dnl Command-line args. Check for mutually-exclusive options.
+dnl ==================================================================
+
+AC_ARG_ENABLE(fullscreen,
+AC_HELP_STRING([--enable-fullscreen], [Run fullscreen by default [[default=no]]]),
+							[], [enable_fullscreen=no])
+if test x$enable_fullscreen = xyes; then
+	AC_DEFINE(FULLSCREEN_DEFAULT, 1, [Define if want to run fullscreen by default instead of windowed])
+fi
+
+AC_ARG_ENABLE(asm,
+AC_HELP_STRING([--disable-asm], [Disable assembly language [[default=no]]]),
+							[], [enable_asm=yes])
+if test x$enable_asm != xyes; then
+	AC_DEFINE(_DISABLE_ASM, 1, [Define if not want to use assembly language])
+fi
 
 AC_ARG_ENABLE(gl,
-[  --enable-gl	 		Enable OpenGL mode],
-[GLHEXEN="true";SDL_VERSION="1.1.2"; AC_DEFINE(RENDER3D, 1, [Define if building with OpenGL support])],
-[SDL_VERSION="1.1.0"])
+AC_HELP_STRING([--disable-gl], [Disable OpenGL version [[default=no]]]),
+						[], [enable_gl=$no_svga])
+if test x$enable_gl = xyes; then
+	if test x$no_svga = xno; then
+	    AC_MSG_ERROR([*** --enable-gl and --enable-svga can not be used together])
+	fi
+	AC_DEFINE(RENDER3D, 1, [Define if building with OpenGL support])
+	SDL_VERSION="1.1.2"
+else
+	GLHEXEN="false"
+	SDL_VERSION="1.1.0"
+fi
 
 AC_SUBST(GLHEXEN)
-AC_SUBST(SVGALIBS)
+AC_SUBST(SVGAHEXEN)
 
-AH_VERBATIM([_REENTRANT],
-[/* For pthread support in OSS audio code. */
-#ifndef _REENTRANT
-# undef _REENTRANT
-#endif])
+SND_MODULE="oss"
 
-AH_VERBATIM([_THREAD_SAFE],
-[/* For pthread support in OSS audio code. */
-#ifndef _THREAD_SAFE
-# undef _THREAD_SAFE
-#endif])
+AC_SUBST(SND_MODULE)
 
-AC_DEFINE(_REENTRANT)
-AC_DEFINE(_THREAD_SAFE)
-AC_DEFINE(NORANGECHECKING, 1, [Define to not compile most parameter validation debugging code])
 
-dnl **** Check for some programs ****
+dnl ==================================================================
+dnl Checks for programs.
+dnl ==================================================================
 
 AC_PROG_CC
 AC_PROG_CPP
 
-dnl **** Check for some libraries ****
 
-dnl Check for pthread
-AC_CHECK_LIB(pthread, pthread_join, [BASELIBS="-lpthread"])
+dnl ==================================================================
+dnl Checks for header files.
+dnl ==================================================================
 
-AC_SUBST(BASELIBS)
+AC_CHECK_HEADERS(\
+	dlfcn.h \
+	linux/cdrom.h \
+	sys/cdio.h \
+	sys/soundcard.h \
+	linux/soundcard.h \
+	machine/soundcard.h \
+	soundcard.h \
+	stdint.h \
+	inttypes.h \
+	strings.h
+)
+AC_HEADER_STAT()
 
-dnl Check for SDL
-AM_PATH_SDL($SDL_VERSION,
-	[HAVESDL="yes";GLBASE="sdl/i_sdlgl.o";BUILDNAMES="sdl $BUILDNAMES"],
-	[HAVESDL="no"]
+
+dnl ==================================================================
+dnl Checks for typedefs, structures, and compiler characteristics
+dnl ==================================================================
+
+AC_C_CONST()
+AC_C_INLINE()
+AC_C_CHAR_UNSIGNED()
+AC_TYPE_SIZE_T()
+
+AC_CHECK_SIZEOF(char,0)
+AC_CHECK_SIZEOF(short,0)
+AC_CHECK_SIZEOF(int,0)
+AC_CHECK_SIZEOF(long,0)
+AC_CHECK_SIZEOF(long long,0)
+AC_CHECK_SIZEOF(size_t,0)
+AC_CHECK_SIZEOF(void *,0)
+AC_CHECK_SIZEOF(float,0)
+AC_CHECK_SIZEOF(double,0)
+AC_CHECK_SIZEOF(long double,0)
+
+AC_FUNC_ALLOCA
+AC_FUNC_MEMCMP
+
+AC_C_BIGENDIAN
+
+dnl === Check for underscore on external symbols =====================
+AC_MSG_CHECKING(whether external symbols need an underscore prefix)
+AC_TRY_LINK(
+	[asm(".long _bar");
+	int bar;],
+	[],
+	AC_DEFINE(HAVE_SYM_PREFIX_UNDERSCORE, 1, [Define this if C symbols are prefixed with an underscore]) AC_MSG_RESULT(yes),
+	AC_MSG_RESULT(no)
 )
 
-AC_SUBST(GLLIBS)
-AC_SUBST(SDL_OGL)
-AC_SUBST(HAVESDL)
-AC_SUBST(GLBASE)
+dnl === Check if the GCC __builtin_expect keyword is available =======
+AH_VERBATIM([HAVE___BUILTIN_EXPECT],
+[/* Define this if the GCC __builtin_expect keyword is available */
+#undef HAVE___BUILTIN_EXPECT
+#ifndef HAVE___BUILTIN_EXPECT
+# define __builtin_expect(x,c) x
+#endif])
+AC_MSG_CHECKING(for __builtin_expect)
+AC_TRY_COMPILE(
+	[long (*foo) (long, long) = __builtin_expect;],
+	[],
+	AC_DEFINE(HAVE___BUILTIN_EXPECT) AC_MSG_RESULT(yes),
+	AC_MSG_RESULT(no)
+)
 
-AC_CHECK_LIB(dl, dlopen)
-AC_CHECK_LIB(m, sqrt)
-
-dnl Check for GL libraries
-
-if test "$GLHEXEN" = "true"
-then
-    AC_CHECK_LIB(GL, glBindTexture,[LIBS="$LIBS -lGL";]
-      AC_CHECK_LIB(GLU, gluOrtho2D, [HAVEGL="yes"],
-        AC_CHECK_LIB(MesaGL, glBindTexture,[LIBS="$LIBS -lMesaGL";]
-	  AC_CHECK_LIB(MesaGLU, gluOrtho2D, [HAVEGL="yes"], HAVEGL="no"),
-	  HAVEGL="no")
-	),
-        AC_CHECK_LIB(MesaGL, glBindTexture,[LIBS="$LIBS -lMesaGL";]
-	  AC_CHECK_LIB(MesaGLU, gluOrtho2D, [HAVEGL="yes"], HAVEGL="no"),
-	HAVEGL="no")
-    )
-fi
-
-dnl **** Check for gcc strength-reduce bug ****
-
+dnl === Check for gcc strength-reduce bug ============================
 if test "x${GCC}" = "xyes"
 then
   CFLAGS="$CFLAGS -Wall"
-  AC_CACHE_CHECK( "for gcc strength-reduce bug", ac_cv_c_gcc_strength_bug,
+  AC_CACHE_CHECK( [for gcc strength-reduce bug], ac_cv_c_gcc_strength_bug,
                   AC_TRY_RUN([
 int main(void) {
   static int Array[[3]];
@@ -106,68 +158,153 @@ int main(void) {
   fi
 fi
 
-dnl **** Check for underscore on external symbols ****
 
-AC_CACHE_CHECK("whether external symbols need an underscore prefix",
-               ac_cv_c_extern_prefix,
-[saved_libs=$LIBS
-LIBS="conftest_asm.s $LIBS"
-cat > conftest_asm.s <<EOF
-	.globl _ac_test
-_ac_test:
-	.long 0
-EOF
-AC_TRY_LINK([extern int ac_test;],[if (ac_test) return 1],
-            ac_cv_c_extern_prefix="yes",ac_cv_c_extern_prefix="no")
-LIBS=$saved_libs])
+dnl ==================================================================
+dnl Checks for library functions.
+dnl ==================================================================
 
-dnl **** Check for endianness ****
+AC_PATH_X
+X11_INC="$ac_x_includes"
+X11_LIB="$ac_x_libraries"
 
-AC_C_BIGENDIAN
+AC_CHECK_LIB(m, pow,, AC_MSG_ERROR([*** math library (-lm) appears broken]))
 
-dnl **** Check for functions ****
+AH_VERBATIM([_REENTRANT],
+[/* For pthread support in OSS audio code. */
+#ifndef _REENTRANT
+# undef _REENTRANT
+#endif])
 
-AC_FUNC_ALLOCA()
+AH_VERBATIM([_THREAD_SAFE],
+[/* For pthread support in OSS audio code. */
+#ifndef _THREAD_SAFE
+# undef _THREAD_SAFE
+#endif])
 
-dnl **** Check for header files ****
-
-AC_CHECK_HEADERS(\
-	linux/cdrom.h \
-	stdint.h \
-	inttypes.h \
-	strings.h
-)
-AC_HEADER_STAT()
-
-dnl **** Check for types ****
-
-AC_C_CONST()
-AC_C_INLINE()
-AC_TYPE_SIZE_T()
-AC_CHECK_SIZEOF(long long,0)
-
-if test "$HAVEGL" = "yes"
-then
-  if test "$HAVESDL" = "yes"
-  then
-    BUILDNAMES="OpenGL (SDL)"
-  fi 
+dnl == pthreads check: This is linux-centric (see the configure.in of SDL
+dnl == for other systems' pthreads support), but we need this for linux only
+AC_CHECK_LIB(pthread, pthread_join,
+	[HAVE_PTHREADS="yes";THREAD_LIBS="-lpthread";], [HAVE_PTHREADS="no";])
+if test "$SND_MODULE" = "oss";then
+	if test "$HAVE_PTHREADS" = "no"; then
+	   AC_MSG_ERROR([*** libpthread not found! (required by sound code.)])
+	fi
+	AC_DEFINE(_REENTRANT)
+	AC_DEFINE(_THREAD_SAFE)
 fi
 
-dnl **** Generate output files ****
+AC_SUBST(THREAD_LIBS)
+AC_SUBST(X11_INC)
+AC_SUBST(X11_LIB)
+
+dnl === Check for SDL ================================================
+AM_PATH_SDL($SDL_VERSION,
+	[HAVESDL="yes"],
+	[HAVESDL="no"]
+)
+
+if test "$SVGAHEXEN" = "false";then
+  if test "$HAVESDL" = "no"; then
+	AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
+  fi
+fi
+
+saved_libs="$LIBS"
+AC_CHECK_LIB(SDL_mixer, Mix_LoadMUS, [HAVE_SDLMIXER="yes"], [HAVE_SDLMIXER="no"])
+
+LIBS="$saved_libs"
+if test "$SND_MODULE" = "sdlmixer";then
+  if test $HAVE_SDLMIXER = "no";then
+	AC_MSG_ERROR([*** SDL_mixer not found!])
+  else
+	SDL_LIBS="$SDL_LIBS -lSDL_mixer"
+  fi
+fi
+
+AC_SUBST(SDL_CFLAGS)
+AC_SUBST(SDL_LIBS)
+
+dnl === Check for GL libraries =======================================
+saved_libs="$LIBS"
+if test x$ac_x_libraries != x; then
+   LIBS="$LIBS -L$ac_x_libraries "
+fi
+AC_CHECK_LIB(GL, glBindTexture, [GLLIBS="$GLLIBS -lGL";HAVEGL="yes";], [HAVEGL="no";])
+if test "$HAVEGL" = "yes"; then
+   LIBS="$LIBS $GLLIBS"
+   AC_CHECK_LIB(GLU, gluOrtho2D, [GLLIBS="$GLLIBS -lGLU";HAVEGLU="yes";], [HAVEGLU="no";])
+fi
+LIBS="$saved_libs"
+
+if test "$GLHEXEN" = "true"; then
+  if test "$HAVEGL" = "no"; then
+	AC_MSG_ERROR([*** GL library not found!])
+  fi
+  if test "$HAVEGLU" = "no"; then
+	AC_MSG_ERROR([*** GLU library not found!])
+  fi
+fi
+
+AC_SUBST(GLLIBS)
+
+dnl === Check for SVGALib ============================================
+AC_CHECK_LIB(vga, vga_setmode, [SVGALIBS="-lvga"; HAVESVGA="yes"], [HAVESVGA="no"])
+
+if test "$SVGAHEXEN" = "true";then
+  if test "$HAVESVGA" = "no"; then
+	AC_MSG_ERROR([*** SVGALib not found!])
+  fi
+fi
+
+AC_SUBST(SVGALIBS)
+
+
+dnl ==================================================================
+dnl Miscellaneous things
+dnl ==================================================================
+
+dnl === do not compile most parameter validation debugging code ======
+AC_DEFINE(NORANGECHECKING, 1, [Define to not compile most parameter validation debugging code])
+
+
+dnl ==================================================================
+dnl Generate output files
+dnl ==================================================================
 
 AC_OUTPUT(Makefile)
 
+
+dnl ==================================================================
+dnl Make a short report :
+dnl ==================================================================
 echo
 echo "HHeretic configuration finished."
-echo "Enabled targets: $BUILDNAMES"
+
+if test "$SVGAHEXEN" = "true"; then
+    report="Software (SVGALib)"
+else
+  if test "$GLHEXEN" = "true"; then
+    report="OpenGL (SDL)"
+  else
+    report="Software (SDL)"
+  fi
+fi
+echo "Enabled target       : $report"
+
+echo "Audio driver         : $SND_MODULE"
+
+if test "$SVGAHEXEN" = "true"; then
+    report="N/A"
+else
+  if test x$enable_fullscreen = xyes; then
+    report="fullscreen"
+  else
+    report="windowed"
+  fi
+fi
+echo "Default window mode  : $report"
 echo
-if test "$HAVESDL" = "no"
-then
-  echo "It is recommended that you install SDL (http://www.libsdl.org)."
-  echo "Other targets will compile, but they are no longer supported."
-  echo "If SDL is installed, you will need to upgrade to version $SDL_VERSION"
-  echo
-fi  
+
 echo "Type 'make' to compile."
 echo
+

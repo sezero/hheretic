@@ -282,10 +282,31 @@ void I_GetEvent(SDL_Event *Event)
 {
 	Uint8 buttonstate;
 	event_t event;
+	SDLMod mod;
 
 	switch (Event->type)
 	{
 	case SDL_KEYDOWN:
+		mod = SDL_GetModState ();
+		if (mod & (KMOD_RCTRL|KMOD_LCTRL))
+		{
+			if (Event->key.keysym.sym == 'g')
+			{
+				if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF)
+					SDL_WM_GrabInput (SDL_GRAB_ON);
+				else
+					SDL_WM_GrabInput (SDL_GRAB_OFF);
+				break;
+			}
+		}
+		else if (mod & (KMOD_RALT|KMOD_LALT))
+		{
+			if (Event->key.keysym.sym == SDLK_RETURN)
+			{
+				SDL_WM_ToggleFullScreen(SDL_GetVideoSurface());
+				break;
+			}
+		}
 		event.type = ev_keydown;
 		event.data1 = xlatekey(&Event->key.keysym);
 		D_PostEvent(&event);

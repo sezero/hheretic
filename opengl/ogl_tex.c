@@ -199,7 +199,7 @@ unsigned int OGL_BindTexFlat(int lump)
 	int p, i;
 	byte *flatptr = W_CacheLumpNum(lump, PU_STATIC);
 	byte *palette = W_CacheLumpNum(pallump=W_GetNumForName("PLAYPAL"), PU_CACHE);
-	byte *rgbflat = _alloca(3*lumpinfo[lump].size);
+	byte *rgbflat = (byte*)malloc(3*lumpinfo[lump].size);
 	
 	if (lumpinfo[lump].size < 4096)
 	{
@@ -230,6 +230,7 @@ unsigned int OGL_BindTexFlat(int lump)
 
 	// Change the tag.
 	Z_ChangeTag(flatptr, PU_CACHE);
+	free (rgbflat);
 	return name;
 }
 
@@ -339,7 +340,7 @@ unsigned int OGL_PrepareTexture(int idx)
 		int i, k, textype;
 		texture_t *tex = textures[idx];
 		byte *palette = W_CacheLumpNum(pallump, PU_CACHE);
-		byte *rgbflat = _alloca(3*tex->width*tex->height);
+		byte *rgbflat = (byte *)malloc(3*tex->width*tex->height);
 		byte *colptr;
 	
 		if(tex->patchcount > 1)
@@ -355,11 +356,12 @@ unsigned int OGL_PrepareTexture(int idx)
 		else 
 		{
 			// This texture has only only one patch. It might be masked.
-			byte *rgbaflat = _alloca(4*tex->width*tex->height);
+			byte *rgbaflat = (byte*)malloc(4*tex->width*tex->height);
 			memset(rgbaflat, 0, 4*tex->width*tex->height);
 			textype = DrawRealPatch(rgbflat, rgbaflat, palette,	tex->width, tex->height,
 				W_CacheLumpNum(tex->patches[0].patch, PU_CACHE), false);
-			if(textype == GL_RGBA) rgbflat = rgbaflat;
+			if(textype == GL_RGBA) { free(rgbflat); rgbflat = rgbaflat; }
+			else { free (rgbaflat); }
 		}
 						
 		// Generate and bind the texture.
@@ -372,6 +374,8 @@ unsigned int OGL_PrepareTexture(int idx)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		if(textype == GL_RGBA) texmasked[idx] = 1;	// Yes it is.
+
+		free (rgbflat);
 	}
 	texw = textures[idx]->width;
 	texh = textures[idx]->height;
@@ -444,13 +448,13 @@ unsigned int OGL_PrepareSky(int idx, boolean zeroMask)
 		if(zeroMask)
 		{
 			textype = GL_RGBA;
-			imgdata = _alloca(4*numpels);
+			imgdata = (byte *)malloc(4*numpels);
 			memset(imgdata, 0, 4*numpels);
 		}
 		else
 		{
 			textype = GL_RGB;
-			imgdata = _alloca(3*numpels);
+			imgdata = (byte *)malloc(3*numpels);
 			memset(imgdata, 0, 3*numpels);
 		}
 		if(tex->patchcount > 1)
@@ -516,6 +520,8 @@ unsigned int OGL_PrepareSky(int idx, boolean zeroMask)
 			texmasked[idx] = 1;
 		else
 			texmasked[idx] = 0;
+
+		free (imgdata);
 	}
 	texw = textures[idx]->width;
 	texh = textures[idx]->height;
@@ -532,7 +538,7 @@ unsigned int OGL_PrepareSprite(int pnum)
 		int p2width = FindNextPower2(patch->width), 
 			p2height = OGL_ValidTexHeight2(patch->width, patch->height);// FindNextPower2(patch->height);
 		int flatsize = 4*p2width*p2height;
-		byte *rgbaflat = _alloca(flatsize);
+		byte *rgbaflat = (byte *)malloc(flatsize);
 		
 		//printf( "orig: %d x %d => %d x %d\n", patch->width, patch->height, p2width, p2height);
 
@@ -551,6 +557,7 @@ unsigned int OGL_PrepareSprite(int pnum)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 		spriteheights[pnum] = patch->height;
+		free (rgbaflat);
 	}
 	return spritenames[pnum];
 }
@@ -584,8 +591,8 @@ void OGL_SetRawImage(int lump, int part)
 		// Load the raw texture data (320x200).
 		// We'll create two textures (256x256 and 64x256).
 		byte *raw = W_CacheLumpNum(lump, PU_CACHE);
-		byte *dat1 = _alloca(3*256*256);	// Let's hope there's enough stack!
-		byte *dat2 = _alloca(3*64*256);
+		byte *dat1 = (byte*)malloc(3*256*256);
+		byte *dat2 = (byte*)malloc(3*64*256);
 		byte *palette = W_CacheLumpNum(pallump, PU_CACHE);
 		int i,k;
 		memset(dat1, 0, 3*256*256);	// Why must this be done?
@@ -603,9 +610,9 @@ void OGL_SetRawImage(int lump, int part)
 		// Do a special fill for textures with h<200 (part 0).
 		if(/*lumpinfo[lump].size/320 < 200 &&*/ !part)
 		{
-			int lines = lumpinfo[lump].size/320;
+			int _lines = lumpinfo[lump].size/320;
 			// Copy the missing data from the beginning.
-			memcpy(dat1+lines*256*3, dat1, 3*256*(256-lines));
+			memcpy(dat1 + _lines*256*3, dat1, 3*256*(256 - _lines));
 		}
 			
 		// Generate and load the textures.
@@ -632,6 +639,8 @@ void OGL_SetRawImage(int lump, int part)
 		lumptexsizes[lump].w = 256;
 		lumptexsizes[lump].w2 = 64;
 		lumptexsizes[lump].h = 200;
+		free (dat1);
+		free (dat2);
 	}
 	// Bind the correct part.
 	if(part <= 1) glBindTexture(GL_TEXTURE_2D, lumptexnames[lump]);
@@ -685,8 +694,8 @@ void OGL_SetPatch(int lump)	// No mipmaps are generated.
 		int		p2width = FindNextPower2(patch->width), 
 				p2height = OGL_ValidTexHeight2(patch->width, patch->height);//FindNextPower2(patch->height);
 		int		numpels = p2width*p2height;
-		byte	*rgbflat = _alloca(3*numpels), 
-				*rgbaflat = _alloca(4*numpels);
+		byte	*rgbflat = (byte *)malloc(3*numpels), 
+				*rgbaflat = (byte*)malloc(4*numpels);
 		int		ptype;
 		
 		memset(rgbaflat, 0, 4*numpels);
@@ -700,7 +709,7 @@ void OGL_SetPatch(int lump)	// No mipmaps are generated.
 			// applies to both parts. 
 			// The width of the first part is maxTexSize.
 			int part2width = FindNextPower2(patch->width - maxTexSize);
-			byte *tempbuff = _alloca(4*maxTexSize*p2height);
+			byte *tempbuff = (byte*)malloc(4*maxTexSize*p2height);
 			if(part2width > maxTexSize)
 				I_Error("OGL_SetPatch: Too wide texture (really: %d, pow2: %d).\n", patch->width, p2width);
 			// We'll use a temporary buffer for doing to splitting.
@@ -738,6 +747,7 @@ void OGL_SetPatch(int lump)	// No mipmaps are generated.
 
 			lumptexsizes[lump].w = maxTexSize;
 			lumptexsizes[lump].w2 = patch->width - maxTexSize;
+			free (tempbuff);
 		}
 		else // We can use the normal one-part method.
 		{
@@ -757,6 +767,8 @@ void OGL_SetPatch(int lump)	// No mipmaps are generated.
 		lumptexsizes[lump].h = patch->height;
 		lumptexsizes[lump].offx = -patch->leftoffset;
 		lumptexsizes[lump].offy = -patch->topoffset;
+		free (rgbflat);
+		free (rgbaflat);
 	}
 	else
 	{
@@ -847,15 +859,16 @@ void OGL_UpdateTexParams(int mipmode)
 void OGL_UpdateRawScreenParams(int smoothing)
 {
 	int		i;
-	int		glmode = (smoothing)? GL_LINEAR : GL_NEAREST;
+	int		_glmode = (smoothing)? GL_LINEAR : GL_NEAREST;
 
 	for(i=0; i<numrawlumps; i++)
 	{
 		// First part 1.
 		glBindTexture(GL_TEXTURE_2D, lumptexnames[rawlumps[i]]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glmode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _glmode);
 		// Then part 2.
 		glBindTexture(GL_TEXTURE_2D, lumptexnames2[rawlumps[i]]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glmode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _glmode);
 	}
 }
+

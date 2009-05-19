@@ -174,7 +174,7 @@ void R_GenerateLookup (int texnum)
 // fill in the lump / offset, so columns with only a single patch are
 // all done
 //
-	patchcount = (byte *)alloca (texture->width);
+	patchcount = (byte *)malloc (texture->width);
 	memset (patchcount, 0, texture->width);
 	patch = texture->patches;
 		
@@ -202,6 +202,7 @@ void R_GenerateLookup (int texnum)
 		if (!patchcount[x])
 		{
 			printf ("R_GenerateLookup: column without a patch (%s)\n", texture->name);
+			free (patchcount);
 			return;
 		}
 //			I_Error ("R_GenerateLookup: column without a patch");
@@ -214,6 +215,7 @@ void R_GenerateLookup (int texnum)
 			texturecompositesize[texnum] += texture->height;
 		}
 	}	
+	free (patchcount);
 }
 
 
@@ -273,7 +275,7 @@ void R_InitTextures (void)
 	names = W_CacheLumpName ("PNAMES", PU_STATIC);
 	nummappatches = LONG ( *((int *)names) );
 	name_p = names+4;
-	patchlookup = alloca (nummappatches*sizeof(*patchlookup));
+	patchlookup =  (int *)malloc(nummappatches*sizeof(*patchlookup));
 	for (i=0 ; i<nummappatches ; i++)
 	{
 		strncpy (name,name_p+i*8, 8);
@@ -390,6 +392,8 @@ void R_InitTextures (void)
 	texturetranslation = Z_Malloc ((numtextures+1)*4, PU_STATIC, 0);
 	for (i=0 ; i<numtextures ; i++)
 		texturetranslation[i] = i;
+
+	free (patchlookup);
 }
 
 
@@ -601,7 +605,7 @@ void R_PrecacheLevel (void)
 //
 // precache flats
 //	
-	flatpresent = alloca(numflats);
+	flatpresent = (char*)malloc(numflats);
 	memset (flatpresent,0,numflats);	
 	for (i=0 ; i<numsectors ; i++)
 	{
@@ -621,7 +625,7 @@ void R_PrecacheLevel (void)
 //
 // precache textures
 //
-	texturepresent = alloca(numtextures);
+	texturepresent = (char*) malloc(numtextures);
 	memset (texturepresent,0, numtextures);
 	
 	for (i=0 ; i<numsides ; i++)
@@ -650,7 +654,7 @@ void R_PrecacheLevel (void)
 //
 // precache sprites
 //
-	spritepresent = alloca(numsprites);
+	spritepresent = (char*)malloc(numsprites);
 	memset (spritepresent,0, numsprites);
 	
 	for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
@@ -675,8 +679,8 @@ void R_PrecacheLevel (void)
 			}
 		}
 	}
+	free (flatpresent);
+	free (texturepresent);
+	free (spritepresent);
 }
-
-
-
 

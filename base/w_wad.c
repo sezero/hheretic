@@ -139,7 +139,8 @@ void W_AddFile (char *filename)
 	int				handle, length;
 	int				startlump;
 	filelump_t		*fileinfo, singleinfo;
-	
+	filelump_t		*freeFileInfo;
+
 //
 // open the file and add to directory
 //	
@@ -152,6 +153,7 @@ void W_AddFile (char *filename)
 	{
 	// single lump file
 		fileinfo = &singleinfo;
+		freeFileInfo = NULL;
 		singleinfo.filepos = 0;
 		singleinfo.size = LONG(filelength(handle));
 		ExtractFileBase (filename, singleinfo.name);
@@ -170,7 +172,12 @@ void W_AddFile (char *filename)
 		header.numlumps = LONG(header.numlumps);
 		header.infotableofs = LONG(header.infotableofs);
 		length = header.numlumps*sizeof(filelump_t);
-		fileinfo = alloca (length);
+		fileinfo = (filelump_t *) malloc(length);
+		if (!fileinfo)
+		{
+			I_Error("W_AddFile: fileinfo malloc failed\n");
+		}
+		freeFileInfo = fileinfo;
 		lseek (handle, header.infotableofs, SEEK_SET);
 		read (handle, fileinfo, length);
 		numlumps += header.numlumps;
@@ -190,6 +197,10 @@ void W_AddFile (char *filename)
 		lump_p->position = LONG(fileinfo->filepos);
 		lump_p->size = LONG(fileinfo->size);
 		strncpy (lump_p->name, fileinfo->name, 8);
+	}
+	if (freeFileInfo)
+	{
+		free(freeFileInfo);
 	}
 }
 

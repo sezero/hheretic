@@ -13,11 +13,20 @@
 #include <vgakeyboard.h>
 #include <vgamouse.h>
 
-#include "h2def.h"
+#include "doomdef.h"
 #include "r_local.h"
-#include "st_start.h"
 
 // Macros
+
+#define KEY_INS		0x52
+#define KEY_DEL		0x53
+#define KEY_PGUP	0x49
+#define KEY_PGDN	0x51
+#define KEY_HOME	0x47
+#define KEY_END		0x4f
+#define KEY_SHIFT	KEY_RSHIFT
+#define KEY_ALT		KEY_RALT
+#define KEY_CTRL	KEY_RCTRL
 
 // Extern Data
 
@@ -310,7 +319,7 @@ static void I_KeyboardHandler(int scancode, int press)
 	default:			ev.data1 = scantokey[scancode];	break;
 	}
 
-	H2_PostEvent(&ev);
+	D_PostEvent(&ev);
 }
 
 //-----------------------------------------------------------------------------
@@ -331,7 +340,7 @@ static void I_MouseEventHandler(int button, int dx, int dy, int dz,
 	ev.data2 = dx << 2;
 	ev.data3 = -(dy<<2);
 
-	H2_PostEvent(&ev);
+	D_PostEvent(&ev);
 }
 
 //--------------------------------------------------------------------------
@@ -386,11 +395,11 @@ void I_InitGraphics(void)
 
 	if (M_CheckParm("-novideo"))	// if true, stay in text mode for debugging
 	{
-		ST_Message("I_InitGraphics: Video Disabled.\n");
+		printf("I_InitGraphics: Video Disabled.\n");
 		return;
 	}
 
-	ST_Message("I_InitGraphics:\n");
+	printf("I_InitGraphics:\n");
 
 	if (vga_init() != 0)
 		I_Error ("SVGALib failed to allocate a new VC");
@@ -400,7 +409,7 @@ void I_InitGraphics(void)
 	i = vga_runinbackground_version();
 	if (i > 0)
 	{
-		ST_Message ("SVGALIB background support %i detected\n", i);
+		printf ("SVGALIB background support %i detected\n", i);
 		vga_runinbackground (VGA_GOTOBACK, goto_background);
 		vga_runinbackground (VGA_COMEFROMBACK, comefrom_background);
 		vga_runinbackground (1);

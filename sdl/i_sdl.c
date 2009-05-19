@@ -9,49 +9,42 @@
 #include "SDL.h"
 #include "doomdef.h"
 #include "r_local.h"
-#include "p_local.h"    // for P_AproxDistance
-#include "sounds.h"
-#include "i_sound.h"
-#include "soundst.h"
+
+#define BASE_WINDOW_FLAGS	(SDL_SWSURFACE|SDL_HWPALETTE)
+#ifdef FULLSCREEN_DEFAULT
+#define DEFAULT_FLAGS		(BASE_WINDOW_FLAGS|SDL_FULLSCREEN)
+#else
+#define DEFAULT_FLAGS		(BASE_WINDOW_FLAGS)
+#endif
 
 // Public Data
 
 int DisplayTicker = 0;
 
+boolean useexterndriver;
+boolean mousepresent;
 
-// Code
 
-void I_StartupNet (void);
-void I_ShutdownNet (void);
-void I_ReadExternDriver(void);
-void GrabScreen (void);
+// Extern Data
 
 extern int usemouse, usejoystick;
 
-extern void **lumpcache;
+// Private Data
 
-int i_Vector;
-externdata_t *i_ExternData;
-boolean useexterndriver;
+static boolean vid_initialized = false;
 
-SDL_Surface* sdl_screen;
-int grabMouse;
-
-boolean mousepresent;
+static SDL_Surface* sdl_screen;
+static int grabMouse;
 
 //===============================
 
-int ticcount;
 
-
-boolean novideo; // if true, stay in text mode for debugging
-
-#define KEY_INS         0x52
-#define KEY_DEL         0x53
-#define KEY_PGUP        0x49
-#define KEY_PGDN        0x51
-#define KEY_HOME        0x47
-#define KEY_END         0x4f
+#define KEY_INS		0x52
+#define KEY_DEL		0x53
+#define KEY_PGUP	0x49
+#define KEY_PGDN	0x51
+#define KEY_HOME	0x47
+#define KEY_END		0x4f
 
 /*
 ============================================================================
@@ -69,13 +62,13 @@ boolean novideo; // if true, stay in text mode for debugging
 
 void I_WaitVBL(int vbls)
 {
-	if( novideo )
+	if (!vid_initialized)
 	{
 		return;
 	}
-	while( vbls-- )
+	while (vbls--)
 	{
-        SDL_Delay( 16667/1000 );
+		SDL_Delay (16667 / 1000);
 	}
 }
 
@@ -89,27 +82,24 @@ void I_WaitVBL(int vbls)
 
 void I_SetPalette(byte *palette)
 {
-    SDL_Color* c;
-    SDL_Color* cend;
-    SDL_Color cmap[ 256 ];
+	SDL_Color* c;
+	SDL_Color* cend;
+	SDL_Color cmap[256];
 
-	if(novideo)
-	{
+	if (!vid_initialized)
 		return;
-	}
+
 	I_WaitVBL(1);
 
-    c = cmap;
-    cend = c + 256;
-	for( ; c != cend; c++ )
+	c = cmap;
+	cend = c + 256;
+	for ( ; c != cend; c++)
 	{
-		//_outbyte(PEL_DATA, (gammatable[usegamma][*palette++])>>2);
-
-        c->r = gammatable[usegamma][*palette++];
-        c->g = gammatable[usegamma][*palette++];
-        c->b = gammatable[usegamma][*palette++];
+		c->r = gammatable[usegamma][*palette++];
+		c->g = gammatable[usegamma][*palette++];
+		c->b = gammatable[usegamma][*palette++];
 	}
-    SDL_SetColors( sdl_screen, cmap, 0, 256 );
+	SDL_SetColors (sdl_screen, cmap, 0, 256);
 }
 
 /*
@@ -140,12 +130,15 @@ void I_Update (void)
 	int tics;
 	static int lasttic;
 
+	if (!vid_initialized)
+		return;
+
 //
 // blit screen to video
 //
-	if(DisplayTicker)
+	if (DisplayTicker)
 	{
-		if(screenblocks > 9 || UpdateState&(I_FULLSCRN|I_MESSAGES))
+		if (screenblocks > 9 || UpdateState & (I_FULLSCRN|I_MESSAGES))
 		{
 			dest = (byte *)screen;
 		}
@@ -153,80 +146,76 @@ void I_Update (void)
 		{
 			dest = (byte *)pcscreen;
 		}
-		tics = ticcount-lasttic;
+		tics = ticcount - lasttic;
 		lasttic = ticcount;
-		if(tics > 20)
+		if (tics > 20)
 		{
 			tics = 20;
 		}
-		for(i = 0; i < tics; i++)
+		for (i = 0; i < tics; i++)
 		{
 			*dest = 0xff;
 			dest += 2;
 		}
-		for(i = tics; i < 20; i++)
+		for (i = tics; i < 20; i++)
 		{
 			*dest = 0x00;
 			dest += 2;
 		}
 	}
 
-	//memset(pcscreen, 255, SCREENHEIGHT*SCREENWIDTH);
+//	memset(pcscreen, 255, SCREENHEIGHT*SCREENWIDTH);
 
-	if(UpdateState == I_NOUPDATE)
+	if (UpdateState == I_NOUPDATE)
 	{
 		return;
 	}
-	if(UpdateState&I_FULLSCRN)
+	if (UpdateState & I_FULLSCRN)
 	{
 		memcpy(pcscreen, screen, SCREENWIDTH*SCREENHEIGHT);
 		UpdateState = I_NOUPDATE; // clear out all draw types
 
-        SDL_UpdateRect( sdl_screen, 0, 0, SCREENWIDTH, SCREENHEIGHT );
+		SDL_UpdateRect(sdl_screen, 0, 0, SCREENWIDTH, SCREENHEIGHT);
 	}
-	if(UpdateState&I_FULLVIEW)
+	if (UpdateState & I_FULLVIEW)
 	{
-		if(UpdateState&I_MESSAGES && screenblocks > 7)
+		if (UpdateState & I_MESSAGES && screenblocks > 7)
 		{
-			for(i = 0; i <
-				(viewwindowy+viewheight)*SCREENWIDTH; i += SCREENWIDTH)
+			for (i = 0; i < (viewwindowy + viewheight)*SCREENWIDTH; i += SCREENWIDTH)
 			{
-				memcpy(pcscreen+i, screen+i, SCREENWIDTH);
+				memcpy(pcscreen + i, screen + i, SCREENWIDTH);
 			}
 			UpdateState &= ~(I_FULLVIEW|I_MESSAGES);
 
-            SDL_UpdateRect( sdl_screen, 0, 0, SCREENWIDTH,
-                            viewwindowy+viewheight );
+			SDL_UpdateRect (sdl_screen, 0, 0, SCREENWIDTH, viewwindowy + viewheight);
 		}
 		else
 		{
-			for(i = viewwindowy*SCREENWIDTH+viewwindowx; i <
-				(viewwindowy+viewheight)*SCREENWIDTH; i += SCREENWIDTH)
+			for (i = viewwindowy*SCREENWIDTH + viewwindowx;
+			     i < (viewwindowy+viewheight)*SCREENWIDTH; i += SCREENWIDTH)
 			{
-				memcpy(pcscreen+i, screen+i, viewwidth);
+				memcpy(pcscreen + i, screen + i, viewwidth);
 			}
 			UpdateState &= ~I_FULLVIEW;
 
-            SDL_UpdateRect( sdl_screen, viewwindowx, viewwindowy, viewwidth,
-                            viewheight );
+			SDL_UpdateRect (sdl_screen, viewwindowx, viewwindowy, viewwidth, viewheight);
 		}
 	}
-	if(UpdateState&I_STATBAR)
+	if (UpdateState & I_STATBAR)
 	{
-		memcpy(pcscreen+SCREENWIDTH*(SCREENHEIGHT-SBARHEIGHT),
-			screen+SCREENWIDTH*(SCREENHEIGHT-SBARHEIGHT),
+		memcpy(pcscreen + SCREENWIDTH*(SCREENHEIGHT-SBARHEIGHT),
+			screen + SCREENWIDTH*(SCREENHEIGHT-SBARHEIGHT),
 			SCREENWIDTH*SBARHEIGHT);
 		UpdateState &= ~I_STATBAR;
 
-        SDL_UpdateRect( sdl_screen, 0, SCREENHEIGHT-SBARHEIGHT,
-                        SCREENWIDTH, SBARHEIGHT );
+		SDL_UpdateRect (sdl_screen, 0, SCREENHEIGHT-SBARHEIGHT, SCREENWIDTH, SBARHEIGHT);
 	}
-	if(UpdateState&I_MESSAGES)
+	if (UpdateState & I_MESSAGES)
 	{
 		memcpy(pcscreen, screen, SCREENWIDTH*28);
 		UpdateState &= ~I_MESSAGES;
 
-        SDL_UpdateRect( sdl_screen, 0, 0, SCREENWIDTH, 28 );
+		SDL_UpdateRect (sdl_screen, 0, 0, SCREENWIDTH, 28);
 	}
 }
 
@@ -239,47 +228,47 @@ void I_Update (void)
 void I_InitGraphics(void)
 {
 	char text[20];
+	Uint32 flags = DEFAULT_FLAGS;
 
-	if( novideo )
+	if (M_CheckParm("-novideo"))	// if true, stay in text mode for debugging
 	{
+		printf("I_InitGraphics: Video Disabled.\n");
 		return;
 	}
-    
-    // SDL_DOUBLEBUF does not work in full screen mode.  Does not seem to
-    // be necessary anyway.
 
-    sdl_screen = SDL_SetVideoMode(SCREENWIDTH, SCREENHEIGHT, 8, SDL_SWSURFACE);
-                                   //SDL_HWSURFACE | SDL_FULLSCREEN );
-                                   //0 );
-    if( sdl_screen == NULL )
-    {
-        fprintf( stderr, "Couldn't set video mode %dx%d: %s\n",
-                 SCREENWIDTH, SCREENHEIGHT, SDL_GetError() );
-        exit( 3 );
-    }
+	if (M_CheckParm("-f") || M_CheckParm("--fullscreen"))
+		flags |= SDL_FULLSCREEN;
+	if (M_CheckParm("-w") || M_CheckParm("--windowed"))
+		flags &= ~SDL_FULLSCREEN;
 
-    if( SDL_MUSTLOCK( sdl_screen ) )
-    {
-        printf( "SDL_MUSTLOCK\n" );
-        exit( 4 );
-    }
+	// Needs some work to get screenHeight and screenWidth working - S.A.
 
-    // Only grab if we want to
-    if (M_CheckParm ("-nograb")) {
-	    grabMouse = 0;
-    } else {
-	    grabMouse = 1;
-	    SDL_WM_GrabInput (1);
-    }
+	// SDL_DOUBLEBUF does not work in full screen mode.  Does not seem to
+	// be necessary anyway.
+	sdl_screen = SDL_SetVideoMode(SCREENWIDTH, SCREENHEIGHT, 8, flags);
 
-    snprintf (text, 20, "HHeretic v%s", HHERETIC_VERSION);
-    SDL_ShowCursor( 0 );
-    SDL_WM_SetCaption( text, "HHERETIC" );
+	if (sdl_screen == NULL)
+	{
+		I_Error("Couldn't set video mode %dx%d: %s\n",
+			SCREENWIDTH, SCREENHEIGHT, SDL_GetError());
+	}
 
+	vid_initialized = true;
 
-	pcscreen = destscreen = sdl_screen->pixels;
+	// Only grab if we want to
+	if (!M_CheckParm ("--nograb") && !M_CheckParm ("-g"))
+	{
+		grabMouse = 1;
+		SDL_WM_GrabInput (SDL_GRAB_ON);
+	}
 
-	I_SetPalette( W_CacheLumpName("PLAYPAL", PU_CACHE) );
+	SDL_ShowCursor (0);
+	snprintf (text, 20, "HHeretic v%s", HHERETIC_VERSION);
+	SDL_WM_SetCaption (text, "HHERETIC");
+
+	pcscreen = destscreen = (byte *) sdl_screen->pixels;
+
+	I_SetPalette ((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
 
 //--------------------------------------------------------------------------
@@ -290,156 +279,125 @@ void I_InitGraphics(void)
 
 void I_ShutdownGraphics(void)
 {
+	if (!vid_initialized)
+		return;
+	vid_initialized = false;
 	SDL_Quit ();
 }
 
-//--------------------------------------------------------------------------
-//
-// PROC I_ReadScreen
-//
-// Reads the screen currently displayed into a linear buffer.
-//
-//--------------------------------------------------------------------------
-
-/*
-void I_ReadScreen(byte *scr)
-{
-	memcpy(scr, screen, SCREENWIDTH*SCREENHEIGHT);
-}
-*/
-
 //===========================================================================
 
-
 //
-//  Translates the key 
+//  Translates the key
 //
-
-int xlatekey(SDL_keysym *key)
+static int xlatekey (SDL_keysym *key)
 {
+	switch (key->sym)
+	{
+	case SDLK_LEFT:		return KEY_LEFTARROW;
+	case SDLK_RIGHT:	return KEY_RIGHTARROW;
+	case SDLK_DOWN:		return KEY_DOWNARROW;
+	case SDLK_UP:		return KEY_UPARROW;
+	case SDLK_ESCAPE:	return KEY_ESCAPE;
+	case SDLK_RETURN:	return KEY_ENTER;
 
-    int rc;
+	case SDLK_F1:		return KEY_F1;
+	case SDLK_F2:		return KEY_F2;
+	case SDLK_F3:		return KEY_F3;
+	case SDLK_F4:		return KEY_F4;
+	case SDLK_F5:		return KEY_F5;
+	case SDLK_F6:		return KEY_F6;
+	case SDLK_F7:		return KEY_F7;
+	case SDLK_F8:		return KEY_F8;
+	case SDLK_F9:		return KEY_F9;
+	case SDLK_F10:		return KEY_F10;
+	case SDLK_F11:		return KEY_F11;
+	case SDLK_F12:		return KEY_F12;
 
-    switch(key->sym)
-    {
-      case SDLK_LEFT:	rc = KEY_LEFTARROW;	break;
-      case SDLK_RIGHT:	rc = KEY_RIGHTARROW;	break;
-      case SDLK_DOWN:	rc = KEY_DOWNARROW;	break;
-      case SDLK_UP:	rc = KEY_UPARROW;	break;
-      case SDLK_ESCAPE:	rc = KEY_ESCAPE;	break;
-      case SDLK_RETURN:	rc = KEY_ENTER;		break;
-      case SDLK_F1:	rc = KEY_F1;		break;
-      case SDLK_F2:	rc = KEY_F2;		break;
-      case SDLK_F3:	rc = KEY_F3;		break;
-      case SDLK_F4:	rc = KEY_F4;		break;
-      case SDLK_F5:	rc = KEY_F5;		break;
-      case SDLK_F6:	rc = KEY_F6;		break;
-      case SDLK_F7:	rc = KEY_F7;		break;
-      case SDLK_F8:	rc = KEY_F8;		break;
-      case SDLK_F9:	rc = KEY_F9;		break;
-      case SDLK_F10:	rc = KEY_F10;		break;
-      case SDLK_F11:	rc = KEY_F11;		break;
-      case SDLK_F12:	rc = KEY_F12;		break;
-	
-      case SDLK_INSERT: rc = KEY_INS;           break;
-      case SDLK_DELETE: rc = KEY_DEL;           break;
-      case SDLK_PAGEUP: rc = KEY_PGUP;          break;
-      case SDLK_PAGEDOWN: rc = KEY_PGDN;        break;
-      case SDLK_HOME:   rc = KEY_HOME;          break;
-      case SDLK_END:    rc = KEY_END;           break;
+	case SDLK_INSERT:	return KEY_INS;
+	case SDLK_DELETE:	return KEY_DEL;
+	case SDLK_PAGEUP:	return KEY_PGUP;
+	case SDLK_PAGEDOWN:	return KEY_PGDN;
+	case SDLK_HOME:		return KEY_HOME;
+	case SDLK_END:		return KEY_END;
+	case SDLK_BACKSPACE:	return KEY_BACKSPACE;
+	case SDLK_PAUSE:	return KEY_PAUSE;
+	case SDLK_EQUALS:	return KEY_EQUALS;
+	case SDLK_KP_MINUS:
+	case SDLK_MINUS:	return KEY_MINUS;
 
-      case SDLK_BACKSPACE: rc = KEY_BACKSPACE;	break;
+	case SDLK_LSHIFT:
+	case SDLK_RSHIFT:
+		return KEY_RSHIFT;
 
-      case SDLK_PAUSE:	rc = KEY_PAUSE;		break;
+	case SDLK_LCTRL:
+	case SDLK_RCTRL:
+		return KEY_RCTRL;
 
-      case SDLK_EQUALS:	rc = KEY_EQUALS;	break;
+	case SDLK_LALT:
+	case SDLK_LMETA:
+	case SDLK_RALT:
+	case SDLK_RMETA:
+		return KEY_RALT;
 
-      case SDLK_KP_MINUS:
-      case SDLK_MINUS:	rc = KEY_MINUS;		break;
-
-      case SDLK_LSHIFT:
-      case SDLK_RSHIFT:
-	rc = KEY_RSHIFT;
-	break;
-	
-      case SDLK_LCTRL:
-      case SDLK_RCTRL:
-	rc = KEY_RCTRL;
-	break;
-	
-      case SDLK_LALT:
-      case SDLK_LMETA:
-      case SDLK_RALT:
-      case SDLK_RMETA:
-	rc = KEY_RALT;
-	break;
-	
-      default:
-        rc = key->sym;
-	break;
-    }
-
-    return rc;
-
+	default:
+		return key->sym;
+	}
 }
-
 
 /* This processes SDL events */
 void I_GetEvent(SDL_Event *Event)
 {
-    Uint8 buttonstate;
-    event_t event;
+	Uint8 buttonstate;
+	event_t event;
 
-    switch (Event->type)
-    {
-      case SDL_KEYDOWN:
-	event.type = ev_keydown;
-	event.data1 = xlatekey(&Event->key.keysym);
-	D_PostEvent(&event);
-        break;
+	switch (Event->type)
+	{
+	case SDL_KEYDOWN:
+		event.type = ev_keydown;
+		event.data1 = xlatekey(&Event->key.keysym);
+		D_PostEvent(&event);
+		break;
 
-      case SDL_KEYUP:
-        event.type = ev_keyup;
-        event.data1 = xlatekey(&Event->key.keysym);
-        D_PostEvent(&event);
-        break;
+	case SDL_KEYUP:
+		event.type = ev_keyup;
+		event.data1 = xlatekey(&Event->key.keysym);
+		D_PostEvent(&event);
+		break;
 
-      case SDL_MOUSEBUTTONDOWN:
-      case SDL_MOUSEBUTTONUP:
-        buttonstate = SDL_GetMouseState(NULL, NULL);
-        event.type = ev_mouse;
-        event.data1 = 0
-            | (buttonstate & SDL_BUTTON(1) ? 1 : 0)
-            | (buttonstate & SDL_BUTTON(2) ? 2 : 0)
-            | (buttonstate & SDL_BUTTON(3) ? 4 : 0);
-        event.data2 = event.data3 = 0;
-        D_PostEvent(&event);
-        break;
+	case SDL_MOUSEBUTTONDOWN:
+	case SDL_MOUSEBUTTONUP:
+		buttonstate = SDL_GetMouseState(NULL, NULL);
+		event.type = ev_mouse;
+		event.data1 = 0	| (buttonstate & SDL_BUTTON(1) ? 1 : 0)
+				| (buttonstate & SDL_BUTTON(2) ? 2 : 0)
+				| (buttonstate & SDL_BUTTON(3) ? 4 : 0);
+		event.data2 = event.data3 = 0;
+		D_PostEvent(&event);
+		break;
 
-      case SDL_MOUSEMOTION:
-        /* Ignore mouse warp events */
-        if ( (Event->motion.x != sdl_screen->w/2) ||
-             (Event->motion.y != sdl_screen->h/2) )
-        {
-            /* Warp the mouse back to the center */
-            if (grabMouse) {
-                SDL_WarpMouse(sdl_screen->w/2, sdl_screen->h/2);
-            }
-            event.type = ev_mouse;
-            event.data1 = 0
-                | (Event->motion.state & SDL_BUTTON(1) ? 1 : 0)
-                | (Event->motion.state & SDL_BUTTON(2) ? 2 : 0)
-                | (Event->motion.state & SDL_BUTTON(3) ? 4 : 0);
-            event.data2 = Event->motion.xrel << 3;
-            event.data3 = -Event->motion.yrel << 3;
-            D_PostEvent(&event);
-        }
-        break;
+	case SDL_MOUSEMOTION:
+		/* Ignore mouse warp events */
+		if ( (Event->motion.x != sdl_screen->w/2) ||
+		     (Event->motion.y != sdl_screen->h/2) )
+		{
+		/* Warp the mouse back to the center */
+			if (grabMouse) {
+				SDL_WarpMouse(sdl_screen->w/2, sdl_screen->h/2);
+			}
+			event.type = ev_mouse;
+			event.data1 = 0	| (Event->motion.state & SDL_BUTTON(1) ? 1 : 0)
+					| (Event->motion.state & SDL_BUTTON(2) ? 2 : 0)
+					| (Event->motion.state & SDL_BUTTON(3) ? 4 : 0);
+			event.data2 = Event->motion.xrel << 3;
+			event.data3 = -Event->motion.yrel << 3;
+			D_PostEvent(&event);
+		}
+		break;
 
-      case SDL_QUIT:
-        I_Quit();
-    }
-
+	case SDL_QUIT:
+		I_Quit();
+	}
 }
 
 //
@@ -447,46 +405,10 @@ void I_GetEvent(SDL_Event *Event)
 //
 void I_StartTic (void)
 {
-    SDL_Event Event;
-
-    while ( SDL_PollEvent(&Event) )
-        I_GetEvent(&Event);
+	SDL_Event Event;
+	while ( SDL_PollEvent(&Event) )
+		I_GetEvent(&Event);
 }
-
-
-/*
-============================================================================
-
-					TIMER INTERRUPT
-
-============================================================================
-*/
-
-
-/*
-================
-=
-= I_TimerISR
-=
-================
-*/
-
-int I_TimerISR (void)
-{
-	ticcount++;
-	return 0;
-}
-
-/*
-============================================================================
-
-						KEYBOARD
-
-============================================================================
-*/
-
-int lastpress;
-
 
 
 /*
@@ -506,12 +428,8 @@ int lastpress;
 ================
 */
 
-
 void I_StartupMouse (void)
 {
 	mousepresent = 1;
 }
 
-void GrabScreen (void)
-{
-}

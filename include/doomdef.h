@@ -660,6 +660,8 @@ extern	int			totalkills, totalitems, totalsecret;	// for intermission
 extern	int			levelstarttic;		// gametic at level start
 extern	int			leveltime;			// tics in game play for par
 
+extern	int			ticcount;
+
 extern	ticcmd_t	netcmds[MAXPLAYERS][BACKUPTICS];
 extern int ticdup;
 
@@ -966,7 +968,7 @@ void I_InitGraphics (void);
 void I_InitNetwork (void);
 void I_NetCmd (void);
 
-void I_Error (char *error, ...);
+void I_Error (const char *error, ...);
 // called by anything that can generate a terminal error
 // bad exit with diagnostic message
 

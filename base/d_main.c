@@ -529,7 +529,7 @@ void D_CheckRecordFrom (void)
 	char    file[256];
 
 	p = M_CheckParm ("-recordfrom");
-	if (!p || p > myargc-2)
+	if (!p || p >= myargc - 2)
 		return;
 
 	if(cdrom)

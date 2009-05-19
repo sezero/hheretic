@@ -1,6 +1,7 @@
 
 // SB_bar.c
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
@@ -658,7 +659,7 @@ static void DrawSoundInfo(void)
 		MN_DrTextA(text, xPos[x++], y);
 		sprintf(text, "%d", c->mo->y>>FRACBITS);
 		MN_DrTextA(text, xPos[x++], y);
-		sprintf(text, "%ld", c->id);
+		sprintf(text, "%d", c->id);
 		MN_DrTextA(text, xPos[x++], y);
 		sprintf(text, "%d", c->priority);
 		MN_DrTextA(text, xPos[x++], y);

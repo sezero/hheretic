@@ -1,6 +1,6 @@
 // P_sight.c
 
-#include <stdlib.h>
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 
@@ -147,7 +147,7 @@ boolean P_SightTraverseIntercepts ( void )
 	
 	while (count--)
 	{
-		dist = MAXINT;
+		dist = H2MAXINT;
 		for (scan = intercepts ; scan<intercept_p ; scan++)
 			if (scan->frac < dist)
 			{
@@ -157,7 +157,7 @@ boolean P_SightTraverseIntercepts ( void )
 			
 		if ( !PTR_SightTraverse (in) )
 			return false;			// don't bother going farther
-		in->frac = MAXINT;
+		in->frac = H2MAXINT;
 	}
 	
 	return true;		// everything was traversed

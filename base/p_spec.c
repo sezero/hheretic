@@ -1,6 +1,7 @@
 
 // P_Spec.c
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
@@ -440,7 +441,7 @@ fixed_t	P_FindLowestCeilingSurrounding(sector_t *sec)
 	int			i;
 	line_t		*check;
 	sector_t	*other;
-	fixed_t		height = MAXINT;
+	fixed_t		height = H2MAXINT;
 	
 	for (i=0 ;i < sec->linecount ; i++)
 	{

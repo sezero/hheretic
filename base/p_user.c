@@ -1,7 +1,7 @@
 
 // P_user.c
 
-#include <stdlib.h>
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"

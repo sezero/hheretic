@@ -1,5 +1,6 @@
 // I_pcnet.m
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
@@ -661,7 +662,7 @@ void TryRunTics (void)
 //
 	NetUpdate ();
 	
-	lowtic = MAXINT;
+	lowtic = H2MAXINT;
 	numplaying = 0;
 	for (i=0 ; i<doomcom->numnodes ; i++)
 		if (nodeingame[i])
@@ -728,7 +729,7 @@ if (debugfile)
 		{
 	
 			NetUpdate ();   
-			lowtic = MAXINT;
+			lowtic = H2MAXINT;
 			
 			for (i=0 ; i<doomcom->numnodes ; i++)
 				if (nodeingame[i] && nettics[i] < lowtic)

@@ -6,6 +6,7 @@
 // 	older version of D_NET.C, since the new one doesn't seem to work with
 //		ticdup set to greater than one.
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
@@ -694,7 +695,7 @@ void TryRunTics (void)
 //
 	NetUpdate ();
 
-	lowtic = nextlowest = MAXINT;
+	lowtic = nextlowest = H2MAXINT;
 	numplaying = 0;
 	for (i=0 ; i<doomcom->numnodes ; i++)
 		if (nodeingame[i])
@@ -764,7 +765,7 @@ if (debugfile)
 	{
 
 		NetUpdate ();
-		lowtic = MAXINT;
+		lowtic = H2MAXINT;
 
 		for (i=0 ; i<doomcom->numnodes ; i++)
 			if (nodeingame[i] && nettics[i] < lowtic)

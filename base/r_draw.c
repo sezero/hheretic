@@ -1,5 +1,6 @@
 // R_draw.c
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "r_local.h"
 

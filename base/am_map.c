@@ -1,11 +1,11 @@
 
 // AM_map.c
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "am_map.h"
 #include "am_data.h"
-#include <stdio.h>
 
 #ifdef RENDER3D
 #include "ogl_def.h"
@@ -171,9 +171,9 @@ void AM_getIslope(mline_t *ml, islope_t *is)
 
   dy = ml->a.y - ml->b.y;
   dx = ml->b.x - ml->a.x;
-  if (!dy) is->islp = (dx<0?-MAXINT:MAXINT);
+  if (!dy) is->islp = (dx<0?-H2MAXINT:H2MAXINT);
   else is->islp = FixedDiv(dx, dy);
-  if (!dx) is->slp = (dy<0?-MAXINT:MAXINT);
+  if (!dx) is->slp = (dy<0?-H2MAXINT:H2MAXINT);
   else is->slp = FixedDiv(dy, dx);
 }
 */
@@ -235,8 +235,8 @@ void AM_findMinMaxBoundaries(void)
   int i;
   fixed_t a, b;
 
-  min_x = min_y = MAXINT;
-  max_x = max_y = -MAXINT;
+  min_x = min_y = H2MAXINT;
+  max_x = max_y = -H2MAXINT;
   for (i=0;i<numvertexes;i++)
   {
     if (vertexes[i].x < min_x) min_x = vertexes[i].x;
@@ -262,7 +262,7 @@ void AM_changeWindowLoc(void)
   if (m_paninc.x || m_paninc.y)
   {
     followplayer = 0;
-    f_oldloc.x = MAXINT;
+    f_oldloc.x = H2MAXINT;
   }
 
   m_x += m_paninc.x;
@@ -315,7 +315,7 @@ void AM_initVariables(void)
   automapactive = true;
   fb = screen;
 
-  f_oldloc.x = MAXINT;
+  f_oldloc.x = H2MAXINT;
   amclock = 0;
   lightlev = 0;
 
@@ -544,7 +544,7 @@ boolean AM_Responder (event_t *ev)
 	break;
       case AM_FOLLOWKEY:
 	followplayer = !followplayer;
-	f_oldloc.x = MAXINT;
+	f_oldloc.x = H2MAXINT;
 	P_SetMessage(plr, followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF, true);
 	break;
 /*
@@ -637,7 +637,7 @@ void AM_doFollowPlayer(void)
 	 dmapx = (MTOF(plr->mo->x)-MTOF(f_oldloc.x)); //fixed point
 	 dmapy = (MTOF(f_oldloc.y)-MTOF(plr->mo->y));
 
-	 if(f_oldloc.x == MAXINT) //to eliminate an error when the user first
+	 if(f_oldloc.x == H2MAXINT) //to eliminate an error when the user first
 		dmapx=0;  //goes into the automap.
 	 mapxstart += dmapx;
 	 mapystart += dmapy;
@@ -713,7 +713,7 @@ void AM_clearFB(int color)
 
 		oldplr.x = plr->mo->x;
 		oldplr.y = plr->mo->y;
-//		if(f_oldloc.x == MAXINT) //to eliminate an error when the user first
+//		if(f_oldloc.x == H2MAXINT) //to eliminate an error when the user first
 //			dmapx=0;  //goes into the automap.
 		mapxstart += dmapx>>1;
 		mapystart += dmapy>>1;

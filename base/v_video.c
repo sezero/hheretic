@@ -1,6 +1,7 @@
 
 // V_video.c
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 
 #define SC_INDEX 0x3c4

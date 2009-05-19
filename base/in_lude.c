@@ -6,6 +6,7 @@
 ========================
 */
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "soundst.h"
 #ifdef RENDER3D
@@ -412,7 +413,7 @@ void IN_Ticker(void)
 				oldintertime = intertime+200;
 				break;
 			case 2:
-				oldintertime = MAXINT;
+				oldintertime = H2MAXINT;
 				break;
 			case 3:
 				cnt = 10;

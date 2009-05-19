@@ -1,11 +1,10 @@
 // R_things.c
-#include <stdio.h>
-#include <stdlib.h>
+#include "h2stdinc.h"
+#include <math.h>
 #include "doomdef.h"
 #include "r_local.h"
 #ifdef RENDER3D
 #include "ogl_def.h"
-#include <math.h>
 #endif
 
 void R_DrawColumn (void);
@@ -951,7 +950,7 @@ void R_SortVisSprites (void)
 	vsprsortedhead.next = vsprsortedhead.prev = &vsprsortedhead;
 	for (i=0 ; i<count ; i++)
 	{
-		bestscale = MAXINT;
+		bestscale = H2MAXINT;
 		for (ds=unsorted.next ; ds!= &unsorted ; ds=ds->next)
 		{
 			if (ds->scale < bestscale)

@@ -1,7 +1,6 @@
 // $Id$
 
-
-#include <stdio.h>
+#include "h2stdinc.h"
 #include <math.h>       // pow()
 #include <pthread.h>
 #include "doomdef.h"
@@ -125,7 +124,7 @@ typedef struct
 {
     short a;            // always 3
     short freq;         // always 11025
-    long length;        // sample length
+    int32_t length;     // sample length
     unsigned char firstSample;
 } Sample;
 

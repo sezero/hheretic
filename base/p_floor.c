@@ -1,3 +1,4 @@
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
@@ -297,7 +298,7 @@ int EV_DoFloor(line_t *line,floor_e floortype)
 				break;
 			case raiseToTexture:
 				{
-					int	minsize = MAXINT;
+					int	minsize = H2MAXINT;
 					side_t	*side;
 				
 					floor->direction = 1;

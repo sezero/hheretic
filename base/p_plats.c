@@ -1,6 +1,7 @@
 
 // P_plats.c
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"

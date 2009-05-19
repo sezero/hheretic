@@ -3,15 +3,12 @@
 
 #ifndef __DOOMDEF__
 #define __DOOMDEF__
-#include <stdio.h>
-#include <string.h>
+
 #ifdef __WATCOMC__
 #include <malloc.h>
 #define	strcasecmp strcmpi
 #define	strncasecmp strnicmp
 #endif
-
-#include "config.h"
 
 #define VERSION 130
 #define VERSION_TEXT "v1.3"
@@ -67,17 +64,6 @@ extern byte *destview, *destscreen;	// PC direct to screen pointers
 #define	KEY_LALT			KEY_RALT
 
 
-
-#define MAXCHAR ((char)0x7f)
-#define MAXSHORT ((short)0x7fff)
-#define MAXINT	((int)0x7fffffff)	/* max pos 32-bit int */
-#define MAXLONG ((long)0x7fffffff)
-
-#define MINCHAR ((char)0x80)
-#define MINSHORT ((short)0x8000)
-#define MININT 	((int)0x80000000)	/* max negative 32-bit integer */
-#define MINLONG ((long)0x80000000)
-
 #define	FINEANGLES			8192
 #define	FINEMASK			(FINEANGLES-1)
 #define	ANGLETOFINESHIFT	19	// 0x100000000 to 0x2000
@@ -97,10 +83,6 @@ extern byte *destview, *destscreen;	// PC direct to screen pointers
 #define MAXPLAYERS	4
 #define TICRATE		35			// number of tics / second
 #define TICSPERSEC	35
-
-#define	FRACBITS		16
-#define	FRACUNIT		(1<<FRACBITS)
-typedef int fixed_t;
 
 #define ANGLE_1		0x01000000
 #define ANGLE_45	0x20000000
@@ -564,7 +546,7 @@ typedef struct
 
 typedef struct
 {
-	long	id;
+	int32_t	id;
 	short	intnum;			// DOOM executes an int to execute commands
 
 // communication between DOOM and the driver
@@ -730,33 +712,110 @@ fixed_t	FixedMul (fixed_t a, fixed_t b);
 fixed_t	FixedDiv (fixed_t a, fixed_t b);
 fixed_t	FixedDiv2 (fixed_t a, fixed_t b);
 
-#ifdef __WATCOMC__
-#pragma aux FixedMul =	\
+#undef	_HAVE_FIXED_ASM
+
+#if !defined(_DISABLE_ASM)
+#if defined(__i386__) || defined(__386__) || defined(_M_IX86)
+#if defined(__WATCOMC__)
+
+#define	_HAVE_FIXED_ASM			1
+
+#pragma aux FixedMul =			\
 	"imul ebx",			\
-	"shrd eax,edx,16"	\
-	parm	[eax] [ebx] \
-	value	[eax]		\
+	"shrd eax,edx,16"		\
+	parm	[eax] [ebx]		\
+	value	[eax]			\
 	modify exact [eax edx]
 
-#pragma aux FixedDiv2 =	\
+#pragma aux FixedDiv2 =			\
 	"cdq",				\
-	"shld edx,eax,16",	\
-	"sal eax,16",		\
+	"shld edx,eax,16",		\
+	"sal eax,16",			\
 	"idiv ebx"			\
-	parm	[eax] [ebx] \
-	value	[eax]		\
+	parm	[eax] [ebx]		\
+	value	[eax]			\
 	modify exact [eax edx]
-#endif
 
+#elif defined(__GNUC__)
+
+#define	_HAVE_FIXED_ASM			1
+
+# if defined(_INLINE_FIXED_ASM)
+# if (__GNUC__ == 2) && (__GNUC_MINOR__ <= 91)
+# define FixedMul(fa,fb) ({ int __value, __fb = (fb);	\
+	__asm__("imul %%ebx; shrd $16,%%edx,%%eax"	\
+		: "=a" (__value)			\
+		: "0" (fa), "b" (__fb)			\
+		: "eax", "edx" ); __value; })
+
+# define FixedDiv2(fa,fb) ({ int __value;		\
+	__asm__("cdq; shld $16,%%eax,%%edx; sall $16,%%eax; idiv %%ebx"	\
+		: "=a" (__value)			\
+		: "0" (fa), "b" (fb)			\
+		: "eax", "edx" ); __value; })
+
+# else	/* GCC > 2.91.x */
+# define FixedMul(fa,fb) ({ int __value, __fb = (fb);	\
+	__asm__("imul %%ebx; shrd $16,%%edx,%%eax"	\
+		: "=a" (__value)			\
+		: "0" (fa), "b" (__fb)			\
+		: "edx" ); __value; })
+
+# define FixedDiv2(fa,fb) ({ int __value;		\
+	__asm__("cdq; shld $16,%%eax,%%edx; sall $16,%%eax; idiv %%ebx"	\
+		: "=a" (__value)			\
+		: "0" (fa), "b" (fb)			\
+		: "edx" ); __value; })
+
+# endif	/* GCC/EGCS versions */
+
+# endif	/* _INLINE_FIXED_ASM */
+#endif
+#endif	/* X86 */
+#endif	/* !_DISABLE_ASM */
+
+#define FIX2FLT(x)	((float)((x)>>FRACBITS) + (float)((x)&(FRACUNIT-1)) / (float)(FRACUNIT))
+#define Q_FIX2FLT(x)	((float)((x)>>FRACBITS))
+
+
+int16_t ShortSwap(int16_t) __attribute__((const));
+int32_t LongSwap (int32_t) __attribute__((const));
+
+#if defined(__GNUC__)
+static inline __attribute__((const)) int16_t _H2_SWAP16(int16_t x)
+{
+	return (int16_t) (((uint16_t)x << 8) | ((uint16_t)x >> 8));
+}
+static inline __attribute__((const)) int32_t _H2_SWAP32(int32_t x)
+{
+	return (int32_t) (((uint32_t)x << 24) | ((uint32_t)x >> 24) |
+			  (((uint32_t)x & (uint32_t)0x0000ff00UL) << 8) |
+			  (((uint32_t)x & (uint32_t)0x00ff0000UL) >> 8));
+}
+#endif	/* GCC */
+
+/*
 #ifdef __BIG_ENDIAN__
-short ShortSwap(short);
-long LongSwap(long);
-#define SHORT(x)	ShortSwap(x)
-#define LONG(x)		LongSwap(x)
+*/
+#ifdef WORDS_BIGENDIAN
+# ifdef __GNUC__
+#  define SHORT(a)	_H2_SWAP16((a))
+#  define LONG(a)	_H2_SWAP32((a))
+# else
+#  define SHORT(x)	ShortSwap((x))
+#  define LONG(x)	LongSwap((x))
+# endif
 #else
 #define SHORT(x)	(x)
 #define LONG(x)		(x)
 #endif
+
+/* ---- READ_INT16/32 --- */
+
+#define READ_INT16(b)	((b)[0] | ((b)[1] << 8))
+#define READ_INT32(b)	((b)[0] | ((b)[1] << 8) | ((b)[2] << 16) | ((b)[3] << 24))
+#define INCR_INT16(b)	(b)+=2
+#define INCR_INT32(b)	(b)+=4
 
 
 //-----------
@@ -857,14 +916,21 @@ void D_QuitNetGame (void);
 
 void TryRunTics (void);
 
+#if !(defined(__WATCOMC__) || defined(__DJGPP__) || defined(__DOS__) || \
+      defined(_WIN32) || defined(_WIN64))
+char *strupr (char *str);
+char *strlwr (char *str);
+int filelength(int handle);
+#endif
+
 //---------
 //SYSTEM IO
 //---------
 #if 1
-#define	SCREENWIDTH		320
+#define	SCREENWIDTH	320
 #define	SCREENHEIGHT	200
 #else
-#define	SCREENWIDTH		560
+#define	SCREENWIDTH	560
 #define	SCREENHEIGHT	375
 #endif
 
@@ -1180,9 +1246,5 @@ void V_DrawRawScreen(byte *raw);
 
 #include "sounds.h"
 
-#ifdef RENDER3D
-#define FIX2FLT(x)      ((float)((x)>>FRACBITS) + (float)((x)&(FRACUNIT-1)) / (float)(FRACUNIT))
-#define Q_FIX2FLT(x)    ((float)((x)>>FRACBITS))
-#endif
-
 #endif // __DOOMDEF__
+

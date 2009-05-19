@@ -1,7 +1,7 @@
 
 // P_maputl.c
 
-#include <stdlib.h>
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
 
@@ -598,7 +598,7 @@ boolean P_TraverseIntercepts ( traverser_t func, fixed_t maxfrac )
 	
 	while (count--)
 	{
-		dist = MAXINT;
+		dist = H2MAXINT;
 		for (scan = intercepts ; scan<intercept_p ; scan++)
 			if (scan->frac < dist)
 			{
@@ -621,7 +621,7 @@ boolean P_TraverseIntercepts ( traverser_t func, fixed_t maxfrac )
 
 		if ( !func (in) )
 			return false;			// don't bother going farther
-		in->frac = MAXINT;
+		in->frac = H2MAXINT;
 	}
 	
 	return true;		// everything was traversed

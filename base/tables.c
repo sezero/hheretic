@@ -1,3 +1,4 @@
+#include "h2stdinc.h"
 #include "doomdef.h"
 
 int finetangent[4096] = {

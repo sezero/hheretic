@@ -6,12 +6,6 @@
 #ifndef __DOOMDATA__
 #define __DOOMDATA__
 
-#ifndef __BYTEBOOL__
-#define __BYTEBOOL__
-typedef enum {false, true} boolean;
-typedef unsigned char byte;
-#endif
-
 /*
 ===============================================================================
 
@@ -130,10 +124,10 @@ typedef struct
 typedef struct
 {
 	char		name[8];
-	boolean		masked;	
+	boolean		masked;
 	short		width;
 	short		height;
-	void		**columndirectory;	// OBSOLETE
+	int32_t		columndirectory;	/* OBSOLETE */
 	short		patchcount;
 	mappatch_t	patches[1];
 } maptexture_t;

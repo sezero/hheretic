@@ -7,12 +7,13 @@
 
 // HEADER FILES ------------------------------------------------------------
 
+#include "h2stdinc.h"
+#include <math.h>
 #include <GL/gl.h>
 #include "doomdef.h"
 #include "r_local.h"
 #include "ogl_def.h"
 #include "ogl_rl.h"
-#include <math.h>
 
 // MACROS ------------------------------------------------------------------
 

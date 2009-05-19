@@ -2,7 +2,7 @@
 // Chat mode
 //
 
-#include <string.h>
+#include "h2stdinc.h"
 #include <ctype.h>
 #include "doomdef.h"
 #include "p_local.h"

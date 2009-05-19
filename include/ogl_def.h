@@ -4,12 +4,6 @@
 #include "r_local.h"
 #include <GL/gl.h>
 
-
-#ifdef __linux__
-#define _alloca alloca
-#endif
-
-
 enum {VX, VY};	// Vertex indices.
 
 typedef struct // For dynamic lighting.

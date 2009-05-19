@@ -4,9 +4,7 @@
 //**
 //**************************************************************************
 
-
-#include <stdlib.h>
-#include <stdarg.h>
+#include "h2stdinc.h"
 #include <sys/time.h>
 #include <SDL/SDL.h> 
 #include "doomdef.h"

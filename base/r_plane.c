@@ -1,6 +1,6 @@
 // R_planes.c
 
-#include <stdlib.h>
+#include "h2stdinc.h"
 #include "doomdef.h"
 #include "r_local.h"
 

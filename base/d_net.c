@@ -2,6 +2,7 @@
 // d_net.c
 // This version has the fixed ticdup code
 
+#include "h2stdinc.h"
 #include "doomdef.h"
 
 #define NCMD_EXIT               0x80000000
@@ -662,7 +663,7 @@ void TryRunTics (void)
 //
 	NetUpdate ();
 
-	lowtic = MAXINT;
+	lowtic = H2MAXINT;
 	numplaying = 0;
 	for (i=0 ; i<doomcom->numnodes ; i++)
 		if (nodeingame[i])
@@ -729,7 +730,7 @@ if (debugfile)
 		{
 
 			NetUpdate ();
-			lowtic = MAXINT;
+			lowtic = H2MAXINT;
 
 			for (i=0 ; i<doomcom->numnodes ; i++)
 				if (nodeingame[i] && nettics[i] < lowtic)

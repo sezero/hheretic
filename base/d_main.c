@@ -1,14 +1,14 @@
 
 // D_main.c
 
+#include "h2stdinc.h"
+#include <sys/stat.h>
+#include <ctype.h>
 #ifdef __WATCOMC__
 #include <dos.h>
 #include <graph.h>
-#include <sys\types.h>
 #include <direct.h>
 #endif
-#include <stdio.h>
-#include <stdlib.h>
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
@@ -51,18 +51,124 @@ void F_Drawer(void);
 boolean F_Responder(event_t *ev);
 
 //---------------------------------------------------------------------------
-//
-// FUNC FixedDiv
-//
-//---------------------------------------------------------------------------
 
-fixed_t FixedDiv(fixed_t a, fixed_t b)
+#if !(defined(__DOS__) || defined(__WATCOMC__) || defined(__DJGPP__) || defined(_WIN32) || defined(_WIN64))
+char *strlwr (char *str)
 {
-	if((abs(a)>>14) >= abs(b))
+	char	*c;
+	c = str;
+	while (*c)
 	{
-		return((a^b)<0 ? MININT : MAXINT);
+		*c = tolower(*c);
+		c++;
 	}
-	return(FixedDiv2(a, b));
+	return str;
+}
+
+char *strupr (char *str)
+{
+	char	*c;
+	c = str;
+	while (*c)
+	{
+		*c = toupper(*c);
+		c++;
+	}
+	return str;
+}
+
+int filelength(int handle)
+{
+	struct stat fileinfo;
+
+	if (fstat(handle, &fileinfo) == -1)
+	{
+		I_Error("Error fstating");
+	}
+	return fileinfo.st_size;
+}
+#endif
+
+//==========================================================================
+//
+// Fixed Point math
+//
+//==========================================================================
+
+#if defined(_HAVE_FIXED_ASM)
+
+#if defined(__i386__) || defined(__386__) || defined(_M_IX86)
+#if defined(__GNUC__) && !defined(_INLINE_FIXED_ASM)
+fixed_t	FixedMul (fixed_t a, fixed_t b)
+{
+	fixed_t retval;
+	__asm__ __volatile__(
+		"imull  %%edx			\n\t"
+		"shrdl  $16, %%edx, %%eax	\n\t"
+		: "=a" (retval)
+		: "a" (a), "d" (b)
+		: "cc"
+	);
+	return retval;
+}
+
+fixed_t	FixedDiv2 (fixed_t a, fixed_t b)
+{
+	fixed_t retval;
+	__asm__ __volatile__(
+		"cdq				\n\t"
+		"shldl  $16, %%eax, %%edx	\n\t"
+		"sall   $16, %%eax		\n\t"
+		"idivl  %%ebx			\n\t"
+		: "=a" (retval)
+		: "a" (a), "b" (b)
+		: "%edx", "cc"
+	);
+	return retval;
+}
+#endif	/* GCC and !_INLINE_FIXED_ASM */
+#endif	/* x86 */
+
+#else	/* C-only versions */
+
+fixed_t FixedMul (fixed_t a, fixed_t b)
+{
+	return ((int64_t) a * (int64_t) b) >> 16;
+}
+
+fixed_t FixedDiv2 (fixed_t a, fixed_t b)
+{
+	if (!b)
+		return 0;
+	return (fixed_t) (((double) a / (double) b) * FRACUNIT);
+}
+#endif
+
+fixed_t FixedDiv (fixed_t a, fixed_t b)
+{
+	if ((abs(a) >> 14) >= abs(b))
+	{
+		return ((a^b) < 0 ? H2MININT : H2MAXINT);
+	}
+	return (FixedDiv2(a, b));
+}
+
+//==========================================================================
+//
+// Byte swap functions
+//
+//==========================================================================
+
+int16_t ShortSwap (int16_t x)
+{
+	return (int16_t) (((uint16_t)x << 8) | ((uint16_t)x >> 8));
+}
+
+int32_t LongSwap (int32_t x)
+{
+	return (int32_t) (((uint32_t)x << 24) | ((uint32_t)x >> 24) |
+			  (((uint32_t)x & (uint32_t)0x0000ff00UL) << 8) |
+			  (((uint32_t)x & (uint32_t)0x00ff0000UL) >> 8));
 }
 
 /*
@@ -1055,3 +1161,4 @@ void D_DoomMain(void)
 #endif
 	D_DoomLoop(); // Never returns
 }
+

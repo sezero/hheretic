@@ -1,5 +1,6 @@
 // F_finale.c
 
+#include "h2stdinc.h"
 #include <ctype.h>	// for toupper()
 #include "doomdef.h"
 #include "soundst.h"

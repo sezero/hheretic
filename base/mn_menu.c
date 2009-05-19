@@ -1,6 +1,7 @@
 
 // MN_menu.c
 
+#include "h2stdinc.h"
 #include <ctype.h>
 #include "doomdef.h"
 #include "p_local.h"

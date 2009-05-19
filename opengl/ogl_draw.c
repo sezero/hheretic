@@ -12,14 +12,13 @@
 
 // HEADER FILES ------------------------------------------------------------
 
-#ifdef __WIN32__
+#include "h2stdinc.h"
+
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glu.h>

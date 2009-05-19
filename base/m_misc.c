@@ -1,10 +1,9 @@
 
 // M_misc.c
 
+#include "h2stdinc.h"
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <fcntl.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 #include <ctype.h>
@@ -150,8 +149,8 @@ void M_ClearRandom (void)
 
 void M_ClearBox (fixed_t *box)
 {
-	box[BOXTOP] = box[BOXRIGHT] = MININT;
-	box[BOXBOTTOM] = box[BOXLEFT] = MAXINT;
+	box[BOXTOP] = box[BOXRIGHT] = H2MININT;
+	box[BOXBOTTOM] = box[BOXLEFT] = H2MAXINT;
 }
 
 void M_AddToBox (fixed_t *box, fixed_t x, fixed_t y)
@@ -175,10 +174,6 @@ void M_AddToBox (fixed_t *box, fixed_t x, fixed_t y)
 =
 ==================
 */
-
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
 
 boolean M_WriteFile (char const *name, void *source, int length)
 {

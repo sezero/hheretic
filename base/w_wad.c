@@ -1,22 +1,10 @@
 // W_wad.c
 
-#ifdef NeXT
-#include <libc.h>
-#include <ctype.h>
-
-#else
-// next doesn't need a binary flag in open call
-#define	O_BINARY	0
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
+#include "h2stdinc.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <unistd.h>
-#endif
 
 #include "doomdef.h"
 
@@ -52,38 +40,6 @@ void		**lumpcache;
 
 
 //===================
-
-
-#define strcmpi strcasecmp
-
-void strupr (char *s)
-{
-    while (*s)
-    {
-	*s = toupper(*s);
-	s++;
-    }
-}
-
-/*
-================
-=
-= filelength
-=
-================
-*/
-
-int filelength (int handle)
-{
-    struct stat	fileinfo;
-    
-    if (fstat (handle,&fileinfo) == -1)
-	I_Error ("Error fstating");
-
-    return fileinfo.st_size;
-}
-
-
 
 void ExtractFileBase (char *path, char *dest)
 {
@@ -149,7 +105,7 @@ void W_AddFile (char *filename)
 
 	startlump = numlumps;
 	
-	if (strcmpi (filename+strlen(filename)-3 , "wad" ) )
+	if (strcasecmp(filename + strlen(filename) - 3, "wad") != 0)
 	{
 	// single lump file
 		fileinfo = &singleinfo;

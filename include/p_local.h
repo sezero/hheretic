@@ -187,7 +187,7 @@ int 	P_BoxOnLineSide (fixed_t *tmbox, line_t *ld);
 
 extern	fixed_t opentop, openbottom, openrange;
 extern	fixed_t	lowfloor;
-void 	P_LineOpening (line_t *linedef);
+void	P_LineOpening (line_t *ld);
 
 boolean P_BlockLinesIterator (int x, int y, boolean(*func)(line_t*) );
 boolean P_BlockThingsIterator (int x, int y, boolean(*func)(mobj_t*) );

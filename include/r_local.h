@@ -310,7 +310,6 @@ extern	angle_t		rw_normalangle;
 //
 extern	int				viewwidth, viewheight, viewwindowx, viewwindowy;
 extern	int				centerx, centery;
-extern	int				flyheight;
 extern	fixed_t			centerxfrac;
 extern	fixed_t			centeryfrac;
 extern	fixed_t			projection;

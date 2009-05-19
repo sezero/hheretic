@@ -239,18 +239,18 @@ float	frac, num, den, v1x,v1y,v1dx,v1dy,v2x,v2y,v2dx,v2dy;
 fixed_t opentop, openbottom, openrange;
 fixed_t	lowfloor;
 
-void P_LineOpening (line_t *linedef)
+void P_LineOpening (line_t *ld)
 {
 	sector_t	*front, *back;
 	
-	if (linedef->sidenum[1] == -1)
+	if (ld->sidenum[1] == -1)
 	{	// single sided line
 		openrange = 0;
 		return;
 	}
 	 
-	front = linedef->frontsector;
-	back = linedef->backsector;
+	front = ld->frontsector;
+	back = ld->backsector;
 	
 	if (front->ceilingheight < back->ceilingheight)
 		opentop = front->ceilingheight;

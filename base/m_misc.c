@@ -366,16 +366,21 @@ int mouseSensitivity;
 
 extern  int screenblocks;
 
-extern char *chat_macros[10];
+typedef struct
+{
+	const char	*name;
+	int	*location;
+	int	defaultvalue;
+	int	scantranslate;		/* PC scan code hack */
+	int	untranslated;		/* lousy hack */
+} default_t;
 
 typedef struct
 {
-	char    *name;
-	int     *location;
-	int     defaultvalue;
-	int     scantranslate;      // PC scan code hack
-	int     untranslated;       // lousy hack
-} default_t;
+	const char	*name;
+	char	*location;	/* pointer to an 80 char array, null terminated */
+	char	*defaultvalue;	/* backup of the default value. malloc'ed at init */
+} default_str_t;
 
 #ifndef __NeXT__
 extern int snd_Channels;
@@ -414,7 +419,7 @@ default_t defaults[] =
 	{ "key_lookcenter", &key_lookcenter, SC_END },
 	{ "key_invleft", &key_invleft, '[' },
 	{ "key_invright", &key_invright, ']' },
-	{ "key_useartifact", &key_useartifact, 13 },
+	{ "key_useartifact", &key_useartifact, KEY_ENTER },
 
 	{ "key_fire", &key_fire, KEY_RCTRL, 1 },
 	{ "key_use", &key_use, ' ', 1 },
@@ -443,20 +448,24 @@ default_t defaults[] =
 	{ "snd_mport", &snd_Mport, -1 },
 
 	{ "usegamma", &usegamma, 0 },
-
-	{ "chatmacro0", (int *) &chat_macros[0], (int) HUSTR_CHATMACRO0 },
-	{ "chatmacro1", (int *) &chat_macros[1], (int) HUSTR_CHATMACRO1 },
-	{ "chatmacro2", (int *) &chat_macros[2], (int) HUSTR_CHATMACRO2 },
-	{ "chatmacro3", (int *) &chat_macros[3], (int) HUSTR_CHATMACRO3 },
-	{ "chatmacro4", (int *) &chat_macros[4], (int) HUSTR_CHATMACRO4 },
-	{ "chatmacro5", (int *) &chat_macros[5], (int) HUSTR_CHATMACRO5 },
-	{ "chatmacro6", (int *) &chat_macros[6], (int) HUSTR_CHATMACRO6 },
-	{ "chatmacro7", (int *) &chat_macros[7], (int) HUSTR_CHATMACRO7 },
-	{ "chatmacro8", (int *) &chat_macros[8], (int) HUSTR_CHATMACRO8 },
-	{ "chatmacro9", (int *) &chat_macros[9], (int) HUSTR_CHATMACRO9 }
 };
 
-int numdefaults;
+default_str_t default_strings[] =
+{
+	{ "chatmacro0", chat_macros[0] },
+	{ "chatmacro1", chat_macros[1] },
+	{ "chatmacro2", chat_macros[2] },
+	{ "chatmacro3", chat_macros[3] },
+	{ "chatmacro4", chat_macros[4] },
+	{ "chatmacro5", chat_macros[5] },
+	{ "chatmacro6", chat_macros[6] },
+	{ "chatmacro7", chat_macros[7] },
+	{ "chatmacro8", chat_macros[8] },
+	{ "chatmacro9", chat_macros[9] }
+};
+
+static int numdefaults, numstrings;
+
 char *defaultfile;
 
 /*
@@ -469,28 +478,23 @@ char *defaultfile;
 
 void M_SaveDefaults (void)
 {
-	int     i,v;
-	FILE    *f;
+	int	i,v;
+	FILE	*f;
 
 	f = fopen (defaultfile, "w");
 	if (!f)
-		return;         // can't write the file, but don't complain
+		return;	// can't write the file, but don't complain
 
-	for (i=0 ; i<numdefaults ; i++)
+	for (i = 0; i < numdefaults; i++)
 	{
-#ifdef __WATCOMC__
-		if (defaults[i].scantranslate)
-			defaults[i].location = &defaults[i].untranslated;
-#endif
-		if (defaults[i].defaultvalue > -0xfff
-		  && defaults[i].defaultvalue < 0xfff)
-		{
-			v = *defaults[i].location;
-			fprintf (f,"%s\t\t%i\n",defaults[i].name,v);
-		} else {
-			fprintf (f,"%s\t\t\"%s\"\n",defaults[i].name,
-			  * (char **) (defaults[i].location));
-		}
+		v = *defaults[i].location;
+		fprintf (f, "%s\t\t%i\n", defaults[i].name, v);
+	}
+
+	for (i = 0; i < numstrings; i++)
+	{
+		fprintf (f, "%s\t\t\"%s\"\n", default_strings[i].name,
+					default_strings[i].location);
 	}
 
 	fclose (f);
@@ -510,26 +514,32 @@ extern char *basedefault;
 
 void M_LoadDefaults (void)
 {
-	int     i, len;
-	FILE    *f;
-	char    def[80];
-	char        strparm[100];
-	char    *newstring = NULL;
-	int     parm;
-	boolean     isstring;
+	int i, len;
+	FILE *f;
+	char def[80];
+	char strparm[100];
+	int parm;
 
 //
 // set everything to base values
 //
-	numdefaults = sizeof(defaults)/sizeof(defaults[0]);
-	for (i=0 ; i<numdefaults ; i++)
+	numdefaults = sizeof(defaults) / sizeof(defaults[0]);
+	numstrings = sizeof(default_strings) / sizeof(default_strings[0]);
+	printf("Loading default settings\n");
+	for (i = 0; i < numdefaults; i++)
 		*defaults[i].location = defaults[i].defaultvalue;
+	// Make a backup of all default strings
+	for (i = 0; i < numstrings; i++)
+	{
+		default_strings[i].defaultvalue = (char *) calloc(1, 80);
+		strcpy (default_strings[i].defaultvalue, default_strings[i].location);
+	}
 
 //
 // check for a custom default file
 //
 	i = M_CheckParm("-config");
-	if(i && i<myargc-1)
+	if (i && i < myargc-1)
 	{
 		defaultfile = myargv[i+1];
 		printf("default file: %s\n", defaultfile);
@@ -551,32 +561,49 @@ void M_LoadDefaults (void)
 	{
 		while (!feof(f))
 		{
-			isstring = false;
-			if (fscanf (f, "%79s %[^\n]\n", def, strparm) == 2)
+			if (fscanf(f, "%79s %[^\n]\n", def, strparm) == 2)
 			{
-			  if (strparm[0] == '"')
-			  {
-				// get a string default
-				isstring = true;
-				len = strlen(strparm);
-				newstring = (char *) malloc(len);
-				strparm[len-1] = 0;
-				strcpy(newstring, strparm+1);
-			  }
-			  else if (strparm[0] == '0' && strparm[1] == 'x')
-				  sscanf(strparm+2, "%x", &parm);
-			  else
-				  sscanf(strparm, "%i", &parm);
-			  for (i=0 ; i<numdefaults ; i++)
-				  if (!strcmp(def, defaults[i].name))
-				  {
-					  if (!isstring)
+				if (strparm[0] == '"') /* string values */
+				{
+					for (i = 0; i < numstrings; i++)
+					{
+						if (!strcmp(def, default_strings[i].name))
+						{
+							len = (int)strlen(strparm) - 2;
+							if (len <= 0)
+							{
+								default_strings[i].location[0] = '\0';
+								break;
+							}
+							if (len > 79)
+							{
+								len = 79;
+							}
+							strncpy(default_strings[i].location, strparm + 1, len);
+							default_strings[i].location[len] = '\0';
+							break;
+						}
+					}
+					continue;
+				}
+
+				/* numeric values */
+				if (strparm[0] == '0' && strparm[1] == 'x')
+				{
+					sscanf(strparm + 2, "%x", &parm);
+				}
+				else
+				{
+					sscanf(strparm, "%i", &parm);
+				}
+				for (i = 0; i < numdefaults; i++)
+				{
+					if (!strcmp(def, defaults[i].name))
+					{
 						*defaults[i].location = parm;
-					  else
-						*defaults[i].location =
-						  (int) newstring;
-					  break;
-				  }
+						break;
+					}
+				}
 			}
 		}
 

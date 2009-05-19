@@ -1198,6 +1198,7 @@ boolean CT_Responder(event_t *ev);
 void CT_Ticker(void);
 char CT_dequeueChatChar(void);
 
+extern char chat_macros[10][80];
 extern boolean chatmodeon;
 extern boolean ultimatemsg;
 

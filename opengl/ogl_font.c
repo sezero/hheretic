@@ -88,7 +88,7 @@ static int findPow2(int num)
 }
 */
 
-#ifdef __WIN32__
+#ifdef _WIN32
 // Prepare a GDI font. Select it as the current font.
 int FR_PrepareGDIFont(HFONT hfont)
 {

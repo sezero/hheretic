@@ -27,7 +27,7 @@ void FR_Shutdown();
 jfrfont_t *FR_GetFont(int id);
 
 // Prepare a GDI font. Select it as the current font.
-#ifdef __WIN32
+#ifdef _WIN32
 int FR_PrepareGDIFont(HFONT hfont);
 #else
 int FR_PrepareGDIFont(void* hfont);

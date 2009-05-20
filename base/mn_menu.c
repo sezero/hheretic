@@ -19,6 +19,9 @@
 #define LEFT_DIR 0
 #define RIGHT_DIR 1
 #define ITEM_HEIGHT 20
+#define SMALL_ITEM_HEIGHT 9
+#define MENU_MAX_MOUSE_SENS 50
+
 #define SELECTOR_XOFFSET (-28)
 #define SELECTOR_YOFFSET (-1)
 #define SLOTTEXTLEN     16
@@ -32,7 +35,8 @@ typedef enum
 	ITT_EFUNC,
 	ITT_LRFUNC,
 	ITT_SETMENU,
-	ITT_INERT
+	ITT_INERT,
+	ITT_SETKEY
 } ItemType_t;
 
 typedef enum
@@ -42,6 +46,7 @@ typedef enum
 	MENU_SKILL,
 	MENU_OPTIONS,
 	MENU_OPTIONS2,
+	MENU_OPTIONS3,
 	MENU_FILES,
 	MENU_LOAD,
 	MENU_SAVE,
@@ -65,11 +70,14 @@ typedef struct
 	int itemCount;
 	MenuItem_t *items;
 	int oldItPos;
+	int step;
 	MenuType_t prevMenu;
 } Menu_t;
 
 // Private Functions
 
+static char *Key2String(int key);	/* const */
+static void ClearControls(int key);
 static void InitFonts(void);
 static void SetMenu(MenuType_t menu);
 static boolean SCNetCheck(int option);
@@ -85,11 +93,15 @@ static boolean SCSaveGame(int option);
 static boolean SCMessages(int option);
 static boolean SCEndGame(int option);
 static boolean SCInfo(int option);
+static boolean SCSetKey(int option);
+static boolean SCMouselook(int option);
+static boolean SCAlwaysRun(int option);
 static void DrawMainMenu(void);
 static void DrawEpisodeMenu(void);
 static void DrawSkillMenu(void);
 static void DrawOptionsMenu(void);
 static void DrawOptions2Menu(void);
+static void DrawOptions3Menu(void);
 static void DrawFileSlots(Menu_t *menu);
 static void DrawFilesMenu(void);
 static void MN_DrawInfo(void);
@@ -100,8 +112,20 @@ void MN_LoadSlotText(void);
 
 // External Data
 
+extern default_t defaults[];
+
 extern int detailLevel;
 extern int screenblocks;
+
+extern int alwaysrun;
+extern int mouselook;
+
+extern int key_right, key_left, key_up, key_down;
+extern int key_straferight, key_strafeleft;
+extern int key_fire, key_use, key_strafe, key_speed;
+extern int key_flyup, key_flydown, key_flycenter;
+extern int key_lookup, key_lookdown, key_lookcenter;
+extern int key_invleft, key_invright, key_useartifact;
 
 // Public Data
 
@@ -140,6 +164,10 @@ static int quicksave;
 static int quickload;
 static int typeofask;
 
+static int FirstKey = 0;
+static boolean askforkey = false;
+static int keyaskedfor;
+
 static MenuItem_t MainItems[] =
 {
 	{ ITT_EFUNC, "NEW GAME", SCNetCheck, 1, MENU_EPISODE },
@@ -155,6 +183,7 @@ static Menu_t MainMenu =
 	DrawMainMenu,
 	5, MainItems,
 	0,
+	ITEM_HEIGHT,
 	MENU_NONE
 };
 
@@ -173,6 +202,7 @@ static Menu_t EpisodeMenu =
 	DrawEpisodeMenu,
 	3, EpisodeItems,
 	0,
+	ITEM_HEIGHT,
 	MENU_MAIN
 };
 
@@ -188,6 +218,7 @@ static Menu_t FilesMenu =
 	DrawFilesMenu,
 	2, FilesItems,
 	0,
+	ITEM_HEIGHT,
 	MENU_MAIN
 };
 
@@ -207,6 +238,7 @@ static Menu_t LoadMenu =
 	DrawLoadMenu,
 	6, LoadItems,
 	0,
+	ITEM_HEIGHT,
 	MENU_FILES
 };
 
@@ -226,6 +258,7 @@ static Menu_t SaveMenu =
 	DrawSaveMenu,
 	6, SaveItems,
 	0,
+	ITEM_HEIGHT,
 	MENU_FILES
 };
 
@@ -245,6 +278,7 @@ static Menu_t SkillMenu =
 	DrawSkillMenu,
 	5, SkillItems,
 	2,
+	ITEM_HEIGHT,
 	MENU_EPISODE
 };
 
@@ -252,8 +286,10 @@ static MenuItem_t OptionsItems[] =
 {
 	{ ITT_EFUNC, "END GAME", SCEndGame, 0, MENU_NONE },
 	{ ITT_EFUNC, "MESSAGES : ", SCMessages, 0, MENU_NONE },
-	{ ITT_LRFUNC, "MOUSE SENSITIVITY", SCMouseSensi, 0, MENU_NONE },
-	{ ITT_EMPTY, NULL, NULL, 0, MENU_NONE },
+	{ ITT_LRFUNC, "MOUSE SENSITIVITY :", SCMouseSensi, 0, MENU_NONE },
+	{ ITT_SETMENU, "CONTROL SETUP", NULL, 0, MENU_OPTIONS3 },
+	{ ITT_LRFUNC, "MOUSELOOK : ", SCMouselook, 0, MENU_NONE },
+	{ ITT_EFUNC, "ALWAYS RUN : ", SCAlwaysRun, 0, MENU_NONE },
 	{ ITT_SETMENU, "MORE...", NULL, 0, MENU_OPTIONS2 }
 };
 
@@ -261,8 +297,10 @@ static Menu_t OptionsMenu =
 {
 	88, 30,
 	DrawOptionsMenu,
-	5, OptionsItems,
+	7,
+	OptionsItems,
 	0,
+	ITEM_HEIGHT,
 	MENU_MAIN
 };
 
@@ -282,6 +320,50 @@ static Menu_t Options2Menu =
 	DrawOptions2Menu,
 	6, Options2Items,
 	0,
+	ITEM_HEIGHT,
+	MENU_OPTIONS
+};
+
+static MenuItem_t Options3Items[] =
+{
+/* see defaults[] in m_misc.c for the correct option number:
+ * key_right corresponds to defaults[3], which means that we
+ * are using the (index_number - 3) here.
+ */
+	{ ITT_SETKEY, "TURN RIGHT :", SCSetKey, 0, MENU_NONE },
+	{ ITT_SETKEY, "TURN LEFT :", SCSetKey, 1, MENU_NONE },
+	{ ITT_SETKEY, "MOVE FORWARD :", SCSetKey, 2, MENU_NONE },
+	{ ITT_SETKEY, "MOVE BACK :" , SCSetKey, 3, MENU_NONE },
+	{ ITT_SETKEY, "STRAFE LEFT :", SCSetKey, 4, MENU_NONE },
+	{ ITT_SETKEY, "STRAFE RIGHT :", SCSetKey, 5, MENU_NONE },
+	{ ITT_SETKEY, "FLY UP :", SCSetKey, 6, MENU_NONE },
+	{ ITT_SETKEY, "FLY DOWN :", SCSetKey, 7, MENU_NONE },
+	{ ITT_SETKEY, "FLY CENTER :", SCSetKey, 8, MENU_NONE },
+	{ ITT_SETKEY, "LOOK UP :", SCSetKey, 9, MENU_NONE },
+	{ ITT_SETKEY, "LOOK DOWN :", SCSetKey, 10, MENU_NONE },
+	{ ITT_SETKEY, "LOOK CENTER :", SCSetKey, 11, MENU_NONE },
+	{ ITT_SETKEY, "INVETORY LEFT :", SCSetKey, 12, MENU_NONE },
+	{ ITT_SETKEY, "INVENTORY RIGHT :", SCSetKey, 13, MENU_NONE },
+	{ ITT_SETKEY, "USE ARTIFACT :", SCSetKey, 14, MENU_NONE },
+	{ ITT_SETKEY, "FIRE :", SCSetKey, 15, MENU_NONE },
+	{ ITT_SETKEY, "USE :", SCSetKey, 16, MENU_NONE },
+	{ ITT_SETKEY, "STRAFE :", SCSetKey, 17, MENU_NONE },
+	{ ITT_SETKEY, "SPEED :", SCSetKey, 18, MENU_NONE }
+};
+
+/* Many items in Options3Items[], only 15 can be drawn on a page:
+ * So, FirstKey changes between 0 and FIRSTKEY_MAX. This menu is
+ * way too fragile. Should we adapt from Quake's M_Menu_Keys and
+ * bindnames?? */
+#define FIRSTKEY_MAX	4
+static Menu_t Options3Menu =
+{
+	70,20,
+	DrawOptions3Menu,
+	15, /* actually 19 */
+	Options3Items,
+	0,
+	SMALL_ITEM_HEIGHT,
 	MENU_OPTIONS
 };
 
@@ -292,10 +374,90 @@ static Menu_t *Menus[] =
 	&SkillMenu,
 	&OptionsMenu,
 	&Options2Menu,
+	&Options3Menu,
 	&FilesMenu,
 	&LoadMenu,
 	&SaveMenu
 };
+
+static char *mlooktext[] = /* const */
+{
+	"OFF",
+	"NORMAL",
+	"INVERSE"
+};
+
+static char *stupidtable[] = /* const */
+{
+	"A","B","C","D","E",
+	"F","G","H","I","J",
+	"K","L","M","N","O",
+	"P","Q","R","S","T",
+	"U","V","W","X","Y",
+	"Z"
+};
+
+// CODE --------------------------------------------------------------------
+
+static char *Key2String (int key) /* const */
+{
+/* S.A.: return "[" or "]" or "\"" doesn't work
+ * because there are no lumps for these chars,
+ * therefore we have to go with "RIGHT BRACKET"
+ * and similar for much punctuation.  Probably
+ * won't work with international keyboards and
+ * dead keys, either.
+ */
+	switch (key)
+	{
+	case KEY_LEFTBRACKET:	return "LEFT BRACK";
+	case KEY_RIGHTBRACKET:	return "RIGHT BRACK";
+	case KEY_BACKQUOTE:	return "BACK QUOTE";
+	case KEY_QUOTE:		return "'";
+	case KEY_QUOTEDBL:	return "DOUBLE QUOTE";
+	case KEY_SEMICOLON:	return ";";
+	case KEY_MINUS:		return "-";
+	case KEY_PERIOD:	return ".";
+	case KEY_COMMA:		return ",";
+	case KEY_SLASH:		return "/";
+	case KEY_BACKSLASH:	return "BACKSLASH";
+	case KEY_TAB:		return "TAB";
+	case KEY_EQUALS:	return "=";
+
+	case KEY_RIGHTARROW:	return "RIGHT ARROW";
+	case KEY_LEFTARROW:	return "LEFT ARROW";
+	case KEY_DOWNARROW:	return "DOWN ARROW";
+	case KEY_UPARROW:	return "UP ARROW";
+	case KEY_ENTER:		return "ENTER";
+	case KEY_PGUP:		return "PAGE UP";
+	case KEY_PGDN:		return "PAGE DOWN";
+	case KEY_INS:		return "INSERT";
+	case KEY_HOME:		return "HOME";
+	case KEY_END:		return "END";
+	case KEY_DEL:		return "DELETE";
+	case ' ':		return "SPACE";
+	case KEY_RSHIFT:	return "SHIFT";
+	case KEY_RALT:		return "ALT";
+	case KEY_RCTRL:		return "CTRL";
+	}
+	/* Handle letter keys */
+	/* S.A.: could also be done with toupper */
+	if (key >= 'a' && key <= 'z')
+		return stupidtable[(key - 'a')];
+
+	return "?";		/* Everything else */
+}
+
+static void ClearControls (int key)
+{
+	int i;
+
+	for (i = 3; i < 24; i++)
+	{
+		if (*defaults[i].location == key)
+			*defaults[i].location = 0;
+	}
+}
 
 //---------------------------------------------------------------------------
 //
@@ -541,15 +703,15 @@ void MN_Drawer(void)
 	if(MenuActive == false)
 	{
 #ifdef RENDER3D
-        if(bgAlpha > 0)
-        {
-            UpdateState |= I_FULLSCRN;
-            BorderNeedRefresh = true;
-            //OGL_SetNoTexture();
-            glDisable( GL_TEXTURE_2D );
-            OGL_DrawRect(0,0,320,200,0,0,0,bgAlpha);
-            glEnable( GL_TEXTURE_2D );
-        }
+		if(bgAlpha > 0)
+		{
+			UpdateState |= I_FULLSCRN;
+			BorderNeedRefresh = true;
+			//OGL_SetNoTexture();
+			glDisable( GL_TEXTURE_2D );
+			OGL_DrawRect(0,0,320,200,0,0,0,bgAlpha);
+			glEnable( GL_TEXTURE_2D );
+		}
 #endif
 		if(askforquit)
 		{
@@ -574,64 +736,70 @@ void MN_Drawer(void)
 		return;
 	}
 #ifdef RENDER3D
-    if( MenuActive || fadingOut )
-    {
-        int effTime = (MenuTime>menuDarkTicks)? menuDarkTicks : MenuTime;
-        float temp = .5 * effTime/(float)menuDarkTicks;
+	if( MenuActive || fadingOut )
+	{
+		int effTime = (MenuTime>menuDarkTicks)? menuDarkTicks : MenuTime;
+		float temp = .5 * effTime/(float)menuDarkTicks;
 
-        UpdateState |= I_FULLSCRN;
+		UpdateState |= I_FULLSCRN;
 
-        if(!fadingOut)
-        {
-            if(temp > bgAlpha) bgAlpha = temp;
-            effTime = (MenuTime>slamInTicks)? slamInTicks : MenuTime;
-            temp = effTime / (float)slamInTicks;
+		if(!fadingOut)
+		{
+			if(temp > bgAlpha) bgAlpha = temp;
+			effTime = (MenuTime>slamInTicks)? slamInTicks : MenuTime;
+			temp = effTime / (float)slamInTicks;
 
-            // Draw a dark background. It makes it easier to read the menus.
-            //OGL_SetNoTexture();
-            glDisable( GL_TEXTURE_2D );
-            OGL_DrawRect(0,0,320,200,0,0,0,bgAlpha);
-            glEnable( GL_TEXTURE_2D );
-        }
-        else temp = outFade+1;
-        MN_OGL_SetupState(temp);
+		// Draw a dark background. It makes it easier to read the menus.
+		//	OGL_SetNoTexture();
+			glDisable( GL_TEXTURE_2D );
+			OGL_DrawRect(0,0,320,200,0,0,0,bgAlpha);
+			glEnable( GL_TEXTURE_2D );
+		}
+		else temp = outFade+1;
+		MN_OGL_SetupState(temp);
 
-        if(InfoType)
-        {
-            MN_DrawInfo();
-            MN_OGL_RestoreState();
-            return;
-        }
-        //if(screenblocks < 10)
-        //{
-        BorderNeedRefresh = true;
-        //}
-        if(CurrentMenu->drawFunc != NULL)
-        {
-            CurrentMenu->drawFunc();
-        }
-        x = CurrentMenu->x;
-        y = CurrentMenu->y;
-        item = CurrentMenu->items;
-        for(i = 0; i < CurrentMenu->itemCount; i++)
-        {
-                        switch(item->type)
-                        {
-                                case (ITT_EMPTY):
-                                        break;
-                                default:
-                                        if(item->text)
-                                                MN_DrTextB(item->text, x, y);
-                        }
-	    y += ITEM_HEIGHT;
-            item++;
-        }
-	y = CurrentMenu->y+(CurrentItPos*ITEM_HEIGHT)+SELECTOR_YOFFSET;
-        selName = MenuTime&16 ? "M_SLCTR1" : "M_SLCTR2";
-        OGL_DrawPatch_CS(x+SELECTOR_XOFFSET, y, W_GetNumForName(selName));
+		if(InfoType)
+		{
+			MN_DrawInfo();
+			MN_OGL_RestoreState();
+			return;
+		}
+		//if(screenblocks < 10)
+		//{
+			BorderNeedRefresh = true;
+		//}
+		if(CurrentMenu->drawFunc != NULL)
+		{
+			CurrentMenu->drawFunc();
+		}
+		x = CurrentMenu->x;
+		y = CurrentMenu->y;
+		item = CurrentMenu->items;
+		if(item->type == ITT_SETKEY)
+			item += FirstKey;
+		for(i = 0; i < CurrentMenu->itemCount; i++)
+		{
+			switch(item->type)
+			{
+			case (ITT_EMPTY):
+				break;
+			case (ITT_SETKEY):
+				if(item->text) 
+					MN_DrTextA(item->text, x, y+6);
+				break;
+			default:
+				if(item->text)
+					MN_DrTextB(item->text, x, y);
+			}
+			y += CurrentMenu->step;
+			item++;
+		}
+		y = CurrentMenu->y+(CurrentItPos*CurrentMenu->step)+SELECTOR_YOFFSET;
+		selName = MenuTime&16 ? "M_SLCTR1" : "M_SLCTR2";
+		OGL_DrawPatch_CS(x+SELECTOR_XOFFSET, y, W_GetNumForName(selName));
 
-        MN_OGL_RestoreState();
-    }
+		MN_OGL_RestoreState();
+	}
 #else
 	else
 	{
@@ -652,16 +820,26 @@ void MN_Drawer(void)
 		x = CurrentMenu->x;
 		y = CurrentMenu->y;
 		item = CurrentMenu->items;
+		if(item->type == ITT_SETKEY)
+			item += FirstKey;
 		for(i = 0; i < CurrentMenu->itemCount; i++)
 		{
-			if(item->type != ITT_EMPTY && item->text)
+			switch(item->type)
 			{
-				MN_DrTextB(item->text, x, y);
+			case (ITT_EMPTY):
+				break;
+			case (ITT_SETKEY):
+				if(item->text) 
+					MN_DrTextA(item->text, x, y+6);
+				break;
+			default:
+				if(item->text)
+					MN_DrTextB(item->text, x, y);
 			}
-			y += ITEM_HEIGHT;
+			y += CurrentMenu->step;
 			item++;
 		}
-		y = CurrentMenu->y+(CurrentItPos*ITEM_HEIGHT)+SELECTOR_YOFFSET;
+		y = CurrentMenu->y+(CurrentItPos*CurrentMenu->step)+SELECTOR_YOFFSET;
 		selName = MenuTime&16 ? "M_SLCTR1" : "M_SLCTR2";
 		V_DrawPatch(x+SELECTOR_XOFFSET, y,
 			W_CacheLumpName(selName, PU_CACHE));
@@ -834,6 +1012,8 @@ static void DrawFileSlots(Menu_t *menu)
 
 static void DrawOptionsMenu(void)
 {
+	char num[5];
+
 	if(messageson)
 	{
 		MN_DrTextB("ON", 196, 50);
@@ -842,7 +1022,22 @@ static void DrawOptionsMenu(void)
 	{
 		MN_DrTextB("OFF", 196, 50);
 	}
-	DrawSlider(&OptionsMenu, 3, 10, mouseSensitivity);
+
+	if (mouselook < 0 || mouselook > 2)
+		mouselook = 0;
+	MN_DrTextB(mlooktext[mouselook], 208, 110);
+
+	sprintf(num,"%d",mouseSensitivity);
+	MN_DrTextB(num, 265, 71);
+
+	if(alwaysrun)
+	{
+		MN_DrTextB("ON", 208, 130);
+	}
+	else
+	{
+		MN_DrTextB("OFF", 208,130);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -856,6 +1051,24 @@ static void DrawOptions2Menu(void)
 	DrawSlider(&Options2Menu, 1, 9, screenblocks-3);
 	DrawSlider(&Options2Menu, 3, 16, snd_MaxVolume);
 	DrawSlider(&Options2Menu, 5, 16, snd_MusicVolume);
+}
+
+static void DrawOptions3Menu(void)
+{
+	int i;
+
+	for (i = 0; i < 15; i++)
+	{
+		if (askforkey && keyaskedfor == i)
+		{
+			MN_DrTextA("???", 195, (i*SMALL_ITEM_HEIGHT+26));
+		}
+		else
+		{
+			MN_DrTextA(Key2String(*(defaults[i+FirstKey+3].location)),
+				195, (i*SMALL_ITEM_HEIGHT+26));
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -1068,7 +1281,7 @@ static boolean SCMouseSensi(int option)
 {
 	if(option == RIGHT_DIR)
 	{
-		if(mouseSensitivity < 9)
+		if(mouseSensitivity < MENU_MAX_MOUSE_SENS)
 		{
 			mouseSensitivity++;
 		}
@@ -1169,6 +1382,49 @@ static boolean SCInfo(int option)
 
 //---------------------------------------------------------------------------
 //
+// PROC SCSetKey
+//
+//---------------------------------------------------------------------------
+
+static boolean SCSetKey(int option)
+{
+	askforkey = true;
+	keyaskedfor = option;
+	if (!netgame && !demoplayback)
+	{
+		paused = true;
+	}
+	return true;
+}
+
+//---------------------------------------------------------------------------
+//
+// PROC SCMouslook(int option)
+//
+//---------------------------------------------------------------------------
+
+static boolean SCMouselook(int option)
+{
+	if (option == RIGHT_DIR)
+	{
+		if (mouselook < 2)
+			mouselook++;
+	}
+	else if (mouselook)
+		mouselook--;
+	return true;
+}
+
+static boolean SCAlwaysRun(int option)
+{
+	if (alwaysrun)
+		alwaysrun = 0;
+	else	alwaysrun = 1;
+	return true;
+}
+
+//---------------------------------------------------------------------------
+//
 // FUNC MN_Responder
 //
 //---------------------------------------------------------------------------
@@ -1184,6 +1440,23 @@ boolean MN_Responder(event_t *event)
 	extern void G_CheckDemoStatus(void);
 	char *textBuffer;
 
+	if(askforkey && event->type == ev_keydown)
+	{
+		ClearControls(event->data1);
+		*defaults[keyaskedfor+3+FirstKey].location = event->data1;
+		askforkey = false;
+		return(true);
+	}
+	if(askforkey && event->type == ev_mouse)
+	{
+		if (event->data1 & 1)
+			return true;
+		if (event->data1 & 2)
+			return true;
+		if (event->data1 & 4)
+			return true;
+		return false;
+	}
 	if(event->data1 == KEY_RSHIFT)
 	{
 		shiftdown = (event->type == ev_keydown);
@@ -1209,7 +1482,10 @@ boolean MN_Responder(event_t *event)
 		}
 		if(!InfoType)
 		{
-			paused = false;
+			if (!netgame && !demoplayback)
+			{
+				paused = false;
+			}
 			MN_DeactivateMenu();
 			SB_state = -1; //refresh the statbar
 			BorderNeedRefresh = true;
@@ -1228,6 +1504,7 @@ boolean MN_Responder(event_t *event)
 	{
 		switch(key)
 		{
+			case KEY_ENTER:
 			case 'y':
 				if(askforquit)
 				{
@@ -1344,7 +1621,7 @@ boolean MN_Responder(event_t *event)
 					slottextloaded = false; //reload the slot text, when needed
 				}
 				return true;
-			case KEY_F4: // volume
+			case KEY_F5: // volume
 				MenuActive = true;
 				FileMenuKeySteal = false;
 				MenuTime = 0;
@@ -1357,7 +1634,18 @@ boolean MN_Responder(event_t *event)
 				S_StartSound(NULL, sfx_dorcls);
 				slottextloaded = false; //reload the slot text, when needed
 				return true;
-			case KEY_F5: // F5 isn't used in Heretic. (detail level)
+			case KEY_F4: //controls S.A.
+				MenuActive = true;
+				FileMenuKeySteal = false;
+				MenuTime = 0;
+				CurrentMenu = &OptionsMenu;
+				CurrentItPos = CurrentMenu->oldItPos;
+				if (!netgame && !demoplayback)
+				{
+					paused = true;
+				}
+				S_StartSound(NULL, sfx_dorcls);
+				slottextloaded = false; //reload the slot text, when needed
 				return true;
 			case KEY_F6: // quicksave
 				if(gamestate == GS_LEVEL && !demoplayback)
@@ -1471,7 +1759,20 @@ boolean MN_Responder(event_t *event)
 			case KEY_DOWNARROW:
 				do
 				{
-					if(CurrentItPos+1 > CurrentMenu->itemCount-1)
+					if(CurrentMenu->items[CurrentItPos].type == ITT_SETKEY &&
+					   CurrentItPos+1 > CurrentMenu->itemCount-1)
+					{
+						if(FirstKey == FIRSTKEY_MAX)
+						{
+							CurrentItPos = 0; // End of Key menu
+							FirstKey = 0;
+						}
+						else
+						{
+							FirstKey++;
+						}
+					}
+					else if(CurrentItPos+1 > CurrentMenu->itemCount-1)
 					{
 						CurrentItPos = 0;
 					}
@@ -1486,7 +1787,20 @@ boolean MN_Responder(event_t *event)
 			case KEY_UPARROW:
 				do
 				{
-					if(CurrentItPos == 0)
+					if(CurrentMenu->items[CurrentItPos].type == ITT_SETKEY && CurrentItPos==0)
+					{
+						if(FirstKey == 0)
+						{
+							CurrentItPos = 14; // End of Key menu
+									   // 14 == 15 (max lines on a page) - 1
+							FirstKey = FIRSTKEY_MAX;
+						}
+						else
+						{
+							FirstKey--;
+						}
+					}
+					else if(CurrentItPos == 0)
 					{
 						CurrentItPos = CurrentMenu->itemCount-1;
 					}
@@ -1565,6 +1879,10 @@ boolean MN_Responder(event_t *event)
 							CurrentItPos = i;
 							return(true);
 						}
+					}
+					else if(item->type == ITT_SETKEY)
+					{
+						item->func(item->option);
 					}
 				}
 				break;

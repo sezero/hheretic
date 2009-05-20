@@ -344,6 +344,9 @@ void M_ForceUppercase(char *text)
 int     usemouse;
 int     usejoystick;
 
+extern int mouselook;
+extern int alwaysrun;
+
 extern  int     key_right, key_left, key_up, key_down;
 extern  int     key_strafeleft, key_straferight;
 extern  int     key_fire, key_use, key_strafe, key_speed;
@@ -366,22 +369,6 @@ int mouseSensitivity;
 
 extern  int screenblocks;
 
-typedef struct
-{
-	const char	*name;
-	int	*location;
-	int	defaultvalue;
-	int	scantranslate;		/* PC scan code hack */
-	int	untranslated;		/* lousy hack */
-} default_t;
-
-typedef struct
-{
-	const char	*name;
-	char	*location;	/* pointer to an 80 char array, null terminated */
-	char	*defaultvalue;	/* backup of the default value. malloc'ed at init */
-} default_str_t;
-
 #ifndef __NeXT__
 extern int snd_Channels;
 extern int snd_DesiredMusicDevice, snd_DesiredSfxDevice;
@@ -394,6 +381,9 @@ extern int     snd_Mport;                              // midi variables
 
 default_t defaults[] =
 {
+/* change of order here affects mn_menu.c :
+ * see, for example, Options3Items there...
+ */
 	{ "mouse_sensitivity", &mouseSensitivity, 5 },
 	{ "sfx_volume", &snd_MaxVolume, 10},
 	{ "music_volume", &snd_MusicVolume, 10},
@@ -440,6 +430,8 @@ default_t defaults[] =
 	{ "snd_mport", &snd_Mport, -1 },
 
 	{ "usegamma", &usegamma, 0 },
+	{ "mouselook", &mouselook, 1 },
+	{ "alwaysrun", &alwaysrun, 0 }
 };
 
 default_str_t default_strings[] =

@@ -120,6 +120,9 @@ int             mousebfire;
 int             mousebstrafe;
 int             mousebforward;
 
+int             mouselook;
+int             alwaysrun;
+
 int             joybfire;
 int             joybstrafe;
 int             joybuse;
@@ -236,6 +239,8 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	}
 #endif
 
+	if (alwaysrun && !demoplayback && !demorecording)
+		speed = !speed;
 	forward = side = look = arti = flyheight = 0;
 
 //
@@ -657,7 +662,33 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	{
 		cmd->angleturn -= mousex*0x8;
 	}
-	forward += mousey;
+
+	if (demorecording || demoplayback || (mouselook == 0))
+	{
+		forward += mousey;
+	}
+	else if (mousey && !paused)	/* mouselook, but not when paused */
+	{
+		// We'll directly change the viewing pitch of the console player.
+		float adj = ((mousey*0x4) << 16) / (float) ANGLE_180*180*110.0/85.0;
+		float newlookdir = 0;
+
+		adj *= 2;	// Speed up the X11 mlook a little.
+
+		if (mouselook == 1)
+			newlookdir = players[consoleplayer].lookdir + adj;
+		else if (mouselook == 2)
+			newlookdir = players[consoleplayer].lookdir - adj;
+
+		// vertical view angle taken from p_user.c line 249.
+		if (newlookdir > 90)
+			newlookdir = 90;
+		else if (newlookdir < -110)
+			newlookdir = -110;
+
+		players[consoleplayer].lookdir = newlookdir;
+	}
+
 	mousex = mousey = 0;
 
 	if (forward > MAXPLMOVE)

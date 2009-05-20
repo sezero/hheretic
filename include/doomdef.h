@@ -269,6 +269,22 @@ typedef enum
 	wipe_random
 } wipe_t;
 
+typedef struct
+{
+	const char	*name;
+	int	*location;
+	int	defaultvalue;
+	int	scantranslate;		/* PC scan code hack */
+	int	untranslated;		/* lousy hack */
+} default_t;
+
+typedef struct
+{
+	const char	*name;
+	char	*location;	/* pointer to an 80 char array, null terminated */
+	char	*defaultvalue;	/* backup of the default value. malloc'ed at init */
+} default_str_t;
+
 /*
 ===============================================================================
 

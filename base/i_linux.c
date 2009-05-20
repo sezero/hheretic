@@ -272,10 +272,12 @@ void S_StartSound(mobj_t *origin, int sound_id)
 	{
 		if (W_LumpLength(S_sfx[sound_id].lumpnum) <= 8)
 		{
+			char name[9];
+			strncpy(name, S_sfx[sound_id].name, 8);
+			name[8] = '\0';
 		//	I_Error("broken sound lump #%d (%s)\n",
 			fprintf(stderr, "broken sound lump #%d (%s)\n",
-					S_sfx[sound_id].lumpnum,
-					S_sfx[sound_id].lumpname);
+					S_sfx[sound_id].lumpnum, name);
 			return;
 		}
 		S_sfx[sound_id].snd_ptr = W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
@@ -364,10 +366,12 @@ void S_StartSoundAtVolume(mobj_t *origin, int sound_id, int volume)
 	{
 		if (W_LumpLength(S_sfx[sound_id].lumpnum) <= 8)
 		{
+			char name[9];
+			strncpy(name, S_sfx[sound_id].name, 8);
+			name[8] = '\0';
 		//	I_Error("broken sound lump #%d (%s)\n",
 			fprintf(stderr, "broken sound lump #%d (%s)\n",
-					S_sfx[sound_id].lumpnum,
-					S_sfx[sound_id].lumpname);
+					S_sfx[sound_id].lumpnum, name);
 			return;
 		}
 		S_sfx[sound_id].snd_ptr = W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);

@@ -1055,8 +1055,14 @@ void I_CheckExternDriver (void)
 }
 
 
+static void PrintVersion (void)
+{
+	printf ("HHeretic v%d.%d.%d\n", VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
+}
+
 int main (int argc, char** argv)
 {
+	PrintVersion ();
 	myargc = argc;
 	myargv = argv;
 	D_DoomMain();

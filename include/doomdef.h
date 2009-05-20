@@ -6,15 +6,16 @@
 #ifndef __DOOMDEF__
 #define __DOOMDEF__
 
-#ifdef __WATCOMC__
-#include <malloc.h>
-#define	strcasecmp strcmpi
-#define	strncasecmp strnicmp
-#endif
+#define __STRINGIFY(x) #x
+#define STRINGIFY(x) __STRINGIFY(x)
 
-#define VERSION 130
-#define VERSION_TEXT "v1.3"
-#define HHERETIC_VERSION "0.1"
+#define VERSION			130
+#define VERSION_TEXT		"v1.3"
+
+#define VERSION_MAJ	0
+#define VERSION_MIN	2
+#define VERSION_PATCH	0
+#define HHERETIC_VERSION	"v" STRINGIFY(VERSION_MAJ) "." STRINGIFY(VERSION_MIN) "." STRINGIFY(VERSION_PATCH)
 
 /* max length of a filesystem pathname	*/
 #define	MAX_OSPATH		256
@@ -22,6 +23,12 @@
 // if rangecheck is undefined, most parameter validation debugging code
 // will not be compiled
 //#define RANGECHECK
+
+#ifdef __WATCOMC__
+#include <malloc.h>
+#define strcasecmp strcmpi
+#define strncasecmp strnicmp
+#endif
 
 // all external data is defined here
 #include "doomdata.h"

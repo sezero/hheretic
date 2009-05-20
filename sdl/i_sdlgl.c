@@ -186,7 +186,8 @@ void I_InitGraphics(void)
 	}
 
 	SDL_ShowCursor (0);
-	snprintf (text, 20, "HHeretic v%s", HHERETIC_VERSION);
+	snprintf (text, sizeof(text), "HHeretic v%d.%d.%d",
+		  VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
 	SDL_WM_SetCaption (text, "HHERETIC" );
 }
 

@@ -1850,6 +1850,10 @@ boolean MN_Responder(event_t *event)
 							}
 						}
 					}
+					else if(item->type == ITT_SETKEY)
+					{
+						item->func(item->option);
+					}
 				}
 				S_StartSound(NULL, sfx_dorcls);
 				return(true);
@@ -1879,10 +1883,6 @@ boolean MN_Responder(event_t *event)
 							CurrentItPos = i;
 							return(true);
 						}
-					}
-					else if(item->type == ITT_SETKEY)
-					{
-						item->func(item->option);
 					}
 				}
 				break;

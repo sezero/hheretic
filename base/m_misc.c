@@ -397,26 +397,18 @@ default_t defaults[] =
 	{ "mouse_sensitivity", &mouseSensitivity, 5 },
 	{ "sfx_volume", &snd_MaxVolume, 10},
 	{ "music_volume", &snd_MusicVolume, 10},
-
-#define SC_INSERT                               0x52
-#define SC_DELETE                               0x53
-#define SC_PAGEUP                               0x49
-#define SC_PAGEDOWN                             0x51
-#define SC_HOME                                 0x47
-#define SC_END                                  0x4f
-
 	{ "key_right", &key_right, KEY_RIGHTARROW },
 	{ "key_left", &key_left, KEY_LEFTARROW },
 	{ "key_up", &key_up, KEY_UPARROW },
 	{ "key_down", &key_down, KEY_DOWNARROW },
 	{ "key_strafeleft", &key_strafeleft, ',' },
 	{ "key_straferight", &key_straferight, '.' },
-	{ "key_flyup", &key_flyup, SC_PAGEUP },
-	{ "key_flydown", &key_flydown, SC_INSERT },
-	{ "key_flycenter", &key_flycenter, SC_HOME },
-	{ "key_lookup", &key_lookup, SC_PAGEDOWN },
-	{ "key_lookdown", &key_lookdown, SC_DELETE },
-	{ "key_lookcenter", &key_lookcenter, SC_END },
+	{ "key_flyup", &key_flyup, KEY_PGUP },
+	{ "key_flydown", &key_flydown, KEY_INS },
+	{ "key_flycenter", &key_flycenter, KEY_HOME },
+	{ "key_lookup", &key_lookup, KEY_PGDN },
+	{ "key_lookdown", &key_lookdown, KEY_DEL },
+	{ "key_lookcenter", &key_lookcenter, KEY_END },
 	{ "key_invleft", &key_invleft, '[' },
 	{ "key_invright", &key_invright, ']' },
 	{ "key_useartifact", &key_useartifact, KEY_ENTER },

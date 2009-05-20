@@ -133,8 +133,7 @@ fixed_t         sidemove[2] = {0x18, 0x28};
 fixed_t         angleturn[3] = {640, 1280, 320};     // + slow turn
 #define SLOWTURNTICS    6
 
-#define NUMKEYS 256
-boolean         gamekeydown[NUMKEYS];
+boolean         gamekeydown[MAXKEYS];
 int             turnheld;                   // for accelerative turning
 int                              lookheld;
 
@@ -856,14 +855,14 @@ boolean G_Responder(event_t *ev)
 				sendpause = true;
 				return(true);
 			}
-			if(ev->data1 < NUMKEYS)
+			if(ev->data1 < MAXKEYS)
 			{
 				gamekeydown[ev->data1] = true;
 			}
 			return(true); // eat key down events
 
 		case ev_keyup:
-			if(ev->data1 < NUMKEYS)
+			if(ev->data1 < MAXKEYS)
 			{
 				gamekeydown[ev->data1] = false;
 			}

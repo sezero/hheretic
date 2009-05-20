@@ -18,16 +18,6 @@
 
 // Macros
 
-#define KEY_INS		0x52
-#define KEY_DEL		0x53
-#define KEY_PGUP	0x49
-#define KEY_PGDN	0x51
-#define KEY_HOME	0x47
-#define KEY_END		0x4f
-#define KEY_SHIFT	KEY_RSHIFT
-#define KEY_ALT		KEY_RALT
-#define KEY_CTRL	KEY_RCTRL
-
 // Extern Data
 
 extern int usemouse, usejoystick;

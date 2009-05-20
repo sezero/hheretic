@@ -36,15 +36,6 @@ static boolean vid_initialized = false;
 static SDL_Surface* sdl_screen;
 static int grabMouse;
 
-//===============================
-
-
-#define KEY_INS		0x52
-#define KEY_DEL		0x53
-#define KEY_PGUP	0x49
-#define KEY_PGDN	0x51
-#define KEY_HOME	0x47
-#define KEY_END		0x4f
 
 /*
 ============================================================================
@@ -294,6 +285,18 @@ static int xlatekey (SDL_keysym *key)
 {
 	switch (key->sym)
 	{
+	// S.A.
+	case SDLK_LEFTBRACKET:	return KEY_LEFTBRACKET;
+	case SDLK_RIGHTBRACKET:	return KEY_RIGHTBRACKET;
+	case SDLK_BACKQUOTE:	return KEY_BACKQUOTE;
+	case SDLK_QUOTEDBL:	return KEY_QUOTEDBL;
+	case SDLK_QUOTE:	return KEY_QUOTE;
+	case SDLK_SEMICOLON:	return KEY_SEMICOLON;
+	case SDLK_PERIOD:	return KEY_PERIOD;
+	case SDLK_COMMA:	return KEY_COMMA;
+	case SDLK_SLASH:	return KEY_SLASH;
+	case SDLK_BACKSLASH:	return KEY_BACKSLASH;
+
 	case SDLK_LEFT:		return KEY_LEFTARROW;
 	case SDLK_RIGHT:	return KEY_RIGHTARROW;
 	case SDLK_DOWN:		return KEY_DOWNARROW;
@@ -323,7 +326,6 @@ static int xlatekey (SDL_keysym *key)
 	case SDLK_BACKSPACE:	return KEY_BACKSPACE;
 	case SDLK_PAUSE:	return KEY_PAUSE;
 	case SDLK_EQUALS:	return KEY_EQUALS;
-	case SDLK_KP_MINUS:
 	case SDLK_MINUS:	return KEY_MINUS;
 
 	case SDLK_LSHIFT:
@@ -339,6 +341,66 @@ static int xlatekey (SDL_keysym *key)
 	case SDLK_RALT:
 	case SDLK_RMETA:
 		return KEY_RALT;
+
+	case SDLK_KP0:
+		if (key->mod & KMOD_NUM)
+			return SDLK_0;
+		else
+			return KEY_INS;
+	case SDLK_KP1:
+		if (key->mod & KMOD_NUM)
+			return SDLK_1;
+		else
+			return KEY_END;
+	case SDLK_KP2:
+		if (key->mod & KMOD_NUM)
+			return SDLK_2;
+		else
+			return KEY_DOWNARROW;
+	case SDLK_KP3:
+		if (key->mod & KMOD_NUM)
+			return SDLK_3;
+		else
+			return KEY_PGDN;
+	case SDLK_KP4:
+		if (key->mod & KMOD_NUM)
+			return SDLK_4;
+		else
+			return KEY_LEFTARROW;
+	case SDLK_KP5:
+		return SDLK_5;
+	case SDLK_KP6:
+		if (key->mod & KMOD_NUM)
+			return SDLK_6;
+		else
+			return KEY_RIGHTARROW;
+	case SDLK_KP7:
+		if (key->mod & KMOD_NUM)
+			return SDLK_7;
+		else
+			return KEY_HOME;
+	case SDLK_KP8:
+		if (key->mod & KMOD_NUM)
+			return SDLK_8;
+		else
+			return KEY_UPARROW;
+	case SDLK_KP9:
+		if (key->mod & KMOD_NUM)
+			return SDLK_9;
+		else
+			return KEY_PGUP;
+
+	case SDLK_KP_PERIOD:
+		if (key->mod & KMOD_NUM)
+			return SDLK_PERIOD;
+		else
+			return KEY_DEL;
+	case SDLK_KP_DIVIDE:	return SDLK_SLASH;
+	case SDLK_KP_MULTIPLY:	return SDLK_ASTERISK;
+	case SDLK_KP_MINUS:	return KEY_MINUS;
+	case SDLK_KP_PLUS:	return SDLK_PLUS;
+	case SDLK_KP_ENTER:	return KEY_ENTER;
+	case SDLK_KP_EQUALS:	return KEY_EQUALS;
 
 	default:
 		return key->sym;

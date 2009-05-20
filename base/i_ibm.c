@@ -1825,7 +1825,7 @@ void I_Shutdown (void)
 ================
 */
 
-void I_Error (char *error, ...)
+void I_Error (const char *error, ...)
 {
 	union REGS regs;
 
@@ -1836,7 +1836,7 @@ void I_Error (char *error, ...)
 	va_start (argptr,error);
 	regs.x.eax = 0x3;
 	int386(0x10, &regs, &regs);
-	vprintf (error,argptr);
+	vprintf (error, argptr);
 	va_end (argptr);
 	printf ("\n");
 	exit (1);

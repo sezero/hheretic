@@ -982,7 +982,7 @@ void	*W_CacheLumpName (char *name, int tag);
 void D_DoomMain (void);
 void IncThermo(void);
 void InitThermo(int max);
-void tprintf(char *string, int initflag);
+void tprintf(const char *string, int initflag);
 // not a globally visible function, just included for source reference
 // calls all startup code
 // parses command line options
@@ -1056,11 +1056,11 @@ void I_InitGraphics (void);
 void I_InitNetwork (void);
 void I_NetCmd (void);
 
-void I_Error (const char *error, ...);
+void I_Error (const char *error, ...) __attribute__((format(printf,1,2), noreturn));
 // called by anything that can generate a terminal error
 // bad exit with diagnostic message
 
-void I_Quit (void);
+void I_Quit (void) __attribute__((noreturn));
 // called by M_Responder when quit is selected
 // clean exit, displays sell blurb
 

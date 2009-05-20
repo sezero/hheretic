@@ -682,7 +682,7 @@ void hput(unsigned char c, unsigned char a)
 	*hscreen++ = a;
 }
 
-void hprintf(char *string, unsigned char a)
+void hprintf(const char *string, unsigned char a)
 {
 #ifdef __WATCOMC__
 	int i;
@@ -714,7 +714,7 @@ void drawstatus(void)
 	#endif
 }
 
-void status(char *string)
+void status(const char *string)
 {
 	strcat(smsg,string);
 	drawstatus();
@@ -804,7 +804,7 @@ void blitStartup(void)
 #endif
 
 char tmsg[300];
-void tprintf(char *msg,int initflag)
+void tprintf(const char *msg, int initflag)
 {
 #if 0
 	#ifdef __WATCOMC__

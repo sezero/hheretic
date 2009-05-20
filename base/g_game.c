@@ -102,7 +102,8 @@ boolean         precache = true;        // if true, load all graphics at start
 
 short            consistancy[MAXPLAYERS][BACKUPTICS];
 
-byte            *savebuffer, *save_p;
+void            *savebuffer;
+byte            *save_p;
 
 
 //
@@ -1466,7 +1467,7 @@ void G_DoLoadGame(void)
 	gameaction = ga_nothing;
 
 	length = M_ReadFile(savename, &savebuffer);
-	save_p = savebuffer+SAVESTRINGSIZE;	// Skip the description field
+	save_p = (byte *)savebuffer + SAVESTRINGSIZE;	// Skip the description field
 	memset(vcheck, 0, sizeof(vcheck));
 	sprintf(vcheck, "version %i", VERSION);
 	if (strcmp((char *)save_p, vcheck) != 0)
@@ -1874,7 +1875,8 @@ void G_DoSaveGame(void)
 void SV_Open(char *fileName)
 {
 	MallocFailureOk = true;
-	save_p = savebuffer = Z_Malloc(SAVEGAMESIZE, PU_STATIC, NULL);
+	savebuffer = Z_Malloc(SAVEGAMESIZE, PU_STATIC, NULL);
+	save_p = (byte *)savebuffer;
 	MallocFailureOk = false;
 	if(savebuffer == NULL)
 	{ // Not enough memory - use file save method
@@ -1900,7 +1902,7 @@ void SV_Close(char *fileName)
 	SV_WriteByte(SAVE_GAME_TERMINATOR);
 	if(SaveGameType == SVG_RAM)
 	{
-		length = save_p-savebuffer;
+		length = save_p - (byte *)savebuffer;
 		if(length > SAVEGAMESIZE)
 		{
 			I_Error("Savegame buffer overrun");

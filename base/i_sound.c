@@ -185,7 +185,7 @@ void I_SetSfxVolume(int volume)
 
 int I_GetSfxLumpNum(sfxinfo_t *sound)
 {
-	if (sound->name == 0)
+	if (sound->name[0] == 0)
 		return 0;
 	if (sound->link)
 		sound = sound->link;

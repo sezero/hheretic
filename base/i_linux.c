@@ -270,6 +270,14 @@ void S_StartSound(mobj_t *origin, int sound_id)
 	}
 	if (S_sfx[sound_id].snd_ptr == NULL)
 	{
+		if (W_LumpLength(S_sfx[sound_id].lumpnum) <= 8)
+		{
+		//	I_Error("broken sound lump #%d (%s)\n",
+			fprintf(stderr, "broken sound lump #%d (%s)\n",
+					S_sfx[sound_id].lumpnum,
+					S_sfx[sound_id].lumpname);
+			return;
+		}
 		S_sfx[sound_id].snd_ptr = W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
 	}
 
@@ -354,6 +362,14 @@ void S_StartSoundAtVolume(mobj_t *origin, int sound_id, int volume)
 	}
 	if (S_sfx[sound_id].snd_ptr == NULL)
 	{
+		if (W_LumpLength(S_sfx[sound_id].lumpnum) <= 8)
+		{
+		//	I_Error("broken sound lump #%d (%s)\n",
+			fprintf(stderr, "broken sound lump #%d (%s)\n",
+					S_sfx[sound_id].lumpnum,
+					S_sfx[sound_id].lumpname);
+			return;
+		}
 		S_sfx[sound_id].snd_ptr = W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
 	}
 	Channel[i].pitch = (byte)(127 - (M_Random() & 3) + (M_Random() & 3));

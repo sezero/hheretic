@@ -202,11 +202,11 @@ boolean M_WriteFile (char const *name, void *source, int length)
 ==================
 */
 
-int M_ReadFile (char const *name, byte **buffer)
+int M_ReadFile (char const *name, void **buffer)
 {
 	int handle, count, length;
 	struct stat fileinfo;
-	byte        *buf;
+	void        *buf;
 
 	handle = open (name, O_RDONLY | O_BINARY, 0666);
 	if (handle == -1)

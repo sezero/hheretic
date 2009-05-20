@@ -112,7 +112,7 @@ void S_StartSong(int song, boolean loop)
 			Z_ChangeTag(lumpcache[Mus_LumpNum], PU_CACHE);
 		}
 	}
-	if (song < mus_e1m1 || song > NUMMUSIC)
+	if (song < mus_e1m1 || song >= NUMMUSIC)
 	{
 		return;
 	}

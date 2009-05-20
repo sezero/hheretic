@@ -114,7 +114,7 @@ void S_StartSong(int song, boolean loop)
 			_dpmi_unlockregion(mus_sndptr, lumpinfo[mus_lumpnum].size);
 		#endif
 	}
-	if(song < mus_e1m1 || song > NUMMUSIC)
+	if (song < mus_e1m1 || song >= NUMMUSIC)
 	{
 		return;
 	}

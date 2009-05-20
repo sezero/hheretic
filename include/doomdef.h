@@ -16,6 +16,9 @@
 #define VERSION_TEXT "v1.3"
 #define HHERETIC_VERSION "0.1"
 
+/* max length of a filesystem pathname	*/
+#define	MAX_OSPATH		256
+
 // if rangecheck is undefined, most parameter validation debugging code
 // will not be compiled
 //#define RANGECHECK

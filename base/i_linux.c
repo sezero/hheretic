@@ -47,6 +47,7 @@ extern musicinfo_t S_music[];
 
 static channel_t Channel[MAX_CHANNELS];
 static int RegisteredSong; //the current registered song.
+static int isExternalSong;
 static int NextCleanup;
 static boolean MusicPaused;
 static int Mus_Song = -1;
@@ -106,10 +107,21 @@ void S_StartSong(int song, boolean loop)
 	{
 		I_StopSong(RegisteredSong);
 		I_UnRegisterSong(RegisteredSong);
-		Z_ChangeTag(lumpcache[Mus_LumpNum], PU_CACHE);
+		if (!isExternalSong)
+		{
+			Z_ChangeTag(lumpcache[Mus_LumpNum], PU_CACHE);
+		}
 	}
 	if (song < mus_e1m1 || song > NUMMUSIC)
 	{
+		return;
+	}
+	isExternalSong = I_RegisterExternalSong(S_music[song].name);
+	if (isExternalSong)
+	{
+		RegisteredSong = isExternalSong;
+		I_PlaySong(RegisteredSong, loop);
+		Mus_Song = song;
 		return;
 	}
 	Mus_LumpNum = W_GetNumForName(S_music[song].name);

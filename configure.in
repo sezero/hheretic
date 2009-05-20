@@ -62,7 +62,33 @@ fi
 AC_SUBST(GLHEXEN)
 AC_SUBST(SVGAHEXEN)
 
-SND_MODULE="oss"
+if test "$SVGAHEXEN" = "true";then
+  default_audio="oss"
+else
+  default_audio="sdl"
+fi
+
+AC_ARG_WITH(audio,
+[  --with-audio=<driver>   If set, will change the audio driver. Valid values
+                          are oss, sdl and sdlmixer.  sdl is the default.
+                          sdlmixer adds the ability of midi music playback.],
+audio_drv="$withval", audio_drv="$default_audio")
+
+if test "$SVGAHEXEN" = "true";then
+	if test "$audio_drv" != "$default_audio";then
+		AC_MSG_WARN([Ignoring --with-audio option for svgahexen])
+	fi
+	SND_MODULE="$default_audio"
+else
+  case "$audio_drv" in
+	oss|sdl|sdlmixer)
+		SND_MODULE="$audio_drv"
+		;;
+	*)
+		AC_MSG_ERROR([*** invalid value for --with-audio])
+		;;
+  esac
+fi
 
 AC_SUBST(SND_MODULE)
 

@@ -1732,11 +1732,11 @@ boolean MN_Responder(event_t *event)
 				}
 				return true;
 			case KEY_F10: // quit
-				if(gamestate == GS_LEVEL)
-				{
-					SCQuitGame(0);
-					S_StartSound(NULL, sfx_chat);
-				}
+			// S.A.: allowed quit to work when not in a level
+			//	if (!(gamestate == GS_LEVEL))
+			//		return true;
+				SCQuitGame(0);
+				S_StartSound(NULL, sfx_chat);
 				return true;
 			case KEY_F11: // F11 - gamma mode correction
 				usegamma++;

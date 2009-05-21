@@ -1204,6 +1204,14 @@ static boolean SCLoadGame(int option)
 static boolean SCSaveGame(int option)
 {
 	char *ptr;
+	player_t *player = &players[consoleplayer];
+
+	if (gamestate != GS_LEVEL || demoplayback
+		|| player->playerstate == PST_DEAD)
+	{
+		FileMenuKeySteal = false;
+		return false;
+	}
 
 	if(!FileMenuKeySteal)
 	{

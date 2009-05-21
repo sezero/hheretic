@@ -528,10 +528,6 @@ void M_LoadDefaults(const char *fileName)
 		snprintf(defaultfile, sizeof(defaultfile), "%s%s", basePath, myargv[i + 1]);
 		printf("default file: %s\n", defaultfile);
 	}
-	else if(cdrom)
-	{
-		strcpy(defaultfile, "c:\\heretic.cd\\heretic.cfg");
-	}
 	else
 	{
 		snprintf(defaultfile, sizeof(defaultfile), "%s%s", basePath, fileName);

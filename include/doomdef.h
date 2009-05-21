@@ -31,12 +31,19 @@
 /* max length of a filesystem pathname	*/
 #define	MAX_OSPATH		256
 
+#define	H_USERDIR		".hheretic"
+
 /* path to the user directory		*/
 extern	const char		*basePath;
 
-// if rangecheck is undefined, most parameter validation debugging code
-// will not be compiled
-//#define RANGECHECK
+#define	SAVEGAMENAME		"hticsav"
+
+/* if rangecheck is undefined, most parameter
+ * validation debugging code will not be compiled
+ */
+#ifndef NORANGECHECKING
+#define RANGECHECK
+#endif
 
 #ifdef __WATCOMC__
 #include <malloc.h>
@@ -179,9 +186,6 @@ extern byte *destview, *destscreen;	// PC direct to screen pointers
 #define	FINEANGLES			8192
 #define	FINEMASK			(FINEANGLES-1)
 #define	ANGLETOFINESHIFT	19	// 0x100000000 to 0x2000
-
-#define	SAVEGAMENAME "hticsav"
-#define SAVEGAMENAMECD "c:\\heretic.cd\\hticsav"
 
 /*
 ===============================================================================
@@ -750,10 +754,6 @@ extern boolean debugmode; // checkparm of -debug
 extern boolean usergame; // ok to save / end game
 
 extern boolean ravpic; // checkparm of -ravpic
-
-extern boolean altpal; // checkparm to use an alternate palette routine
-
-extern boolean cdrom; // true if cd-rom mode active ("-cdrom")
 
 extern boolean deathmatch; // only if started as net death
 

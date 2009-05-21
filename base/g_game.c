@@ -1860,15 +1860,8 @@ void G_DoSaveGame(void)
 	char verString[VERSIONSIZE];
 	char *description;
 
-	if(cdrom)
-	{
-		sprintf(name, SAVEGAMENAMECD"%d.hsg", savegameslot);
-	}
-	else
-	{
-		snprintf(name, sizeof(name), "%s%s%d.hsg",
-			 basePath, SAVEGAMENAME, savegameslot);
-	}
+	snprintf(name, sizeof(name), "%s%s%d.hsg",
+		 basePath, SAVEGAMENAME, savegameslot);
 	description = savedescription;
 
 	SV_Open(name);

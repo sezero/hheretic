@@ -30,7 +30,6 @@ boolean nomonsters;			// checkparm of -nomonsters
 boolean respawnparm;			// checkparm of -respawn
 boolean debugmode;			// checkparm of -debug
 boolean ravpic;				// checkparm of -ravpic
-boolean cdrom;					// true if cd-rom mode active
 boolean singletics;			// debug flag to cancel adaptiveness
 boolean noartiskip;			// whether shift-enter skips an artifact
 
@@ -533,15 +532,8 @@ void D_CheckRecordFrom (void)
 	if (!p || p >= myargc - 2)
 		return;
 
-	if(cdrom)
-	{
-		sprintf(file, SAVEGAMENAMECD"%c.hsg",myargv[p+1][0]);
-	}
-	else
-	{
-		snprintf(file, sizeof(file), "%s%s%d.hsg",
-			 basePath, SAVEGAMENAME, myargv[p+1][0]);
-	}
+	snprintf(file, sizeof(file), "%s%s%d.hsg",
+		 basePath, SAVEGAMENAME, myargv[p+1][0]);
 	G_LoadGame (file);
 	G_DoLoadGame ();    // load the gameskill etc info from savegame
 
@@ -895,7 +887,7 @@ void D_DoomMain(void)
 	int p;
 	int e;
 	int m;
-	char file[256];
+	char file[MAX_OSPATH];
 	FILE *fp;
 	boolean devMap;
 	//char *screen;
@@ -922,16 +914,6 @@ void D_DoomMain(void)
 	{ // Change to look for shareware wad
 		wadfiles[0] = SHAREWAREWADNAME;
 	}
-
-	// Check for -CDROM
-	cdrom = false;
-#ifdef __WATCOMC__
-	if(M_CheckParm("-cdrom"))
-	{
-		cdrom = true;
-		mkdir("c:\\heretic.cd");
-	}
-#endif
 
 	// -FILE [filename] [filename] ...
 	// Add files to the wad list.
@@ -1125,14 +1107,8 @@ void D_DoomMain(void)
 	p = M_CheckParm("-loadgame");
 	if(p && p < myargc-1)
 	{
-		if(cdrom)
-		{
-			sprintf(file, SAVEGAMENAMECD"%c.hsg", myargv[p+1][0]);
-		}
-		else
-		{
-			sprintf(file, SAVEGAMENAME"%c.hsg", myargv[p+1][0]);
-		}
+		snprintf(file, sizeof(file), "%s%s%c.hsg",
+			 basePath, SAVEGAMENAME, myargv[p+1][0]);
 		G_LoadGame(file);
 	}
 

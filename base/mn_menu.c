@@ -953,15 +953,7 @@ void MN_LoadSlotText(void)
 
 	for (i = 0; i < 6; i++)
 	{
-		if(cdrom)
-		{
-			sprintf(name, SAVEGAMENAMECD"%d.hsg", i);
-		}
-		else
-		{
-			snprintf(name, sizeof(name), "%s%s%d.hsg",
-					basePath, SAVEGAMENAME, i);
-		}
+		snprintf(name, sizeof(name), "%s%s%d.hsg", basePath, SAVEGAMENAME, i);
 		fp = fopen(name, "rb+");
 		if (!fp)
 		{
@@ -1177,15 +1169,7 @@ static boolean SCLoadGame(int option)
 	{ // slot's empty...don't try and load
 		return false;
 	}
-	if(cdrom)
-	{
-		sprintf(name, SAVEGAMENAMECD"%d.hsg", option);
-	}
-	else
-	{
-		snprintf(name, sizeof(name), "%s%s%d.hsg",
-			 basePath, SAVEGAMENAME, option);
-	}
+	snprintf(name, sizeof(name), "%s%s%d.hsg", basePath, SAVEGAMENAME, option);
 	G_LoadGame(name);
 	MN_DeactivateMenu();
 	BorderNeedRefresh = true;

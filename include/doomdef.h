@@ -17,6 +17,17 @@
 #define VERSION_PATCH	0
 #define HHERETIC_VERSION	"v" STRINGIFY(VERSION_MAJ) "." STRINGIFY(VERSION_MIN) "." STRINGIFY(VERSION_PATCH)
 
+/* compatibility definitions: */
+#if defined(_WIN32) && !defined(F_OK)
+/* values for the mode argument of access(). MS does not define them.
+   these aren't in h2stdinc.h, because not all files include io.h or
+   unistd.h */
+#define	R_OK	4		/* Test for read permission.  */
+#define	W_OK	2		/* Test for write permission.  */
+#define	X_OK	1		/* Test for execute permission.  */
+#define	F_OK	0		/* Test for existence.  */
+#endif
+
 /* max length of a filesystem pathname	*/
 #define	MAX_OSPATH		256
 

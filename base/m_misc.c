@@ -739,7 +739,7 @@ void M_ScreenShot (void)
 	{
 		lbmname[5] = i/10 + '0';
 		lbmname[6] = i%10 + '0';
-		if (access(lbmname,0) == -1)
+		if (access(lbmname, F_OK) == -1)
 			break;  // file doesn't exist
 	}
 	if (i==100)

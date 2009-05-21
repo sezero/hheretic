@@ -1083,7 +1083,7 @@ static void PrintVersion (void)
 	printf ("HHeretic v%d.%d.%d\n", VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
 }
 
-static const char datadir[] = HHERETIC_DATAPATH;
+static const char datadir[] = SHARED_DATAPATH;
 
 int main (int argc, char** argv)
 {
@@ -1094,17 +1094,17 @@ int main (int argc, char** argv)
 
 	CreateBasePath();
 
-	waddir = getenv("HERETIC_DATA");
+	waddir = getenv(DATA_ENVVAR);
 	if (waddir == NULL)
 	{
 		if (datadir[0])
 		{
-			setenv ("HERETIC_DATA", datadir, 0);
-			waddir = getenv("HERETIC_DATA");
+			setenv (DATA_ENVVAR, datadir, 0);
+			waddir = getenv(DATA_ENVVAR);
 		}
 	}
 	if (waddir && *waddir)
-		printf ("HERETIC_DATA environment: %s\n", waddir);
+		printf ("%s environment: %s\n", DATA_ENVVAR, waddir);
 
 	D_DoomMain();
 	return 0;

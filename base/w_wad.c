@@ -104,8 +104,10 @@ void W_AddFile (char *filename)
 // open the file and add to directory
 //
 	handle = -1;
-	/* Add support for HERETIC_DATA envirionment variable */
-	waddir = getenv("HERETIC_DATA");
+	/* try the directory specified by the
+	 * shared data environment variable first.
+	 */
+	waddir = getenv(DATA_ENVVAR);
 	if (waddir && *waddir)
 	{
 		snprintf (path, sizeof(path), "%s/%s", waddir, filename);
@@ -189,13 +191,9 @@ void W_AddFile (char *filename)
 = W_InitMultipleFiles
 =
 = Pass a null terminated list of files to use.
-=
 = All files are optional, but at least one file must be found
-=
 = Files with a .wad extension are idlink files with multiple lumps
-=
 = Other files are single lumps with the base filename for the lump name
-=
 = Lump names can appear multiple times. The name searcher looks backwards,
 = so a later file can override an earlier one.
 =

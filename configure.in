@@ -65,9 +65,9 @@ AC_SUBST(SVGAHEXEN)
 AC_ARG_WITH(datapath,
 [  --with-datapath=<DIR>   Use DIR for shared game data. Not defined by default.],
 datapath="$withval", datapath="")
-AC_DEFINE_UNQUOTED(HHERETIC_DATAPATH, "$datapath", [Define this to the shared game directory root])
-HHERETIC_DATAPATH="$datapath"
-AC_SUBST(HHERETIC_DATAPATH)
+AC_DEFINE_UNQUOTED(SHARED_DATAPATH, "$datapath", [Define this to the shared game directory root])
+SHARED_DATAPATH="$datapath"
+AC_SUBST(SHARED_DATAPATH)
 
 if test "$SVGAHEXEN" = "true";then
   default_audio="oss"

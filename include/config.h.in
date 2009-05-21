@@ -82,7 +82,7 @@
 #endif
 
 /* Define this to the shared game directory root */
-#undef HHERETIC_DATAPATH
+#undef SHARED_DATAPATH
 
 /* Define to not compile most parameter validation debugging code */
 #undef NORANGECHECKING

@@ -31,6 +31,7 @@
 /* max length of a filesystem pathname	*/
 #define	MAX_OSPATH		256
 
+#define	DATA_ENVVAR		"HERETIC_DATA"
 #define	H_USERDIR		".hheretic"
 
 /* path to the user directory		*/

@@ -13,12 +13,12 @@
 #include "doomdef.h"
 #include "soundst.h"
 
+#ifdef RENDER3D
+#include "ogl_def.h"
+#endif
+
 int myargc;
 char **myargv;
-
-#ifdef RENDER3D
-extern void OGL_GrabScreen();
-#endif
 
 //---------------------------------------------------------------------------
 //
@@ -711,6 +711,7 @@ void WritePCXfile (const char *filename, byte *data, int width, int height, byte
 #ifdef RENDER3D
 void M_ScreenShot (void)
 {
+	OGL_GrabScreen();
 }
 #else
 void M_ScreenShot (void)
@@ -771,3 +772,4 @@ void M_ScreenShot (void)
 #endif
 }
 #endif
+

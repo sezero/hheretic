@@ -362,6 +362,8 @@ extern  int         joybstrafe;
 extern  int         joybuse;
 extern  int         joybspeed;
 
+extern  int         messageson;
+
 extern  int     viewwidth, viewheight;
 
 int mouseSensitivity;

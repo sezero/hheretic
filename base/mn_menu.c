@@ -1504,8 +1504,10 @@ boolean MN_Responder(event_t *event)
 		return(true); //make the info screen eat the keypress
 	}
 
-	if(ravpic && key == KEY_F1)
+	if (ravpic && key == KEY_F1)
 	{
+	// F12 is screenshot now. This
+	// is here for reference, only.
 		G_ScreenShot();
 		return(true);
 	}
@@ -1631,6 +1633,19 @@ boolean MN_Responder(event_t *event)
 					slottextloaded = false; //reload the slot text, when needed
 				}
 				return true;
+			case KEY_F4: // S.A.: made F4 Controls. was Volume, before.
+				MenuActive = true;
+				FileMenuKeySteal = false;
+				MenuTime = 0;
+				CurrentMenu = &OptionsMenu;
+				CurrentItPos = CurrentMenu->oldItPos;
+				if (!netgame && !demoplayback)
+				{
+					paused = true;
+				}
+				S_StartSound(NULL, sfx_dorcls);
+				slottextloaded = false; //reload the slot text, when needed
+				return true;
 			case KEY_F5: // volume
 				MenuActive = true;
 				FileMenuKeySteal = false;
@@ -1638,19 +1653,6 @@ boolean MN_Responder(event_t *event)
 				CurrentMenu = &Options2Menu;
 				CurrentItPos = CurrentMenu->oldItPos;
 				if(!netgame && !demoplayback)
-				{
-					paused = true;
-				}
-				S_StartSound(NULL, sfx_dorcls);
-				slottextloaded = false; //reload the slot text, when needed
-				return true;
-			case KEY_F4: //controls S.A.
-				MenuActive = true;
-				FileMenuKeySteal = false;
-				MenuTime = 0;
-				CurrentMenu = &OptionsMenu;
-				CurrentItPos = CurrentMenu->oldItPos;
-				if (!netgame && !demoplayback)
 				{
 					paused = true;
 				}
@@ -1747,6 +1749,9 @@ boolean MN_Responder(event_t *event)
 				I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 #endif
 				return true;
+			case KEY_F12: // S.A.: made F12 Screenshot
+				G_ScreenShot();
+				return(true);
 #endif
 		}
 

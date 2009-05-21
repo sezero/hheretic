@@ -75,7 +75,12 @@ char *LevelNames[] =
 	"E5M6:  COLONNADE",
 	"E5M7:  FOETID MANSE",
 	"E5M8:  FIELD OF JUDGEMENT",
-	"E5M9:  SKEIN OF D'SPARIL"
+	"E5M9:  SKEIN OF D'SPARIL",
+	// EPISODE 6: FATE'S PATH
+	"E6M1:  RAVEN'S LAIR",		/* OFFICES */
+	"E6M2:  THE WATER SHRINE",	/* RUINED TEMPLE */
+	"E6M3:  AMERICAN'S LEGACY"	/* AMERICAN LEGACY */
+	/* Episode 6 names are taken from the Heretic FAQ. */
 };
 
 static int cheating = 0;
@@ -1514,7 +1519,7 @@ void AM_Drawer(void)
     AM_OGL_RestoreState();
 #endif
 
-	if((gameepisode < (ExtendedWAD ? 6 : 4)) && gamemap < 10)
+	if((gameepisode <= (ExtendedWAD ? 6 : 3)) && gamemap <= 9)
 	{
 		MN_DrTextA(LevelNames[(gameepisode-1)*9+gamemap-1], 20, 145);
 	}

@@ -1016,7 +1016,7 @@ void IN_DrawNumber(int val, int x, int y, int digits)
 		{
 #ifdef RENDER3D
 			patch = FontB3DNumbers[val/100];
-			OGL_DrawShadowedPatch(xpos+6-patch->width/2,y,FontBNumbers[val/1000]);
+			OGL_DrawShadowedPatch(xpos+6-patch->width/2,y,FontBNumbers[val/100]);
 #else
 			patch = FontBNumbers[val/100];
 			V_DrawShadowedPatch(xpos+6-patch->width/2, y, patch);

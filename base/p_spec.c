@@ -570,15 +570,15 @@ void P_CrossSpecialLine(int linenum, int side, mobj_t *thing)
 		// TRIGGERS
 		//====================================================
 		case 2: // Open Door
-			EV_DoDoor(line,open,VDOORSPEED);
+			EV_DoDoor(line,vldoor_open,VDOORSPEED);
 			line->special = 0;
 			break;
 		case 3: // Close Door
-			EV_DoDoor(line,close,VDOORSPEED);
+			EV_DoDoor(line,vldoor_close,VDOORSPEED);
 			line->special = 0;
 			break;
 		case 4: // Raise Door
-			EV_DoDoor(line,normal,VDOORSPEED);
+			EV_DoDoor(line,vldoor_normal,VDOORSPEED);
 			line->special = 0;
 			break;
 		case 5: // Raise Floor
@@ -714,7 +714,7 @@ void P_CrossSpecialLine(int linenum, int side, mobj_t *thing)
 			EV_CeilingCrushStop(line);
 			break;
 		case 75:			// Close Door
-			EV_DoDoor(line,close,VDOORSPEED);
+			EV_DoDoor(line,vldoor_close,VDOORSPEED);
 			break;
 		case 76:		// Close Door 30
 			EV_DoDoor(line,close30ThenOpen,VDOORSPEED);
@@ -741,7 +741,7 @@ void P_CrossSpecialLine(int linenum, int side, mobj_t *thing)
 			EV_DoFloor(line,lowerAndChange);
 			break;
 		case 86:			// Open Door
-			EV_DoDoor(line,open,VDOORSPEED);
+			EV_DoDoor(line,vldoor_open,VDOORSPEED);
 			break;
 		case 87:		// Perpetual Platform Raise
 			EV_DoPlat(line,perpetualRaise,0);
@@ -753,10 +753,10 @@ void P_CrossSpecialLine(int linenum, int side, mobj_t *thing)
 			EV_StopPlat(line);
 			break;
 		case 90:			// Raise Door
-			EV_DoDoor(line,normal,VDOORSPEED);
+			EV_DoDoor(line,vldoor_normal,VDOORSPEED);
 			break;
 		case 100: // Retrigger_Raise_Door_Turbo
-			EV_DoDoor(line, normal, VDOORSPEED*3);
+			EV_DoDoor(line,vldoor_normal,VDOORSPEED*3);
 			break;
 		case 91:			// Raise Floor
 			EV_DoFloor(line,raiseFloor);
@@ -814,7 +814,7 @@ void P_ShootSpecialLine(mobj_t *thing, line_t *line)
 			P_ChangeSwitchTexture(line, 0);
 			break;
 		case 46: // Impact_OpenDoor
-			EV_DoDoor(line, open, VDOORSPEED);
+			EV_DoDoor(line, vldoor_open, VDOORSPEED);
 			P_ChangeSwitchTexture(line, 1);
 			break;
 		case 47: // Impact_RaiseFloorNear&Change

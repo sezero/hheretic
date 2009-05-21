@@ -240,10 +240,10 @@ void	P_ActivateInStasis(int tag);
 */
 typedef enum
 {
-	normal,
+	vldoor_normal,
 	close30ThenOpen,
-	close,
-	open,
+	vldoor_close,
+	vldoor_open,
 	raiseIn5Mins
 } vldoor_e;
 
@@ -254,17 +254,17 @@ typedef struct
 	sector_t	*sector;
 	fixed_t		topheight;
 	fixed_t		speed;
-	int			direction;		// 1 = up, 0 = waiting at top, -1 = down
-	int			topwait;		// tics to wait at the top
-								// (keep in case a door going down is reset)
-	int			topcountdown;	// when it reaches 0, start going down
+	int		direction;	// 1 = up, 0 = waiting at top, -1 = down
+	int		topwait;	// tics to wait at the top
+					// (keep in case a door going down is reset)
+	int		topcountdown;	// when it reaches 0, start going down
 } vldoor_t;
-	
+
 #define	VDOORSPEED	FRACUNIT*2
 #define	VDOORWAIT		150
 
 void	EV_VerticalDoor (line_t *line, mobj_t *thing);
-int		EV_DoDoor (line_t *line, vldoor_e type, fixed_t speed);
+int	EV_DoDoor (line_t *line, vldoor_e type, fixed_t speed);
 void	T_VerticalDoor (vldoor_t *door);
 void	P_SpawnDoorCloseIn30 (sector_t *sec);
 void	P_SpawnDoorRaiseIn5Mins (sector_t *sec, int secnum);
@@ -374,3 +374,4 @@ void	T_MoveFloor(floormove_t *floor);
 
 boolean P_Teleport(mobj_t *thing, fixed_t x, fixed_t y, angle_t angle);
 boolean EV_Teleport(line_t *line, int side, mobj_t *thing);
+

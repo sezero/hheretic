@@ -21,7 +21,7 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "h2def.h"
+#include "doomdef.h"
 #include "r_local.h"
 #include "ogl_def.h"
 #include "p_local.h"

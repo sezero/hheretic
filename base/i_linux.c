@@ -1083,6 +1083,30 @@ static void PrintVersion (void)
 	printf ("HHeretic v%d.%d.%d\n", VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
 }
 
+static void PrintHelp (const char *name)
+{
+	printf ("http://sourceforge.net/projects/hhexen\n");
+	printf ("http://hhexen.sf.net , http://icculus.org/hast\n");
+	printf ("\n");
+	printf ("Usage: %s [options]\n", name);
+	printf ("     [ -h | --help]           Display this help message\n");
+	printf ("     [ -v | --version]        Display the game version\n");
+	printf ("     [ -f | --fullscreen]     Run the game fullscreen\n");
+	printf ("     [ -w | --windowed]       Run the game windowed\n");
+	printf ("     [ -s | --nosound]        Run the game without sound\n");
+	printf ("     [ -g | --nograb]         Disable mouse grabbing\n");
+	printf ("     [ -file <wadfile> ]      Load extra wad files\n");
+#ifdef RENDER3D
+	printf ("     [ -width  <width> ]      Set screen width \n");
+	printf ("     [ -height <height> ]     Set screen height\n");
+#endif
+	printf ("\n");
+	printf ("You can use the %s environment variable to force\n",
+		DATA_ENVVAR);
+	printf ("the HHeretic data directory.\n");
+	printf ("\n");
+}
+
 static const char datadir[] = SHARED_DATAPATH;
 
 int main (int argc, char** argv)
@@ -1091,6 +1115,13 @@ int main (int argc, char** argv)
 	PrintVersion ();
 	myargc = argc;
 	myargv = argv;
+	if (M_CheckParm("--version") || M_CheckParm("-v"))
+		return 0;
+	if (M_CheckParm("--help") || M_CheckParm("-h") || M_CheckParm("-?"))
+	{
+		PrintHelp (argv[0]);
+		return 0;
+	}
 
 	CreateBasePath();
 

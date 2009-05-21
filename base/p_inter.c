@@ -8,6 +8,8 @@
 #include "p_local.h"
 #include "soundst.h"
 
+extern int messageson;
+
 #define BONUSADD 6
 
 int WeaponValue[] =
@@ -111,8 +113,6 @@ boolean ultimatemsg;
 
 void P_SetMessage(player_t *player, char *message, boolean ultmsg)
 {
-	extern boolean messageson;
-	
 	if((ultimatemsg || !messageson) && !ultmsg)
 	{
 		return;

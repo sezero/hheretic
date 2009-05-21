@@ -131,7 +131,7 @@ extern int key_invleft, key_invright, key_useartifact;
 
 boolean MenuActive;
 int InfoType;
-boolean messageson;
+int messageson;	/* boolean */
 
 // Private Data
 
@@ -469,7 +469,7 @@ void MN_Init(void)
 {
 	InitFonts();
 	MenuActive = false;
-	messageson = true;
+//	messageson = 1;	// Set by defaults in .CFG
 	SkullBaseLump = W_GetNumForName("M_SKL00");
 	if(ExtendedWAD)
 	{ // Add episodes 4 and 5 to the menu
@@ -1149,14 +1149,15 @@ static boolean SCEndGame(int option)
 
 static boolean SCMessages(int option)
 {
-	messageson ^= 1;
 	if(messageson)
 	{
-		P_SetMessage(&players[consoleplayer], "MESSAGES ON", true);
+		messageson = 0;
+		P_SetMessage(&players[consoleplayer], "MESSAGES OFF", true);
 	}
 	else
 	{
-		P_SetMessage(&players[consoleplayer], "MESSAGES OFF", true);
+		messageson = 1;
+		P_SetMessage(&players[consoleplayer], "MESSAGES ON", true);
 	}
 	S_StartSound(NULL, sfx_chat);
 	return true;

@@ -419,7 +419,6 @@ default_t defaults[] =
 	{ "joyb_speed", &joybspeed, 2 },
 
 	{ "screenblocks", &screenblocks, 10 },
-
 	{ "snd_channels", &snd_Channels, 3 },
 	{ "snd_musicdevice", &snd_DesiredMusicDevice, 0 },
 	{ "snd_sfxdevice", &snd_DesiredSfxDevice, 0 },
@@ -429,6 +428,7 @@ default_t defaults[] =
 	{ "snd_mport", &snd_Mport, -1 },
 
 	{ "usegamma", &usegamma, 0 },
+	{ "messageson", &messageson, 1 },
 	{ "mouselook", &mouselook, 1 },
 	{ "alwaysrun", &alwaysrun, 0 }
 };

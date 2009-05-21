@@ -7,10 +7,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 #include <ctype.h>
-
 #include "doomdef.h"
+#include "p_local.h"
 #include "soundst.h"
 
 #ifdef RENDER3D
@@ -746,7 +745,7 @@ void M_ScreenShot (void)
 	}
 	if (i == 100)
 	{
-		players[consoleplayer].message = "SCREEN SHOT FAILED";
+		P_SetMessage(&players[consoleplayer], "SCREEN SHOT FAILED", false);
 		return;
 	}
 
@@ -766,7 +765,7 @@ void M_ScreenShot (void)
 
 	WritePCXfile (lbmname, linear, SCREENWIDTH, SCREENHEIGHT, pal);
 
-	players[consoleplayer].message = "SCREEN SHOT";
+	P_SetMessage(&players[consoleplayer], "SCREEN SHOT", false);
 #ifdef __WATCOMC__
 	Z_Free(pal);
 #endif

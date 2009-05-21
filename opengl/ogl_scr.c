@@ -64,7 +64,7 @@ void OGL_GrabScreen (void)
 	}
 	if (i == 100)
 	{
-		players[consoleplayer].message = "SCREEN SHOT FAILED";
+		P_SetMessage(&players[consoleplayer], "SCREEN SHOT FAILED", false);
 		return;
 	}
 
@@ -94,6 +94,6 @@ void OGL_GrabScreen (void)
 	M_WriteFile (tganame, buffer, len);
 
 	free (buffer);
-	players[consoleplayer].message = "SCREEN SHOT";
+	P_SetMessage(&players[consoleplayer], "SCREEN SHOT", false);
 }
 

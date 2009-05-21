@@ -93,20 +93,37 @@ void W_AddFile (char *filename)
 {
 	wadinfo_t		header;
 	lumpinfo_t		*lump_p;
-	unsigned		i;
-	int				handle, length;
-	int				startlump;
+	char			path[MAX_OSPATH], *waddir;
+	int			handle, length;
+	int			startlump;
 	filelump_t		*fileinfo, singleinfo;
 	filelump_t		*freeFileInfo;
+	int			i;
 
 //
 // open the file and add to directory
-//	
-	if ( (handle = open (filename,O_RDONLY | O_BINARY)) == -1)
-		return;
+//
+	handle = -1;
+	/* Add support for HERETIC_DATA envirionment variable */
+	waddir = getenv("HERETIC_DATA");
+	if (waddir && *waddir)
+	{
+		snprintf (path, sizeof(path), "%s/%s", waddir, filename);
+		handle = open(path, O_RDONLY|O_BINARY);
+	}
+	if (handle == -1)	/* Try UserDIR */
+	{
+		snprintf (path, sizeof(path), "%s%s", basePath, filename);
+		handle = open(path, O_RDONLY|O_BINARY);
+	}
+	if (handle == -1)	/* Now try CWD */
+	{
+		handle = open(filename, O_RDONLY|O_BINARY);
+	}
+	if (handle == -1)
+		return;		/* Didn't find the file. */
 
 	startlump = numlumps;
-	
 	if (strcasecmp(filename + strlen(filename) - 3, "wad") != 0)
 	{
 	// single lump file

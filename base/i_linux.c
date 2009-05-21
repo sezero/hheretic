@@ -1055,16 +1055,56 @@ void I_CheckExternDriver (void)
 }
 
 
+//=========================================================================
+//
+//		MAIN
+//
+//=========================================================================
+
+static char base[MAX_OSPATH];
+
+static void CreateBasePath (void)
+{
+	int rc;
+	char *homedir = getenv("HOME");
+	if (homedir == NULL)
+		I_Error ("Unable to determine user home directory");
+	snprintf(base, sizeof(base), "%s/.hheretic/", homedir);
+	basePath = base;
+	rc = mkdir(base, S_IRWXU|S_IRWXG|S_IRWXO);
+	if (rc != 0 && errno != EEXIST)
+		I_Error ("Unable to create hheretic user directory");
+}
+
+
 static void PrintVersion (void)
 {
 	printf ("HHeretic v%d.%d.%d\n", VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
 }
 
+static const char datadir[] = HHERETIC_DATAPATH;
+
 int main (int argc, char** argv)
 {
+	char *waddir;
 	PrintVersion ();
 	myargc = argc;
 	myargv = argv;
+
+	CreateBasePath();
+
+	waddir = getenv("HERETIC_DATA");
+	if (waddir == NULL)
+	{
+		if (datadir[0])
+		{
+			setenv ("HERETIC_DATA", datadir, 0);
+			waddir = getenv("HERETIC_DATA");
+		}
+	}
+	if (waddir && *waddir)
+		printf ("HERETIC_DATA environment: %s\n", waddir);
+
 	D_DoomMain();
 	return 0;
 }

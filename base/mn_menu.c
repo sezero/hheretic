@@ -949,7 +949,7 @@ void MN_LoadSlotText(void)
 	FILE *fp;
 	int             count;
 	int             i;
-	char    name[256];
+	char    name[MAX_OSPATH];
 
 	for (i = 0; i < 6; i++)
 	{
@@ -959,7 +959,8 @@ void MN_LoadSlotText(void)
 		}
 		else
 		{
-			sprintf(name, SAVEGAMENAME"%d.hsg", i);
+			snprintf(name, sizeof(name), "%s%s%d.hsg",
+					basePath, SAVEGAMENAME, i);
 		}
 		fp = fopen(name, "rb+");
 		if (!fp)
@@ -1169,7 +1170,7 @@ static boolean SCMessages(int option)
 
 static boolean SCLoadGame(int option)
 {
-	char name[256];
+	char name[MAX_OSPATH];
 
 	if(!SlotStatus[option])
 	{ // slot's empty...don't try and load
@@ -1181,7 +1182,8 @@ static boolean SCLoadGame(int option)
 	}
 	else
 	{
-		sprintf(name, SAVEGAMENAME"%d.hsg", option);
+		snprintf(name, sizeof(name), "%s%s%d.hsg",
+			 basePath, SAVEGAMENAME, option);
 	}
 	G_LoadGame(name);
 	MN_DeactivateMenu();

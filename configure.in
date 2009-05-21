@@ -62,6 +62,13 @@ fi
 AC_SUBST(GLHEXEN)
 AC_SUBST(SVGAHEXEN)
 
+AC_ARG_WITH(datapath,
+[  --with-datapath=<DIR>   Use DIR for shared game data. Not defined by default.],
+datapath="$withval", datapath="")
+AC_DEFINE_UNQUOTED(HHERETIC_DATAPATH, "$datapath", [Define this to the shared game directory root])
+HHERETIC_DATAPATH="$datapath"
+AC_SUBST(HHERETIC_DATAPATH)
+
 if test "$SVGAHEXEN" = "true";then
   default_audio="oss"
 else
@@ -326,6 +333,13 @@ fi
 echo "Enabled target       : $report"
 
 echo "Audio driver         : $SND_MODULE"
+
+if test x$datapath = x; then
+    report="(not set)"
+else
+    report="$datapath"
+fi
+echo "Shared game data path: $report"
 
 if test "$SVGAHEXEN" = "true"; then
     report="N/A"

@@ -92,7 +92,7 @@ int             gametic;
 int             levelstarttic;          // gametic at level start
 int             totalkills, totalitems, totalsecret;    // for intermission
 
-char            demoname[32];
+char            demoname[MAX_OSPATH];
 boolean         demorecording;
 boolean         demoplayback;
 byte            *demobuffer, *demo_p;
@@ -1470,7 +1470,7 @@ void G_DoWorldDone(void)
 //
 //---------------------------------------------------------------------------
 
-char savename[256];
+char savename[MAX_OSPATH];
 
 void G_LoadGame(char *name)
 {
@@ -1707,8 +1707,7 @@ void G_RecordDemo (skill_t skill, int numplayers, int episode, int map, char *na
 
 	G_InitNew (skill, episode, map);
 	usergame = false;
-	strcpy (demoname, name);
-	strcat (demoname, ".lmp");
+	snprintf (demoname, sizeof(demoname), "%s%s.lmp", basePath, name);
 	demobuffer = demo_p = Z_Malloc (0x20000,PU_STATIC,NULL);
 	*demo_p++ = skill;
 	*demo_p++ = episode;
@@ -1857,7 +1856,7 @@ void G_SaveGame(int slot, char *description)
 void G_DoSaveGame(void)
 {
 	int i;
-	char name[100];
+	char name[MAX_OSPATH];
 	char verString[VERSIONSIZE];
 	char *description;
 
@@ -1867,7 +1866,8 @@ void G_DoSaveGame(void)
 	}
 	else
 	{
-		sprintf(name, SAVEGAMENAME"%d.hsg", savegameslot);
+		snprintf(name, sizeof(name), "%s%s%d.hsg",
+			 basePath, SAVEGAMENAME, savegameslot);
 	}
 	description = savedescription;
 

@@ -443,7 +443,7 @@ void I_SetChannels(int channels)
 /*
  *	SONG API
  */
-#define basePath "./" /* until I add userdir support.. */
+
 static Mix_Music *CurrentSong = NULL;
 
 int I_RegisterSong(void *data)

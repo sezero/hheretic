@@ -22,6 +22,7 @@
 #define V_DrawRawScreen(a)          OGL_DrawRawScreen(a)
 #endif
 
+const char *basePath = "";
 boolean shareware = false;		// true if only episode 1 present
 boolean ExtendedWAD = false;	// true if episodes 4 and 5 present
 
@@ -526,7 +527,7 @@ void D_StartTitle (void)
 void D_CheckRecordFrom (void)
 {
 	int     p;
-	char    file[256];
+	char    file[MAX_OSPATH];
 
 	p = M_CheckParm ("-recordfrom");
 	if (!p || p >= myargc - 2)
@@ -538,7 +539,8 @@ void D_CheckRecordFrom (void)
 	}
 	else
 	{
-		sprintf(file, SAVEGAMENAME"%c.hsg",myargv[p+1][0]);
+		snprintf(file, sizeof(file), "%s%s%d.hsg",
+			 basePath, SAVEGAMENAME, myargv[p+1][0]);
 	}
 	G_LoadGame (file);
 	G_DoLoadGame ();    // load the gameskill etc info from savegame
@@ -555,7 +557,8 @@ void D_CheckRecordFrom (void)
 ===============
 */
 
-#define MAXWADFILES 20
+#define CONFIG_FILE_NAME	"heretic.cfg"
+#define MAXWADFILES		20
 
 // MAPDIR should be defined as the directory that holds development maps
 // for the -wart # # command
@@ -589,8 +592,6 @@ char *wadfiles[MAXWADFILES] =
 };
 
 #endif
-
-char *basedefault = "heretic.cfg";
 
 char exrnwads[80];
 char exrnwads2[80];
@@ -1013,7 +1014,7 @@ void D_DoomMain(void)
 
 	// Load defaults before initing other systems
 	printf("M_LoadDefaults: Load system defaults.\n");
-	M_LoadDefaults();
+	M_LoadDefaults(CONFIG_FILE_NAME);
 
 	printf("Z_Init: Init zone memory allocation daemon.\n");
 	Z_Init();

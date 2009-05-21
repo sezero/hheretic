@@ -450,7 +450,7 @@ default_str_t default_strings[] =
 
 static int numdefaults, numstrings;
 
-char *defaultfile;
+static char defaultfile[MAX_OSPATH];
 
 /*
 ==============
@@ -494,9 +494,8 @@ void M_SaveDefaults (void)
 */
 
 extern byte scantokey[128];
-extern char *basedefault;
 
-void M_LoadDefaults (void)
+void M_LoadDefaults(const char *fileName)
 {
 	int i, len;
 	FILE *f;
@@ -525,16 +524,16 @@ void M_LoadDefaults (void)
 	i = M_CheckParm("-config");
 	if (i && i < myargc-1)
 	{
-		defaultfile = myargv[i+1];
+		snprintf(defaultfile, sizeof(defaultfile), "%s%s", basePath, myargv[i + 1]);
 		printf("default file: %s\n", defaultfile);
 	}
 	else if(cdrom)
 	{
-		defaultfile = "c:\\heretic.cd\\heretic.cfg";
+		strcpy(defaultfile, "c:\\heretic.cd\\heretic.cfg");
 	}
 	else
 	{
-		defaultfile = basedefault;
+		snprintf(defaultfile, sizeof(defaultfile), "%s%s", basePath, fileName);
 	}
 
 //
@@ -620,19 +619,19 @@ void M_LoadDefaults (void)
 
 typedef struct
 {
-	char    manufacturer;
-	char    version;
-	char    encoding;
-	char    bits_per_pixel;
-	unsigned short  xmin,ymin,xmax,ymax;
-	unsigned short  hres,vres;
-	unsigned char   palette[48];
-	char    reserved;
-	char    color_planes;
-	unsigned short  bytes_per_line;
-	unsigned short  palette_type;
-	char    filler[58];
-	unsigned char   data;           // unbounded
+	char	manufacturer;
+	char	version;
+	char	encoding;
+	char	bits_per_pixel;
+	unsigned short	xmin,ymin,xmax,ymax;
+	unsigned short	hres,vres;
+	unsigned char	palette[48];
+	char	reserved;
+	char	color_planes;
+	unsigned short	bytes_per_line;
+	unsigned short	palette_type;
+	char	filler[58];
+	unsigned char	data;	// unbounded
 } pcx_t;
 
 /*
@@ -643,49 +642,51 @@ typedef struct
 ==============
 */
 
-void WritePCXfile (char *filename, byte *data, int width, int height, byte *palette)
+void WritePCXfile (const char *filename, byte *data, int width, int height, byte *palette)
 {
-	int     i, length;
-	pcx_t   *pcx;
-	byte        *pack;
+	int	i, length;
+	pcx_t	*pcx;
+	byte	*pack;
 	
-	pcx = Z_Malloc (width*height*2+1000, PU_STATIC, NULL);
+	pcx = (pcx_t *) Z_Malloc (width*height*2 + 1000, PU_STATIC, NULL);
 
-	pcx->manufacturer = 0x0a;   // PCX id
-	pcx->version = 5;           // 256 color
-	pcx->encoding = 1;      // uncompressed
-	pcx->bits_per_pixel = 8;        // 256 color
+	pcx->manufacturer = 0x0a;	// PCX id
+	pcx->version = 5;		// 256 color
+	pcx->encoding = 1;		// uncompressed
+	pcx->bits_per_pixel = 8;	// 256 color
 	pcx->xmin = 0;
 	pcx->ymin = 0;
 	pcx->xmax = SHORT(width-1);
 	pcx->ymax = SHORT(height-1);
 	pcx->hres = SHORT(width);
 	pcx->vres = SHORT(height);
-	memset (pcx->palette,0,sizeof(pcx->palette));
-	pcx->color_planes = 1;      // chunky image
+	memset (pcx->palette, 0, sizeof(pcx->palette));
+	pcx->color_planes = 1;		// chunky image
 	pcx->bytes_per_line = SHORT(width);
-	pcx->palette_type = SHORT(2);       // not a grey scale
-	memset (pcx->filler,0,sizeof(pcx->filler));
+	pcx->palette_type = SHORT(2);	// not a grey scale
+	memset (pcx->filler, 0, sizeof(pcx->filler));
 
 //
 // pack the image
 //
 	pack = &pcx->data;
 
-	for (i=0 ; i<width*height ; i++)
-		if ( (*data & 0xc0) != 0xc0)
+	for (i = 0; i < width*height; i++)
+	{
+		if ((*data & 0xc0) != 0xc0)
 			*pack++ = *data++;
 		else
 		{
 			*pack++ = 0xc1;
 			*pack++ = *data++;
 		}
+	}
 
 //
 // write the palette
 //
-	*pack++ = 0x0c; // palette ID byte
-	for (i=0 ; i<768 ; i++)
+	*pack++ = 0x0c;		// palette ID byte
+	for (i = 0; i < 768; i++)
 		*pack++ = *palette++;
 
 //
@@ -714,10 +715,10 @@ void M_ScreenShot (void)
 #else
 void M_ScreenShot (void)
 {
-	int     i;
-	byte    *linear;
-	char    lbmname[12];
-	byte *pal;
+	int	i;
+	byte	*linear;
+	char	lbmname[MAX_OSPATH], *p;
+	byte	*pal;
 
 #ifdef _WATCOMC_
 	extern  byte *pcscreen;
@@ -733,17 +734,20 @@ void M_ScreenShot (void)
 //
 // find a file name to save it to
 //
-	strcpy(lbmname,"HRTIC00.pcx");
-
-	for (i=0 ; i<=99 ; i++)
+	snprintf (lbmname, sizeof(lbmname), "%shrtic00.pcx", basePath);
+	p = lbmname + strlen(basePath);
+	for (i = 0; i <= 99; i++)
 	{
-		lbmname[5] = i/10 + '0';
-		lbmname[6] = i%10 + '0';
+		p[5] = i/10 + '0';
+		p[6] = i%10 + '0';
 		if (access(lbmname, F_OK) == -1)
 			break;  // file doesn't exist
 	}
-	if (i==100)
-		I_Error ("M_ScreenShot: Couldn't create a PCX");
+	if (i == 100)
+	{
+		players[consoleplayer].message = "SCREEN SHOT FAILED";
+		return;
+	}
 
 //
 // save the pcx file
@@ -759,8 +763,7 @@ void M_ScreenShot (void)
 	pal = (byte *)W_CacheLumpName("PLAYPAL", PU_CACHE);
 #endif
 
-	WritePCXfile (lbmname, linear, SCREENWIDTH, SCREENHEIGHT
-		, pal);
+	WritePCXfile (lbmname, linear, SCREENWIDTH, SCREENHEIGHT, pal);
 
 	players[consoleplayer].message = "SCREEN SHOT";
 #ifdef __WATCOMC__

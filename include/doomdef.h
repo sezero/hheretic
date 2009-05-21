@@ -31,6 +31,9 @@
 /* max length of a filesystem pathname	*/
 #define	MAX_OSPATH		256
 
+/* path to the user directory		*/
+extern	const char		*basePath;
+
 // if rangecheck is undefined, most parameter validation debugging code
 // will not be compiled
 //#define RANGECHECK
@@ -1297,7 +1300,7 @@ int M_ReadFile (char const *name, void **buffer);
 
 void M_ScreenShot (void);
 
-void M_LoadDefaults (void);
+void M_LoadDefaults(const char *fileName);
 
 void M_SaveDefaults (void);
 

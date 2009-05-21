@@ -21,8 +21,6 @@ automatically if needed
 ==============================================================================
 */
 
-#define	ZONEID	0x1d4a11
-
 typedef struct
 {
 	int		size;		// total bytes malloced, including header

@@ -506,8 +506,8 @@ boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
 	}
 	sector = actor->subsector->sector;
 	c = 0;
-	stop = (actor->lastlook-1)&3;
-	for( ; ; actor->lastlook = (actor->lastlook+1)&3 )
+	stop = (actor->lastlook - 1) & (MAXPLAYERS - 1);
+	for( ; ; actor->lastlook = (actor->lastlook + 1) & (MAXPLAYERS - 1))
 	{
 		if (!playeringame[actor->lastlook])
 			continue;

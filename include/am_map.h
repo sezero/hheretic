@@ -5,8 +5,6 @@
 #ifndef __AMMAP_H__
 #define __AMMAP_H__
 
-//#pragma once	// no pragma's in my code - DDOI
-
 // For use if I do walls with outsides/insides
 #define REDS		12*8
 #define REDRANGE	1//16
@@ -123,3 +121,4 @@ typedef struct
 // extern int f_x, f_y, f_w, f_h;
 
 #endif
+

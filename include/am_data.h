@@ -5,8 +5,6 @@
 #ifndef __AMDATA_H__
 #define __AMDATA_H__
 
-//#pragma once	// no pragmas in my code! - DDOI
-
 // a line drawing of the player pointing right, starting from the middle.
 
 #define R ((8*PLAYERRADIUS)/7)
@@ -90,3 +88,4 @@ mline_t thintriangle_guy[] = {
 #define NUMTHINTRIANGLEGUYLINES (sizeof(thintriangle_guy)/sizeof(mline_t))
 
 #endif
+

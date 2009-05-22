@@ -411,8 +411,8 @@ fixed_t	P_FindNextHighestFloor(sector_t *sec,int currentheight)
 			heightlist[h++] = other->floorheight;
 		if (h >= MAX_ADJOINING_SECTORS)
 		{
-			printf("Sector with more than %d adjoining sectors\n",
-							MAX_ADJOINING_SECTORS);
+			fprintf(stderr, "Sector with more than %d adjoining sectors\n",
+					 MAX_ADJOINING_SECTORS);
 			break;
 		}
 	}

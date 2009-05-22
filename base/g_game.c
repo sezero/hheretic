@@ -214,7 +214,6 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	static int oldAngle;
 	extern int newViewAngleOff;
 	static int externInvKey;
-	extern boolean automapactive;
 	event_t ev;
 #endif
 

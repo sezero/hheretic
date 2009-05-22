@@ -176,7 +176,7 @@ void M_AddToBox (fixed_t *box, fixed_t x, fixed_t y)
 ==================
 */
 
-boolean M_WriteFile (char const *name, void *source, int length)
+boolean M_WriteFile (char const *name, const void *source, int length)
 {
 	int handle, count;
 

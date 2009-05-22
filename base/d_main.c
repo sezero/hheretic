@@ -3,6 +3,8 @@
 // $Revision$
 // $Date$
 
+// HEADER FILES ------------------------------------------------------------
+
 #include "h2stdinc.h"
 #include <sys/stat.h>
 #include <ctype.h>
@@ -15,12 +17,45 @@
 #include "p_local.h"
 #include "soundst.h"
 
+// MACROS ------------------------------------------------------------------
+
 #ifdef RENDER3D
 #include "ogl_def.h"
 #define W_CacheLumpName(a,b)        W_GetNumForName(a)
 #define V_DrawPatch(x,y,p)          OGL_DrawPatch(x,y,p)
 #define V_DrawRawScreen(a)          OGL_DrawRawScreen(a)
 #endif
+
+#define MAXWADFILES		20
+
+#define SHAREWAREWADNAME	"heretic1.wad"
+
+// TYPES -------------------------------------------------------------------
+
+// EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
+
+void D_CheckNetGame(void);
+void G_BuildTiccmd(ticcmd_t *cmd);
+void F_Drawer(void);
+boolean F_Responder(event_t *ev);
+void R_ExecuteSetViewSize(void);
+
+// PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
+
+void D_ProcessEvents(void);
+void D_DoAdvanceDemo(void);
+void D_AdvanceDemo (void);
+void D_PageDrawer (void);
+
+// PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
+
+// EXTERNAL DATA DECLARATIONS ----------------------------------------------
+
+extern boolean finalestage;
+extern boolean MenuActive;
+extern boolean askforquit;
+
+// PUBLIC DATA DEFINITIONS -------------------------------------------------
 
 const char *basePath = "";
 boolean shareware = false;		// true if only episode 1 present
@@ -37,22 +72,27 @@ skill_t startskill;
 int startepisode;
 int startmap;
 boolean autostart;
-extern boolean automapactive;
-
 boolean advancedemo;
-
 FILE *debugfile;
+event_t events[MAXEVENTS];
+int eventhead;
+int eventtail;
 
-void D_CheckNetGame(void);
-void D_ProcessEvents(void);
-void G_BuildTiccmd(ticcmd_t *cmd);
-void D_DoAdvanceDemo(void);
-void D_PageDrawer (void);
-void D_AdvanceDemo (void);
-void F_Drawer(void);
-boolean F_Responder(event_t *ev);
+// PRIVATE DATA DEFINITIONS ------------------------------------------------
 
-//---------------------------------------------------------------------------
+static int demosequence;
+static int pagetic;
+static char *pagename;
+
+static char *wadfiles[MAXWADFILES] =
+{
+	"heretic.wad",
+	"texture1.lmp",
+	"texture2.lmp",
+	"pnames.lmp"
+};
+
+// CODE --------------------------------------------------------------------
 
 #if !(defined(__DOS__) || defined(__WATCOMC__) || defined(__DJGPP__) || defined(_WIN32) || defined(_WIN64))
 char *strlwr (char *str)
@@ -185,10 +225,6 @@ Events can be discarded if no responder claims them
 ===============================================================================
 */
 
-event_t events[MAXEVENTS];
-int eventhead;
-int eventtail;
-
 //---------------------------------------------------------------------------
 //
 // PROC D_PostEvent
@@ -219,11 +255,11 @@ void D_ProcessEvents(void)
 	while (eventtail != eventhead)
 	{
 		ev = &events[eventtail];
-		if(F_Responder(ev))
+		if (F_Responder(ev))
 		{
 			goto _next_ev;
 		}
-		if(MN_Responder(ev))
+		if (MN_Responder(ev))
 		{
 			goto _next_ev;
 		}
@@ -244,11 +280,11 @@ void DrawMessage(void)
 	player_t *player;
 
 	player = &players[consoleplayer];
-	if(player->messageTics <= 0 || !player->message)
+	if (player->messageTics <= 0 || !player->message)
 	{ // No message
 		return;
 	}
-	MN_DrTextA(player->message, 160-MN_TextAWidth(player->message)/2, 1);
+	MN_DrTextA(player->message, 160 - MN_TextAWidth(player->message)/2, 1);
 }
 
 //---------------------------------------------------------------------------
@@ -259,17 +295,10 @@ void DrawMessage(void)
 //
 //---------------------------------------------------------------------------
 
-void R_ExecuteSetViewSize(void);
-
-extern boolean finalestage;
-
 void D_Display(void)
 {
-	extern boolean MenuActive;
-	extern boolean askforquit;
-
 	// Change the view size if needed
-	if(setsizeneeded)
+	if (setsizeneeded)
 	{
 		R_ExecuteSetViewSize();
 	}
@@ -301,23 +330,21 @@ void D_Display(void)
 		break;
 	}
 
-	if(paused && !MenuActive && !askforquit)
+	if (paused && !MenuActive && !askforquit)
 	{
-		if(!netgame)
+		if (!netgame)
 		{
-			V_DrawPatch(160, viewwindowy+5, W_CacheLumpName("PAUSED",
-				PU_CACHE));
+			V_DrawPatch(160, viewwindowy + 5, W_CacheLumpName("PAUSED", PU_CACHE));
 		}
 		else
 		{
-			V_DrawPatch(160, 70, W_CacheLumpName("PAUSED",
-				PU_CACHE));
+			V_DrawPatch(160, 70, W_CacheLumpName("PAUSED", PU_CACHE));
 		}
 	}
 
 #ifdef RENDER3D
-    if( OGL_DrawFilter() )
-        BorderNeedRefresh = true;
+	if (OGL_DrawFilter())
+		BorderNeedRefresh = true;
 #endif
 
 	// Handle player messages
@@ -341,20 +368,20 @@ void D_Display(void)
 
 void D_DoomLoop(void)
 {
-	if(M_CheckParm("-debugfile"))
+	if (M_CheckParm("-debugfile"))
 	{
 		char filename[20];
-		sprintf(filename, "debug%i.txt", consoleplayer);
+		snprintf(filename, sizeof(filename), "debug%i.txt", consoleplayer);
 		debugfile = fopen(filename,"w");
 	}
 	I_InitGraphics();
-	while(1)
+	while (1)
 	{
 		// Frame syncronous IO operations
 		I_StartFrame();
 
 		// Process one or more tics
-		if(singletics)
+		if (singletics)
 		{
 			I_StartTic();
 			D_ProcessEvents();
@@ -384,11 +411,6 @@ void D_DoomLoop(void)
 
 ===============================================================================
 */
-
-int             demosequence;
-int             pagetic;
-char            *pagename;
-
 
 /*
 ================
@@ -420,7 +442,7 @@ extern boolean MenuActive;
 void D_PageDrawer(void)
 {
 	V_DrawRawScreen(W_CacheLumpName(pagename, PU_CACHE));
-	if(demosequence == 1)
+	if (demosequence == 1)
 	{
 		V_DrawPatch(4, 160, W_CacheLumpName("ADVISOR", PU_CACHE));
 	}
@@ -443,57 +465,57 @@ void D_AdvanceDemo (void)
 
 void D_DoAdvanceDemo (void)
 {
-	players[consoleplayer].playerstate = PST_LIVE;  // don't reborn
+	players[consoleplayer].playerstate = PST_LIVE; // don't reborn
 	advancedemo = false;
-	usergame = false;               // can't save / end game here
+	usergame = false; // can't save / end game here
 	paused = false;
 	gameaction = ga_nothing;
-	demosequence = (demosequence+1)%7;
+	demosequence = (demosequence + 1) % 7;
 	switch (demosequence)
 	{
-		case 0:
-			pagetic = 210;
-			gamestate = GS_DEMOSCREEN;
-			pagename = "TITLE";
-			S_StartSong(mus_titl, false);
-			break;
-		case 1:
-			pagetic = 140;
-			gamestate = GS_DEMOSCREEN;
-			pagename = "TITLE";
-			break;
-		case 2:
-			BorderNeedRefresh = true;
-			UpdateState |= I_FULLSCRN;
-			G_DeferedPlayDemo ("demo1");
-			break;
-		case 3:
-			pagetic = 200;
-			gamestate = GS_DEMOSCREEN;
+	case 0:
+		pagetic = 210;
+		gamestate = GS_DEMOSCREEN;
+		pagename = "TITLE";
+		S_StartSong(mus_titl, false);
+		break;
+	case 1:
+		pagetic = 140;
+		gamestate = GS_DEMOSCREEN;
+		pagename = "TITLE";
+		break;
+	case 2:
+		BorderNeedRefresh = true;
+		UpdateState |= I_FULLSCRN;
+		G_DeferedPlayDemo ("demo1");
+		break;
+	case 3:
+		pagetic = 200;
+		gamestate = GS_DEMOSCREEN;
+		pagename = "CREDIT";
+		break;
+	case 4:
+		BorderNeedRefresh = true;
+		UpdateState |= I_FULLSCRN;
+		G_DeferedPlayDemo ("demo2");
+		break;
+	case 5:
+		pagetic = 200;
+		gamestate = GS_DEMOSCREEN;
+		if (shareware)
+		{
+			pagename = "ORDER";
+		}
+		else
+		{
 			pagename = "CREDIT";
-			break;
-		case 4:
-			BorderNeedRefresh = true;
-			UpdateState |= I_FULLSCRN;
-			G_DeferedPlayDemo ("demo2");
-			break;
-		case 5:
-			pagetic = 200;
-			gamestate = GS_DEMOSCREEN;
-			if(shareware)
-			{
-				pagename = "ORDER";
-			}
-			else
-			{
-				pagename = "CREDIT";
-			}
-			break;
-		case 6:
-			BorderNeedRefresh = true;
-			UpdateState |= I_FULLSCRN;
-			G_DeferedPlayDemo ("demo3");
-			break;
+		}
+		break;
+	case 6:
+		BorderNeedRefresh = true;
+		UpdateState |= I_FULLSCRN;
+		G_DeferedPlayDemo ("demo3");
+		break;
 	}
 }
 
@@ -525,8 +547,8 @@ void D_StartTitle (void)
 
 void D_CheckRecordFrom (void)
 {
-	int     p;
-	char    file[MAX_OSPATH];
+	int p;
+	char file[MAX_OSPATH];
 
 	p = M_CheckParm ("-recordfrom");
 	if (!p || p >= myargc - 2)
@@ -549,230 +571,150 @@ void D_CheckRecordFrom (void)
 ===============
 */
 
-#define CONFIG_FILE_NAME	"heretic.cfg"
-#define MAXWADFILES		20
-
-// MAPDIR should be defined as the directory that holds development maps
-// for the -wart # # command
-
-#ifdef __NeXT__
-
-#define MAPDIR "/Novell/Heretic/data/"
-
-#define SHAREWAREWADNAME "/Novell/Heretic/source/heretic1.wad"
-
-char *wadfiles[MAXWADFILES] =
-{
-	"/Novell/Heretic/source/heretic.wad",
-	"/Novell/Heretic/data/texture1.lmp",
-	"/Novell/Heretic/data/texture2.lmp",
-	"/Novell/Heretic/data/pnames.lmp"
-};
-
-#else
-
-#define MAPDIR "\\data\\"
-
-#define SHAREWAREWADNAME "heretic1.wad"
-
-char *wadfiles[MAXWADFILES] =
-{
-	"heretic.wad",
-	"texture1.lmp",
-	"texture2.lmp",
-	"pnames.lmp"
-};
-
-#endif
-
-char exrnwads[80];
-char exrnwads2[80];
-
-void wadprintf(void)
-{
-	if(debugmode)
-	{
-		return;
-	}
-	#ifdef __WATCOMC__
-	_settextposition(23, 2);
-	_setbkcolor(1);
-	_settextcolor(0);
-	_outtext(exrnwads);
-	_settextposition(24, 2);
-	_outtext(exrnwads2);
-	#endif
-}
-
 void D_AddFile(char *file)
 {
 	int numwadfiles;
-	char *new;
-//	char text[256];
+	char *newwad;
 
-	for(numwadfiles = 0; wadfiles[numwadfiles]; numwadfiles++);
-	new = malloc(strlen(file)+1);
-	strcpy(new, file);
-	if(strlen(exrnwads)+strlen(file) < 78)
+	for (numwadfiles = 0; wadfiles[numwadfiles]; numwadfiles++)
 	{
-		if(strlen(exrnwads))
-		{
-			strcat(exrnwads, ", ");
-		}
-		else
-		{
-			strcpy(exrnwads, "External Wadfiles: ");
-		}
-		strcat(exrnwads, file);
+		if (numwadfiles == MAXWADFILES)
+			I_Error ("MAXWADFILES reached for %s", file);
 	}
-	else if(strlen(exrnwads2)+strlen(file) < 79)
-	{
-		if(strlen(exrnwads2))
-		{
-			strcat(exrnwads2, ", ");
-		}
-		else
-		{
-			strcpy(exrnwads2, "     ");
-			strcat(exrnwads, ",");
-		}
-		strcat(exrnwads2, file);
-	}
-	wadfiles[numwadfiles] = new;
+	newwad = (char *) malloc(strlen(file) + 1);
+	strcpy(newwad, file);
+	wadfiles[numwadfiles] = newwad;
 }
 
 //==========================================================
 //
 //  Startup Thermo code
-//
+//  FIXME : MOVE OR REMOVE THIS...
 //==========================================================
-#define MSG_Y       9
-//#define THERM_X 15
-//#define THERM_Y 16
-//#define THERMCOLOR  3
-#define THERM_X     14
-#define THERM_Y     14
+#ifdef __WATCOMC__
 
-int thermMax;
-int thermCurrent;
-char    *startup;           // * to text screen
-char smsg[80];      // status bar line
+#define MSG_Y		9
+/*
+#define THERM_X		15
+#define THERM_Y		16
+#define THERMCOLOR	3
+*/
+#define THERM_X		14
+#define THERM_Y		14
+
+static int thermMax;
+static int thermCurrent;
 
 //
 //  Heretic startup screen shit
 //
+static byte *hscreen;
+static char *startup;	// * to text screen
+static char smsg[80];	// status bar line
+static char tmsg[300];
 
-byte *hscreen;
-
-void hgotoxy(int x,int y)
+static void hgotoxy(int x,int y)
 {
 	hscreen = (byte *)(0xb8000 + y*160 + x*2);
 }
 
-void hput(unsigned char c, unsigned char a)
+static void hput(unsigned char c, unsigned char a)
 {
 	*hscreen++ = c;
 	*hscreen++ = a;
 }
 
-void hprintf(const char *string, unsigned char a)
+static void hprintf(const char *string, unsigned char a)
 {
-#ifdef __WATCOMC__
 	int i;
 
-	if(debugmode)
+	if (debugmode)
 	{
 		puts(string);
 		return;
 	}
-	for(i = 0; i < strlen(string); i++)
+	for (i = 0; i < strlen(string); i++)
 	{
 		hput(string[i], a);
 	}
-#endif
 }
 
-void drawstatus(void)
+static void drawstatus(void)
 {
 	if(debugmode)
 	{
 		return;
 	}
-	#ifdef __WATCOMC__
 	_settextposition(25, 2);
 	_setbkcolor(1);
 	_settextcolor(15);
 	_outtext(smsg);
 	_settextposition(25, 1);
-	#endif
 }
 
-void status(const char *string)
+static void status(const char *string)
 {
-	strcat(smsg,string);
+	strcat(smsg, string);
 	drawstatus();
 }
 
-void DrawThermo(void)
+static void DrawThermo(void)
 {
-	#ifdef __WATCOMC__
-	unsigned char       *screen;
-	int     progress;
-	int     i;
+	unsigned char *screen;
+	int progress;
+	int i;
 
-	if(debugmode)
+	if (debugmode)
 	{
 		return;
 	}
 #if 0
 	progress = (98*thermCurrent)/thermMax;
 	screen = (char *)0xb8000 + (THERM_Y*160 + THERM_X*2);
-	for (i = 0;i < progress/2; i++)
+	for (i = 0; i < progress/2; i++)
 	{
 		switch(i)
 		{
-			case 4:
-			case 9:
-			case 14:
-			case 19:
-			case 29:
-			case 34:
-			case 39:
-			case 44:
-				*screen++ = 0xb3;
-				*screen++ = (THERMCOLOR<<4)+15;
-				break;
-			case 24:
-				*screen++ = 0xba;
-				*screen++ = (THERMCOLOR<<4)+15;
-				break;
-			default:
-				*screen++ = 0xdb;
-				*screen++ = 0x40 + THERMCOLOR;
-				break;
+		case 4:
+		case 9:
+		case 14:
+		case 19:
+		case 29:
+		case 34:
+		case 39:
+		case 44:
+			*screen++ = 0xb3;
+			*screen++ = (THERMCOLOR<<4)+15;
+			break;
+		case 24:
+			*screen++ = 0xba;
+			*screen++ = (THERMCOLOR<<4)+15;
+			break;
+		default:
+			*screen++ = 0xdb;
+			*screen++ = 0x40 + THERMCOLOR;
+			break;
 		}
 	}
-	if (progress&1)
+	if (progress & 1)
 	{
 		*screen++ = 0xdd;
 		*screen++ = 0x40 + THERMCOLOR;
 	}
 #else
-	progress = (50*thermCurrent)/thermMax+2;
-//  screen = (char *)0xb8000 + (THERM_Y*160 + THERM_X*2);
+	progress = (50*thermCurrent)/thermMax + 2;
+//	screen = (char *)0xb8000 + (THERM_Y*160 + THERM_X*2);
 	hgotoxy(THERM_X,THERM_Y);
 	for (i = 0; i < progress; i++)
 	{
-//      *screen++ = 0xdb;
-//      *screen++ = 0x2a;
-		hput(0xdb,0x2a);
+//		*screen++ = 0xdb;
+//		*screen++ = 0x2a;
+		hput(0xdb, 0x2a);
 	}
 #endif
-	#endif
 }
 
-#ifdef __WATCOMC__
-void blitStartup(void)
+static void blitStartup(void)
 {
 	byte *textScreen;
 
@@ -794,25 +736,20 @@ void blitStartup(void)
 	// Hide cursor
 	_settextcursor(0x2000);
 }
-#endif
 
-char tmsg[300];
 void tprintf(const char *msg, int initflag)
 {
-#if 0
-	#ifdef __WATCOMC__
-	char    temp[80];
+# if 0
+	char temp[80];
 	int start;
 	int add;
 	int i;
-	#endif
 
-	if(debugmode)
+	if (debugmode)
 	{
 		printf(msg);
 		return;
 	}
-	#ifdef __WATCOMC__
 	if (initflag)
 		tmsg[0] = 0;
 	strcat(tmsg,msg);
@@ -821,6 +758,7 @@ void tprintf(const char *msg, int initflag)
 	_setbkcolor(4);
 	_settextcolor(15);
 	for (add = start = i = 0; i <= strlen(tmsg); i++)
+	{
 		if ((tmsg[i] == '\n') || (!tmsg[i]))
 		{
 			memset(temp,0,80);
@@ -830,22 +768,24 @@ void tprintf(const char *msg, int initflag)
 			start = i+1;
 			add++;
 		}
+	}
 	_settextposition(25,1);
 	drawstatus();
-	#else
-	printf(msg);
-	#endif
-#endif
+# endif
 }
 
 void CheckAbortStartup(void)
 {
 #ifdef __WATCOMC__
 	extern int lastpress;
-
-	if(lastpress == 1)
+	if (lastpress == 1)
 	{ // Abort if escape pressed
-		CleanExit();
+		union REGS regs;
+		I_ShutdownKeyboard();
+		regs.x.eax = 0x3;
+		int386(0x10, &regs, &regs);
+		printf("Exited from HERETIC.\n");
+		exit(1);
 	}
 #endif
 }
@@ -863,17 +803,21 @@ void InitThermo(int max)
 	thermCurrent = 0;
 }
 
-#ifdef __WATCOMC__
-void CleanExit(void)
-{
-	union REGS regs;
+#else
 
-	I_ShutdownKeyboard();
-	regs.x.eax = 0x3;
-	int386(0x10, &regs, &regs);
-	printf("Exited from HERETIC.\n");
-	exit(1);
+#define hgotoxy(x,y)	do {} while (0)
+#define hprintf(s,a)	puts((s))
+#define status(s)	puts((s))
+#define DrawThermo()	do {} while (0)
+void tprintf(const char *msg, int initflag)
+{
+# if 0
+	printf(msg);
+# endif
 }
+void CheckAbortStartup(void) {}
+void IncThermo(void) {}
+void InitThermo(int x) {}
 #endif
 
 //---------------------------------------------------------------------------
@@ -890,7 +834,6 @@ void D_DoomMain(void)
 	char file[MAX_OSPATH];
 	FILE *fp;
 	boolean devMap;
-	//char *screen;
 
 	M_FindResponseFile();
 	setbuf(stdout, NULL);
@@ -906,7 +849,7 @@ void D_DoomMain(void)
 
 	// wadfiles[0] is a char * to the main wad
 	fp = fopen(wadfiles[0], "rb");
-	if(fp)
+	if (fp)
 	{
 		fclose(fp);
 	}
@@ -918,10 +861,10 @@ void D_DoomMain(void)
 	// -FILE [filename] [filename] ...
 	// Add files to the wad list.
 	p = M_CheckParm("-file");
-	if(p)
+	if (p)
 	{	// the parms after p are wadfile/lump names, until end of parms
 		// or another - preceded parm
-		while(++p != myargc && myargv[p][0] != '-')
+		while (++p != myargc && myargv[p][0] != '-')
 		{
 			D_AddFile(myargv[p]);
 		}
@@ -932,11 +875,11 @@ void D_DoomMain(void)
 	// and sets the start episode and the start map.
 	devMap = false;
 	p = M_CheckParm("-devmap");
-	if(p && p < myargc-2)
+	if (p && p < myargc-2)
 	{
 		e = myargv[p+1][0];
 		m = myargv[p+2][0];
-		sprintf(file, MAPDIR"E%cM%c.wad", e, m);
+		snprintf(file, sizeof(file), "%se%cm%c.wad", DEVMAPDIR, e, m);
 		D_AddFile(file);
 		printf("DEVMAP: Episode %c, Map %c.\n", e, m);
 		startepisode = e-'0';
@@ -946,7 +889,7 @@ void D_DoomMain(void)
 	}
 
 	p = M_CheckParm("-playdemo");
-	if(!p)
+	if (!p)
 	{
 		p = M_CheckParm("-timedemo");
 	}
@@ -960,20 +903,20 @@ void D_DoomMain(void)
 //
 // get skill / episode / map from parms
 //
-	if(M_CheckParm("-deathmatch"))
+	if (M_CheckParm("-deathmatch"))
 	{
 		deathmatch = true;
 	}
 
 	p = M_CheckParm("-skill");
-	if(p && p < myargc-1)
+	if (p && p < myargc-1)
 	{
 		startskill = myargv[p+1][0]-'1';
 		autostart = true;
 	}
 
 	p = M_CheckParm("-episode");
-	if(p && p < myargc-1)
+	if (p && p < myargc-1)
 	{
 		startepisode = myargv[p+1][0]-'0';
 		startmap = 1;
@@ -981,7 +924,7 @@ void D_DoomMain(void)
 	}
 
 	p = M_CheckParm("-warp");
-	if(p && p < myargc-2)
+	if (p && p < myargc-2)
 	{
 		startepisode = myargv[p+1][0]-'0';
 		startmap = myargv[p+2][0]-'0';
@@ -1004,11 +947,11 @@ void D_DoomMain(void)
 	printf("W_Init: Init WADfiles.\n");
 	W_InitMultipleFiles(wadfiles);
 
-	if(W_CheckNumForName("E2M1") == -1)
+	if (W_CheckNumForName("E2M1") == -1)
 	{ // Can't find episode 2 maps, must be the shareware WAD
 		shareware = true;
 	}
-	else if(W_CheckNumForName("EXTENDED") != -1)
+	else if (W_CheckNumForName("EXTENDED") != -1)
 	{ // Found extended lump, must be the extended WAD
 		ExtendedWAD = true;
 	}
@@ -1016,17 +959,12 @@ void D_DoomMain(void)
 #ifdef __WATCOMC__
 	I_StartupKeyboard();
 	I_StartupJoystick();
-#endif
-	#ifdef __WATCOMC__
-	// No use caching this if we're not going to use it - DDOI
 	startup = W_CacheLumpName("LOADING", PU_CACHE);
 	blitStartup();
-	#endif
 
-	//
 	//  Build status bar line!
-	//
 	smsg[0] = 0;
+#endif
 	if (deathmatch)
 		status("DeathMatch...");
 	if (nomonsters)
@@ -1037,10 +975,9 @@ void D_DoomMain(void)
 	{
 		char temp[64];
 		sprintf(temp, "Warp to Episode %d, Map %d, Skill %d ",
-			startepisode, startmap, startskill+1);
+			startepisode, startmap, startskill + 1);
 		status(temp);
 	}
-	wadprintf(); // print the added wadfiles
 
 	tprintf("MN_Init: Init menu system.\n",1);
 	MN_Init();
@@ -1083,14 +1020,14 @@ void D_DoomMain(void)
 	D_CheckRecordFrom();
 
 	p = M_CheckParm("-record");
-	if(p && p < myargc-1)
+	if (p && p < myargc-1)
 	{
 		G_RecordDemo(startskill, 1, startepisode, startmap, myargv[p+1]);
 		D_DoomLoop(); // Never returns
 	}
 
 	p = M_CheckParm("-playdemo");
-	if(p && p < myargc-1)
+	if (p && p < myargc-1)
 	{
 		singledemo = true; // Quit after one demo
 		G_DeferedPlayDemo(myargv[p+1]);
@@ -1098,14 +1035,14 @@ void D_DoomMain(void)
 	}
 
 	p = M_CheckParm("-timedemo");
-	if(p && p < myargc-1)
+	if (p && p < myargc-1)
 	{
 		G_TimeDemo(myargv[p+1]);
 		D_DoomLoop(); // Never returns
 	}
 
 	p = M_CheckParm("-loadgame");
-	if(p && p < myargc-1)
+	if (p && p < myargc-1)
 	{
 		snprintf(file, sizeof(file), "%s%s%c.hsg",
 			 basePath, SAVEGAMENAME, myargv[p+1][0]);
@@ -1113,20 +1050,20 @@ void D_DoomMain(void)
 	}
 
 	// Check valid episode and map
-	if((autostart || netgame) && (devMap == false))
+	if ((autostart || netgame) && (devMap == false))
 	{
-		if(M_ValidEpisodeMap(startepisode, startmap) == false)
+		if (M_ValidEpisodeMap(startepisode, startmap) == false)
 		{
 			startepisode = 1;
 			startmap = 1;
 		}
 	}
 
-	if(gameaction != ga_loadgame)
+	if (gameaction != ga_loadgame)
 	{
 		UpdateState |= I_FULLSCRN;
 		BorderNeedRefresh = true;
-		if(autostart || netgame)
+		if (autostart || netgame)
 		{
 			G_InitNew(startskill, startepisode, startmap);
 		}

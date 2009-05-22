@@ -406,7 +406,7 @@ void P_PostChickenWeapon(player_t *player, weapontype_t weapon)
 
 void P_BringUpWeapon(player_t *player)
 {
-	statenum_t new;
+	statenum_t newstate;
 
 	if(player->pendingweapon == wp_nochange)
 	{
@@ -418,15 +418,15 @@ void P_BringUpWeapon(player_t *player)
 	}
 	if(player->powers[pw_weaponlevel2])
 	{
-		new = wpnlev2info[player->pendingweapon].upstate;
+		newstate = wpnlev2info[player->pendingweapon].upstate;
 	}
 	else
 	{
-		new = wpnlev1info[player->pendingweapon].upstate;
+		newstate = wpnlev1info[player->pendingweapon].upstate;
 	}
 	player->pendingweapon = wp_nochange;
 	player->psprites[ps_weapon].sy = WEAPONBOTTOM;
-	P_SetPsprite(player, ps_weapon, new);
+	P_SetPsprite(player, ps_weapon, newstate);
 }
 
 //---------------------------------------------------------------------------

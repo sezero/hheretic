@@ -244,8 +244,8 @@ void R_InitTranslationTables (void)
 	tinttable = W_CacheLumpName("TINTTAB", PU_STATIC);
 
 	// Allocate translation tables
-	translationtables = Z_Malloc(256*3+255, PU_STATIC, 0);
-	translationtables = (byte *)(( (int)translationtables + 255 )& ~255);
+	translationtables = (byte *) Z_Malloc(256*3 + 255, PU_STATIC, NULL);
+	translationtables = (byte *)(((intptr_t)translationtables + 255) & ~255);
 
 	// Fill out the translation tables
 	for(i = 0; i < 256; i++)

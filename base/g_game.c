@@ -1707,7 +1707,7 @@ void G_RecordDemo (skill_t skill, int numplayers, int episode, int map, const ch
 	G_InitNew (skill, episode, map);
 	usergame = false;
 	snprintf (demoname, sizeof(demoname), "%s%s.lmp", basePath, name);
-	demobuffer = demo_p = Z_Malloc (0x20000,PU_STATIC,NULL);
+	demobuffer = demo_p = (byte *) Z_Malloc (0x20000, PU_STATIC, NULL);
 	*demo_p++ = skill;
 	*demo_p++ = episode;
 	*demo_p++ = map;

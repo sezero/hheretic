@@ -620,7 +620,7 @@ void S_UpdateSounds(mobj_t *listener)
 
 void S_Init(void)
 {
-	SoundCurve = Z_Malloc(MAX_SND_DIST, PU_STATIC, NULL);
+	SoundCurve = (byte *) Z_Malloc(MAX_SND_DIST, PU_STATIC, NULL);
 	I_StartupSound();
 	if (snd_Channels > 8)
 	{

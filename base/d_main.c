@@ -82,9 +82,9 @@ int eventtail;
 
 static int demosequence;
 static int pagetic;
-static char *pagename;
+static const char *pagename;
 
-static char *wadfiles[MAXWADFILES] =
+static const char *wadfiles[MAXWADFILES] =
 {
 	"heretic.wad",
 	"texture1.lmp",
@@ -572,7 +572,7 @@ void D_CheckRecordFrom (void)
 ===============
 */
 
-void D_AddFile(char *file)
+void D_AddFile(const char *file)
 {
 	int i = 0;
 	char *newwad;
@@ -744,9 +744,7 @@ void tprintf(const char *msg, int initflag)
 {
 # if 0
 	char temp[80];
-	int start;
-	int add;
-	int i;
+	int i, start, add;
 
 	if (debugmode)
 	{
@@ -831,9 +829,7 @@ void InitThermo(int x) {}
 
 void D_DoomMain(void)
 {
-	int p;
-	int e;
-	int m;
+	int p, e, m;
 	char file[MAX_OSPATH];
 	FILE *fp;
 	boolean devMap;

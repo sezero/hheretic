@@ -678,7 +678,7 @@ static void DrawSoundInfo(void)
 //
 //---------------------------------------------------------------------------
 
-char patcharti[][10] =
+static const char patcharti[][10] =
 {
 	{"ARTIBOX"},    // none
 	{"ARTIINVU"},   // invulnerability
@@ -693,7 +693,7 @@ char patcharti[][10] =
 	{"ARTIATLP"}    // teleport
 };
 
-char ammopic[][10] =
+static const char ammopic[][10] =
 {
 	{"INAMGLD"},
 	{"INAMBOW"},

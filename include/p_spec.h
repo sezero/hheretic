@@ -29,8 +29,8 @@ typedef struct
 typedef struct
 {
 	boolean	istexture;		// if false, it's a flat
-	char	endname[9];
-	char	startname[9];
+	const char	endname[9];
+	const char	startname[9];
 	int		speed;
 } animdef_t;
 
@@ -149,8 +149,8 @@ void	P_SpawnGlowingLight(sector_t *sector);
 */
 typedef struct
 {
-	char	name1[9];
-	char	name2[9];
+	const char	name1[9];
+	const char	name2[9];
 	short	episode;
 } switchlist_t;
 

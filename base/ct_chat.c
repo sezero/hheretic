@@ -59,7 +59,7 @@ boolean cheated;
 
 static int FontABaseLump;
 
-char *CT_FromPlrText[MAXPLAYERS] =
+static const char *CT_FromPlrText[MAXPLAYERS] =
 {
 	"GREEN:  ",
 	"YELLOW:  ",
@@ -131,7 +131,7 @@ void CT_Stop(void)
 
 boolean CT_Responder(event_t *ev)
 {
-	char *macro;
+	const char *macro;
 
 	int sendto;
 

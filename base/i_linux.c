@@ -1109,12 +1109,12 @@ static void PrintHelp (const char *name)
 
 static const char datadir[] = SHARED_DATAPATH;
 
-int main (int argc, char** argv)
+int main (int argc, char **argv)
 {
 	char *waddir;
 	PrintVersion ();
 	myargc = argc;
-	myargv = argv;
+	myargv = (const char **) argv;
 	if (M_CheckParm("--version") || M_CheckParm("-v"))
 		return 0;
 	if (M_CheckParm("--help") || M_CheckParm("-h") || M_CheckParm("-?"))

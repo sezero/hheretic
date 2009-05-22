@@ -649,7 +649,7 @@ typedef struct player_s
 	int		refire;			/* refired shots are less accurate */
 
 	int		killcount, itemcount, secretcount;	/* for intermission */
-	char		*message;		/* hint messages */
+	const char	*message;		/* hint messages */
 	int		messageTics;		/* counter for showing messages */
 	int		damagecount, bonuscount;/* for screen flashing */
 	int		flamecount;		/* for flame thrower duration */
@@ -993,13 +993,13 @@ COMPILE_TIME_ASSERT(lumpinfo_t, sizeof(lumpinfo_t) == 20);
 extern	lumpinfo_t	*lumpinfo;
 extern	int		numlumps;
 
-void W_InitMultipleFiles(char **filenames);
-int W_CheckNumForName(char *name);
-int W_GetNumForName(char *name);
+void W_InitMultipleFiles(const char **filenames);
+int W_CheckNumForName(const char *name);
+int W_GetNumForName(const char *name);
 int W_LumpLength(int lump);
 void W_ReadLump(int lump, void *dest);
 void *W_CacheLumpNum(int lump, int tag);
-void *W_CacheLumpName(char *name, int tag);
+void *W_CacheLumpName(const char *name, int tag);
 
 
 /* ---------- BASE LEVEL ---------- */
@@ -1166,32 +1166,32 @@ void G_DeferedInitNew (skill_t skill, int episode, int map);
  * a normal game starts at map 1, but a warp test can start elsewhere
  */
 
-void G_DeferedPlayDemo (char *demo);
+void G_DeferedPlayDemo (const char *demo);
 
-void G_LoadGame (char *name);
+void G_LoadGame (const char *name);
 /* can be called by the startup code or M_Responder
  * calls P_SetupLevel or W_EnterWorld
  */
 
 void G_DoLoadGame (void);
 
-void G_SaveGame (int slot, char *description);
+void G_SaveGame (int slot, const char *description);
 /* called by M_Responder */
 
 /* Support routines for saving games */
-void SV_Open(char *fileName);
-void SV_Close(char *fileName);
-void SV_Write(void *buffer, int size);
+void SV_Open(const char *fileName);
+void SV_Close(const char *fileName);
+void SV_Write(const void *buffer, int size);
 void SV_WriteByte(byte val);
 void SV_WriteWord(unsigned short val);
 void SV_WriteLong(unsigned int val);
 
 void G_RecordDemo (skill_t skill, int numplayers, int episode,
-		   int map, char *name);
+		   int map, const char *name);
 /* only called by startup code */
 
-void G_PlayDemo (char *name);
-void G_TimeDemo (char *name);
+void G_PlayDemo (const char *name);
+void G_TimeDemo (const char *name);
 
 void G_ExitLevel (void);
 void G_SecretExitLevel (void);
@@ -1258,26 +1258,28 @@ void R_DrawTopBorder (void);
 void R_SetViewSize (int blocks, int detail);
 /* called by M_Responder */
 
-int R_FlatNumForName (char *name);
+int R_FlatNumForName (const char *name);
 
-int R_TextureNumForName (char *name);
-int R_CheckTextureNumForName (char *name);
+int R_TextureNumForName (const char *name);
+int R_CheckTextureNumForName (const char *name);
 /* called by P_Ticker for switches and animations
  * returns the texture number for the texture name
  */
 
 
 /* ---- MISC ---- */
-extern	char	**myargv;
+extern	const char	**myargv;
 extern	int		myargc;
 
-int M_CheckParm(char *check);
+int M_CheckParm(const char *check);
 /* returns the position of the given parameter in the arg list (0 if not found) */
 
 boolean M_ValidEpisodeMap(int episode, int map);
 /* returns true if the episode/map combo is valid for the current
  * game configuration
  */
+
+void M_ExtractFileBase(const char *path, char *dest);
 
 void M_ForceUppercase(char *text);
 /* Changes a string to uppercase */
@@ -1306,7 +1308,7 @@ void M_LoadDefaults(const char *fileName);
 
 void M_SaveDefaults (void);
 
-int M_DrawText (int x, int y, boolean direct, char *string);
+int M_DrawText (int x, int y, boolean direct, const char *string);
 
 
 /* ---- Interlude (IN_lude.c) ---- */
@@ -1354,10 +1356,10 @@ void MN_DeactivateMenu(void);
 boolean MN_Responder(event_t *event);
 void MN_Ticker(void);
 void MN_Drawer(void);
-void MN_DrTextA(char *text, int x, int y);
-int MN_TextAWidth(char *text);
-void MN_DrTextB(char *text, int x, int y);
-int MN_TextBWidth(char *text);
+void MN_DrTextA(const char *text, int x, int y);
+int MN_TextAWidth(const char *text);
+void MN_DrTextB(const char *text, int x, int y);
+int MN_TextBWidth(const char *text);
 
 
 /* --- AUTOMAP---- */

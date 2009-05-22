@@ -1471,7 +1471,7 @@ void G_DoWorldDone(void)
 
 char savename[MAX_OSPATH];
 
-void G_LoadGame(char *name)
+void G_LoadGame(const char *name)
 {
 	strcpy(savename, name);
 	gameaction = ga_loadgame;
@@ -1700,7 +1700,7 @@ void G_WriteDemoTiccmd (ticcmd_t *cmd)
 ===================
 */
 
-void G_RecordDemo (skill_t skill, int numplayers, int episode, int map, char *name)
+void G_RecordDemo (skill_t skill, int numplayers, int episode, int map, const char *name)
 {
 	int             i;
 
@@ -1727,9 +1727,9 @@ void G_RecordDemo (skill_t skill, int numplayers, int episode, int map, char *na
 ===================
 */
 
-char    *defdemoname;
+const char    *defdemoname;
 
-void G_DeferedPlayDemo (char *name)
+void G_DeferedPlayDemo (const char *name)
 {
 	defdemoname = name;
 	gameaction = ga_playdemo;
@@ -1765,7 +1765,7 @@ void G_DoPlayDemo (void)
 ===================
 */
 
-void G_TimeDemo (char *name)
+void G_TimeDemo (const char *name)
 {
 	skill_t skill;
 	int             episode, map;
@@ -1837,7 +1837,7 @@ boolean G_CheckDemoStatus (void)
 //
 //==========================================================================
 
-void G_SaveGame(int slot, char *description)
+void G_SaveGame(int slot, const char *description)
 {
 	savegameslot = slot;
 	strcpy(savedescription, description);
@@ -1895,7 +1895,7 @@ void G_DoSaveGame(void)
 //
 //==========================================================================
 
-void SV_Open(char *fileName)
+void SV_Open(const char *fileName)
 {
 	MallocFailureOk = true;
 	savebuffer = Z_Malloc(SAVEGAMESIZE, PU_STATIC, NULL);
@@ -1918,7 +1918,7 @@ void SV_Open(char *fileName)
 //
 //==========================================================================
 
-void SV_Close(char *fileName)
+void SV_Close(const char *fileName)
 {
 	int length;
 
@@ -1945,7 +1945,7 @@ void SV_Close(char *fileName)
 //
 //==========================================================================
 
-void SV_Write(void *buffer, int size)
+void SV_Write(const void *buffer, int size)
 {
 	if(SaveGameType == SVG_RAM)
 	{

@@ -75,13 +75,13 @@ typedef enum
 
 typedef struct
 {
-	char name[8];
+	const char name[8];
 	int p1;
 } musicinfo_t;
 
 typedef struct sfxinfo_s
 {
-	char name[8];
+	const char name[8];
 	struct sfxinfo_s *link; // Make alias for another sound
 	unsigned short priority; // Higher priority takes precendence
 	int usefulness; // Determines when a sound should be cached out
@@ -103,7 +103,7 @@ typedef struct
 {
 	int id;
 	unsigned short priority;
-	char *name;
+	const char *name;
 	mobj_t *mo;
 	int distance;
 } ChanInfo_t;

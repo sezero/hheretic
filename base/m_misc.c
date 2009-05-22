@@ -16,8 +16,8 @@
 #include "ogl_def.h"
 #endif
 
-int myargc;
-char **myargv;
+int		myargc;
+const char	**myargv;
 
 //---------------------------------------------------------------------------
 //
@@ -27,41 +27,41 @@ char **myargv;
 
 boolean M_ValidEpisodeMap(int episode, int map)
 {
-	if(episode < 1 || map < 1 || map > 9)
+	if (episode < 1 || map < 1 || map > 9)
 	{
 		return false;
 	}
-	if(shareware)
+	if (shareware)
 	{ // Shareware version checks
-		if(episode != 1)
+		if (episode != 1)
 		{
 			return false;
 		}
 	}
-	else if(ExtendedWAD)
+	else if (ExtendedWAD)
 	{ // Extended version checks
-		if(episode == 6)
+		if (episode == 6)
 		{
 			if(map > 3)
 			{
 				return false;
 			}
 		}
-		else if(episode > 5)
+		else if (episode > 5)
 		{
 			return false;
 		}
 	}
 	else
 	{ // Registered version checks
-		if(episode == 4)
+		if (episode == 4)
 		{
 			if(map != 1)
 			{
 				return false;
 			}
 		}
-		else if(episode > 3)
+		else if (episode > 3)
 		{
 			return false;
 		}
@@ -71,30 +71,62 @@ boolean M_ValidEpisodeMap(int episode, int map)
 
 /*
 =================
-=
+
 = M_CheckParm
 =
 = Checks for the given parameter in the program's command line arguments
-=
 = Returns the argument number (1 to argc-1) or 0 if not present
 =
 =================
 */
 
-int M_CheckParm (char *check)
+int M_CheckParm (const char *check)
 {
-	int     i;
+	int i;
 
-	for (i = 1;i<myargc;i++)
+	for (i = 1; i < myargc; i++)
 	{
-		if ( !strcasecmp(check, myargv[i]) )
+		if (!strcasecmp(check, myargv[i]))
 			return i;
 	}
 
 	return 0;
 }
 
+//==========================================================================
+//
+// M_ExtractFileBase
+//
+//==========================================================================
 
+void M_ExtractFileBase(const char *path, char *dest)
+{
+	const char *src;
+	int length;
+
+	src = path + strlen(path) - 1;
+	if (src <= path)
+	{
+		*dest = '\0';
+		return;
+	}
+
+	// Back up until a \ or the start
+	while (src != path && src[-1] != '/' && src[-1] != '\\')
+		src--;
+
+	// Copy up to eight characters
+	memset(dest, 0, 8);
+	length = 0;
+	while (*src && *src != '.')
+	{
+		if (++length == 9)
+		{
+			I_Error("Filename base of %s > 8 chars", path);
+		}
+		*dest++ = toupper((int)*src++);
+	}
+}
 
 /*
 ===============
@@ -106,39 +138,41 @@ int M_CheckParm (char *check)
 ===============
 */
 
-unsigned char rndtable[256] = {
-	0,   8, 109, 220, 222, 241, 149, 107,  75, 248, 254, 140,  16,  66,
-	74,  21, 211,  47,  80, 242, 154,  27, 205, 128, 161,  89,  77,  36,
-	95, 110,  85,  48, 212, 140, 211, 249,  22,  79, 200,  50,  28, 188,
-	52, 140, 202, 120,  68, 145,  62,  70, 184, 190,  91, 197, 152, 224,
+unsigned char rndtable[256] =
+{
+	  0,   8, 109, 220, 222, 241, 149, 107,  75, 248, 254, 140,  16,  66,
+	 74,  21, 211,  47,  80, 242, 154,  27, 205, 128, 161,  89,  77,  36,
+	 95, 110,  85,  48, 212, 140, 211, 249,  22,  79, 200,  50,  28, 188,
+	 52, 140, 202, 120,  68, 145,  62,  70, 184, 190,  91, 197, 152, 224,
 	149, 104,  25, 178, 252, 182, 202, 182, 141, 197,   4,  81, 181, 242,
 	145,  42,  39, 227, 156, 198, 225, 193, 219,  93, 122, 175, 249,   0,
 	175, 143,  70, 239,  46, 246, 163,  53, 163, 109, 168, 135,   2, 235,
-	25,  92,  20, 145, 138,  77,  69, 166,  78, 176, 173, 212, 166, 113,
-	94, 161,  41,  50, 239,  49, 111, 164,  70,  60,   2,  37, 171,  75,
+	 25,  92,  20, 145, 138,  77,  69, 166,  78, 176, 173, 212, 166, 113,
+	 94, 161,  41,  50, 239,  49, 111, 164,  70,  60,   2,  37, 171,  75,
 	136, 156,  11,  56,  42, 146, 138, 229,  73, 146,  77,  61,  98, 196,
 	135, 106,  63, 197, 195,  86,  96, 203, 113, 101, 170, 247, 181, 113,
-	80, 250, 108,   7, 255, 237, 129, 226,  79, 107, 112, 166, 103, 241,
-	24, 223, 239, 120, 198,  58,  60,  82, 128,   3, 184,  66, 143, 224,
+	 80, 250, 108,   7, 255, 237, 129, 226,  79, 107, 112, 166, 103, 241,
+	 24, 223, 239, 120, 198,  58,  60,  82, 128,   3, 184,  66, 143, 224,
 	145, 224,  81, 206, 163,  45,  63,  90, 168, 114,  59,  33, 159,  95,
-	28, 139, 123,  98, 125, 196,  15,  70, 194, 253,  54,  14, 109, 226,
-	71,  17, 161,  93, 186,  87, 244, 138,  20,  52, 123, 251,  26,  36,
-	17,  46,  52, 231, 232,  76,  31, 221,  84,  37, 216, 165, 212, 106,
+	 28, 139, 123,  98, 125, 196,  15,  70, 194, 253,  54,  14, 109, 226,
+	 71,  17, 161,  93, 186,  87, 244, 138,  20,  52, 123, 251,  26,  36,
+	 17,  46,  52, 231, 232,  76,  31, 221,  84,  37, 216, 165, 212, 106,
 	197, 242,  98,  43,  39, 175, 254, 145, 190,  84, 118, 222, 187, 136,
 	120, 163, 236, 249
 };
+
 int rndindex = 0;
 int prndindex = 0;
 
 int P_Random (void)
 {
-	prndindex = (prndindex+1)&0xff;
+	prndindex = (prndindex + 1) & 0xff;
 	return rndtable[prndindex];
 }
 
 int M_Random (void)
 {
-	rndindex = (rndindex+1)&0xff;
+	rndindex = (rndindex + 1) & 0xff;
 	return rndtable[rndindex];
 }
 
@@ -156,17 +190,15 @@ void M_ClearBox (fixed_t *box)
 
 void M_AddToBox (fixed_t *box, fixed_t x, fixed_t y)
 {
-	if (x<box[BOXLEFT])
+	if (x < box[BOXLEFT])
 		box[BOXLEFT] = x;
-	else if (x>box[BOXRIGHT])
+	else if (x > box[BOXRIGHT])
 		box[BOXRIGHT] = x;
-	if (y<box[BOXBOTTOM])
+	if (y < box[BOXBOTTOM])
 		box[BOXBOTTOM] = y;
-	else if (y>box[BOXTOP])
+	else if (y > box[BOXTOP])
 		box[BOXTOP] = y;
 }
-
-
 
 /*
 ==================
@@ -205,7 +237,7 @@ int M_ReadFile (char const *name, void **buffer)
 {
 	int handle, count, length;
 	struct stat fileinfo;
-	void        *buf;
+	void *buf;
 
 	handle = open (name, O_RDONLY | O_BINARY, 0666);
 	if (handle == -1)
@@ -230,15 +262,15 @@ int M_ReadFile (char const *name, void **buffer)
 //
 //---------------------------------------------------------------------------
 
-#define MAXARGVS 100
+#define MAXARGVS	100
 
 void M_FindResponseFile(void)
 {
 	int i;
 
-	for(i = 1; i < myargc; i++)
+	for (i = 1; i < myargc; i++)
 	{
-		if(myargv[i][0] == '@')
+		if (myargv[i][0] == '@')
 		{
 			FILE *handle;
 			int size;
@@ -247,57 +279,53 @@ void M_FindResponseFile(void)
 			int indexinfile;
 			char *infile;
 			char *file;
-			char *moreargs[20];
-			char *firstargv;
+			const char *moreargs[20];
+			const char *firstargv;
 
 			// READ THE RESPONSE FILE INTO MEMORY
 			handle = fopen(&myargv[i][1], "rb");
-			if(!handle)
+			if (!handle)
 			{
 				printf("\nNo such response file!");
 				exit(1);
 			}
-			printf("Found response file %s!\n",&myargv[i][1]);
-			fseek (handle,0,SEEK_END);
+			printf("Found response file %s!\n", &myargv[i][1]);
+			fseek (handle, 0, SEEK_END);
 			size = ftell(handle);
-			fseek (handle,0,SEEK_SET);
-			file = malloc (size);
-			fread (file,size,1,handle);
+			fseek (handle, 0, SEEK_SET);
+			file = (char *) malloc (size);
+			fread (file, size, 1, handle);
 			fclose (handle);
 
 			// KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
-			for (index = 0,k = i+1; k < myargc; k++)
+			for (index = 0, k = i + 1; k < myargc; k++)
 				moreargs[index++] = myargv[k];
-			
+
 			firstargv = myargv[0];
-			myargv = malloc(sizeof(char *)*MAXARGVS);
-			memset(myargv,0,sizeof(char *)*MAXARGVS);
+			myargv = (const char **) calloc(1, sizeof(char *) * MAXARGVS);
 			myargv[0] = firstargv;
-			
+
 			infile = file;
 			indexinfile = k = 0;
-			indexinfile++;  // SKIP PAST ARGV[0] (KEEP IT)
+			indexinfile++;	// SKIP PAST ARGV[0] (KEEP IT)
 			do
 			{
-				myargv[indexinfile++] = infile+k;
-				while(k < size &&  
+				myargv[indexinfile++] = infile + k;
+				while (k < size && ((*(infile + k) >= ' ' + 1) && (*(infile + k) <= 'z')))
+					k++;
+				*(infile + k) = 0;
+				while (k < size && ((*(infile + k) <= ' ') || (*(infile + k) > 'z')))
+					k++;
+			} while (k < size);
 
-					((*(infile+k)>= ' '+1) && (*(infile+k)<='z')))
-					k++;
-				*(infile+k) = 0;
-				while(k < size &&
-					((*(infile+k)<= ' ') || (*(infile+k)>'z')))
-					k++;
-			} while(k < size);
-			
-			for (k = 0;k < index;k++)
+			for (k = 0; k < index; k++)
 				myargv[indexinfile++] = moreargs[k];
 			myargc = indexinfile;
 			// DISPLAY ARGS
-			if(M_CheckParm("-debug"))
+			if (M_CheckParm("-debug"))
 			{
 				printf("%d command-line args:\n", myargc);
-				for(k = 1; k < myargc; k++)
+				for (k = 1; k < myargc; k++)
 				{
 					printf("%s\n", myargv[k]);
 				}
@@ -319,9 +347,9 @@ void M_ForceUppercase(char *text)
 {
 	char c;
 
-	while((c = *text) != 0)
+	while ((c = *text) != 0)
 	{
-		if(c >= 'a' && c <= 'z')
+		if (c >= 'a' && c <= 'z')
 		{
 			*text++ = c-('a'-'A');
 		}
@@ -340,44 +368,44 @@ void M_ForceUppercase(char *text)
 ==============================================================================
 */
 
-int     usemouse;
-int     usejoystick;
+int	usemouse;
+int	usejoystick;
+
+int	mouseSensitivity;
 
 extern int mouselook;
 extern int alwaysrun;
 
-extern  int     key_right, key_left, key_up, key_down;
-extern  int     key_strafeleft, key_straferight;
-extern  int     key_fire, key_use, key_strafe, key_speed;
-extern	int		key_flyup, key_flydown, key_flycenter;
-extern	int		key_lookup, key_lookdown, key_lookcenter;
-extern	int		key_invleft, key_invright, key_useartifact;
+extern int key_right, key_left, key_up, key_down;
+extern int key_strafeleft, key_straferight;
+extern int key_fire, key_use, key_strafe, key_speed;
+extern int key_flyup, key_flydown, key_flycenter;
+extern int key_lookup, key_lookdown, key_lookcenter;
+extern int key_invleft, key_invright, key_useartifact;
 
-extern  int         mousebfire;
-extern  int         mousebstrafe;
-extern  int         mousebforward;
+extern int mousebfire;
+extern int mousebstrafe;
+extern int mousebforward;
 
-extern  int         joybfire;
-extern  int         joybstrafe;
-extern  int         joybuse;
-extern  int         joybspeed;
+extern int joybfire;
+extern int joybstrafe;
+extern int joybuse;
+extern int joybspeed;
 
-extern  int         messageson;
+extern int messageson;
 
-extern  int     viewwidth, viewheight;
+extern int viewwidth, viewheight;
 
-int mouseSensitivity;
-
-extern  int screenblocks;
+extern int screenblocks;
 
 #ifndef __NeXT__
 extern int snd_Channels;
 extern int snd_DesiredMusicDevice, snd_DesiredSfxDevice;
-extern int snd_MusicDevice, // current music card # (index to dmxCodes)
-	snd_SfxDevice; // current sfx card # (index to dmxCodes)
+extern int snd_MusicDevice,	// current music card # (index to dmxCodes)
+	   snd_SfxDevice;	// current sfx card # (index to dmxCodes)
 
-extern int     snd_SBport, snd_SBirq, snd_SBdma;       // sound blaster variables
-extern int     snd_Mport;                              // midi variables
+extern int snd_SBport, snd_SBirq, snd_SBdma;	// sound blaster variables
+extern int snd_Mport;				// midi variables
 #endif
 
 default_t defaults[] =
@@ -450,7 +478,6 @@ default_str_t default_strings[] =
 };
 
 static int numdefaults, numstrings;
-
 static char defaultfile[MAX_OSPATH];
 
 /*
@@ -494,11 +521,10 @@ void M_SaveDefaults (void)
 ==============
 */
 
-extern byte scantokey[128];
-
 void M_LoadDefaults(const char *fileName)
 {
-	int i, len;
+	int i;
+	int len;
 	FILE *f;
 	char def[80];
 	char strparm[100];
@@ -536,7 +562,7 @@ void M_LoadDefaults(const char *fileName)
 //
 // read the file in, overriding any set defaults
 //
-	f = fopen (defaultfile, "r");
+	f = fopen(defaultfile, "r");
 	if (f)
 	{
 		while (!feof(f))
@@ -586,22 +612,8 @@ void M_LoadDefaults(const char *fileName)
 				}
 			}
 		}
-
 		fclose (f);
 	}
-
-
-#ifdef __WATCOMC__
-	for(i = 0; i < numdefaults; i++)
-	{
-		if(defaults[i].scantranslate)
-		{
-			parm = *defaults[i].location;
-			defaults[i].untranslated = parm;
-			*defaults[i].location = scantokey[parm];
-		}
-	}
-#endif
 }
 
 
@@ -612,7 +624,6 @@ void M_LoadDefaults(const char *fileName)
 
 ==============================================================================
 */
-
 
 typedef struct
 {
@@ -644,7 +655,7 @@ void WritePCXfile (const char *filename, byte *data, int width, int height, byte
 	int	i, length;
 	pcx_t	*pcx;
 	byte	*pack;
-	
+
 	pcx = (pcx_t *) Z_Malloc (width*height*2 + 1000, PU_STATIC, NULL);
 
 	pcx->manufacturer = 0x0a;	// PCX id
@@ -653,8 +664,8 @@ void WritePCXfile (const char *filename, byte *data, int width, int height, byte
 	pcx->bits_per_pixel = 8;	// 256 color
 	pcx->xmin = 0;
 	pcx->ymin = 0;
-	pcx->xmax = SHORT(width-1);
-	pcx->ymax = SHORT(height-1);
+	pcx->xmax = SHORT(width - 1);
+	pcx->ymax = SHORT(height - 1);
 	pcx->hres = SHORT(width);
 	pcx->vres = SHORT(height);
 	memset (pcx->palette, 0, sizeof(pcx->palette));
@@ -723,7 +734,7 @@ void M_ScreenShot (void)
 #endif
 //
 // munge planar buffer to linear
-//
+// 
 #ifdef _WATCOMC_
 	linear = pcscreen;
 #else
@@ -739,7 +750,7 @@ void M_ScreenShot (void)
 		p[5] = i/10 + '0';
 		p[6] = i%10 + '0';
 		if (access(lbmname, F_OK) == -1)
-			break;  // file doesn't exist
+			break;	// file doesn't exist
 	}
 	if (i == 100)
 	{

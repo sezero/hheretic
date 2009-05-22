@@ -24,13 +24,13 @@ int             finalecount;
 #define TEXTSPEED       3
 #define TEXTWAIT        250
 
-char    *e1text = E1TEXT;
-char    *e2text = E2TEXT;
-char    *e3text = E3TEXT;
-char    *e4text = E4TEXT;
-char    *e5text = E5TEXT;
-char    *finaletext;
-char    *finaleflat;
+static const char    *e1text = E1TEXT;
+static const char    *e2text = E2TEXT;
+static const char    *e3text = E3TEXT;
+static const char    *e4text = E4TEXT;
+static const char    *e5text = E5TEXT;
+static const char    *finaletext;
+static const char    *finaleflat;
 
 int FontABaseLump;
 
@@ -154,7 +154,7 @@ void F_TextWrite (void)
 	int             x,y;
 #endif
 	int             count;
-	char    *ch;
+	const char    *ch;
 	int             c;
 	int             cx, cy;
 	patch_t *w;

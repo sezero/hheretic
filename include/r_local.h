@@ -100,7 +100,7 @@ typedef struct line_s
 #ifdef RENDER3D
 typedef struct
 {
-    float x, y;
+	float x, y;
 } fvertex_t;
 #endif
 
@@ -110,14 +110,13 @@ typedef struct subsector_s
 	short		numlines;
 	short		firstline;
 #ifdef RENDER3D
-    // Sorted edge vertices for rendering floors and ceilings.
-    char numedgeverts;
-    fvertex_t* edgeverts;     // A list of edge vertices.
-    fvertex_t* origedgeverts; // Unmodified, accurate edge vertices.
-    fvertex_t bbox[2];        // Min and max points.
-    fvertex_t midpoint;       // Center of bounding box.
+	// Sorted edge vertices for rendering floors and ceilings.
+	char		numedgeverts;
+	fvertex_t	*edgeverts;	// A list of edge vertices.
+	fvertex_t	*origedgeverts;	// Unmodified, accurate edge vertices.
+	fvertex_t	bbox[2];	// Min and max points.
+	fvertex_t	midpoint;	// Center of bounding box.
 #endif
-
 } subsector_t;
 
 typedef struct
@@ -130,7 +129,7 @@ typedef struct
 	sector_t	*frontsector;
 	sector_t	*backsector;		// NULL for one sided lines
 #ifdef RENDER3D
-    float len;  // Length of the segment (v1 -> v2) for texture mapping.
+	float		len;	// Length of the segment (v1 -> v2) for texture mapping.
 #endif
 
 } seg_t;
@@ -144,23 +143,23 @@ typedef struct
 
 typedef struct
 {
-        int             originx;        // block origin (allways UL), which has allready
-        int             originy;        // accounted  for the patch's internal origin
-        int             patch;
+	int		originx;	// block origin (allways UL), which has allready
+	int		originy;	// accounted  for the patch's internal origin
+	int		patch;
 } texpatch_t;
 
 // a maptexturedef_t describes a rectangular texture, which is composed of one
 // or more mappatch_t structures that arrange graphic patches
 typedef struct
 {
-        char            name[8];                // for switch changing, etc
-        short           width;
-        short           height;
-        short           patchcount;
-        texpatch_t      patches[1];             // [patchcount] drawn back to front
-                                                                //  into the cached texture
+	char		name[8];	// for switch changing, etc
+	short		width;
+	short		height;
+	short		patchcount;
+	texpatch_t	patches[1];	// [patchcount] drawn back to front
+						//  into the cached texture
 #ifdef RENDER3D
-        boolean     masked;         // from maptexture_t
+	boolean		masked;		// from maptexture_t
 #endif
 } texture_t;
 
@@ -226,9 +225,9 @@ typedef struct vissprite_s
 	fixed_t		texturemid;
 	int			patch;
 #ifdef RENDER3D
-    int             lightlevel;
-    float           v1[2], v2[2];       // The vertices (v1 is the left one).
-    float           secfloor, secceil;
+	int		lightlevel;
+	float		v1[2], v2[2];		// The vertices (v1 is the left one).
+	float		secfloor, secceil;
 #else
 	lighttable_t	*colormap;
 #endif
@@ -294,8 +293,8 @@ extern	angle_t		viewangle;
 extern	player_t	*viewplayer;
 
 #ifdef RENDER3D
-extern  float           viewpitch;
-extern  int             sbarscale;
+extern	float		viewpitch;
+extern	int		sbarscale;
 #endif
 
 extern	angle_t		clipangle;
@@ -468,12 +467,12 @@ extern	fixed_t		pspritescale, pspriteiscale;
 void R_DrawMaskedColumn (column_t *column, signed int baseclip);
 
 
-void 	R_SortVisSprites (void);
+void	R_SortVisSprites (void);
 
 void	R_AddSprites (sector_t *sec);
 void	R_AddPSprites (void);
 void	R_DrawSprites (void);
-void 	R_InitSprites (char **namelist);
+void	R_InitSprites (const char **namelist);
 void	R_ClearSprites (void);
 void	R_DrawMasked (void);
 void	R_ClipVisSprite (vissprite_t *vis, int xl, int xh);
@@ -492,10 +491,10 @@ extern	fixed_t			dc_iscale;
 extern	fixed_t			dc_texturemid;
 extern	byte			*dc_source;		// first pixel in a column
 
-void 	R_DrawColumn (void);
-void 	R_DrawColumnLow (void);
-void 	R_DrawFuzzColumn (void);
-void 	R_DrawFuzzColumnLow (void);
+void	R_DrawColumn (void);
+void	R_DrawColumnLow (void);
+void	R_DrawFuzzColumn (void);
+void	R_DrawFuzzColumnLow (void);
 void	R_DrawTranslatedColumn (void);
 void	R_DrawTranslatedFuzzColumn (void);
 void	R_DrawTranslatedColumnLow (void);
@@ -513,10 +512,10 @@ extern	byte			*ds_source;		// start of a 64*64 tile image
 extern	byte	*translationtables;
 extern	byte	*dc_translation;
 
-void 	R_DrawSpan (void);
-void 	R_DrawSpanLow (void);
+void	R_DrawSpan (void);
+void	R_DrawSpanLow (void);
 
-void 	R_InitBuffer (int width, int height);
+void	R_InitBuffer (int width, int height);
 void	R_InitTranslationTables (void);
 
 #endif		// __R_LOCAL__

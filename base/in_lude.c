@@ -61,7 +61,7 @@ void IN_DrawCoopStats(void);
 void IN_DrawDMStats(void);
 void IN_DrawNumber(int val, int x, int y, int digits);
 void IN_DrawTime(int x, int y, int h, int m, int s);
-void IN_DrTextB(char *text, int x, int y);
+void IN_DrTextB(const char *text, int x, int y);
 
 static boolean skipintermission;
 static int interstate = 0;
@@ -105,9 +105,9 @@ static signed int totalFrags[MAXPLAYERS];
 static fixed_t dSlideX[MAXPLAYERS];
 static fixed_t dSlideY[MAXPLAYERS];
 
-static char *KillersText[] = { "K", "I", "L", "L", "E", "R", "S" };
+static const char *KillersText[] = { "K", "I", "L", "L", "E", "R", "S" };
 
-extern char *LevelNames[];
+extern const char *LevelNames[];
 
 typedef struct
 {
@@ -1069,7 +1069,7 @@ void IN_DrawNumber(int val, int x, int y, int digits)
 //
 //========================================================================
 
-void IN_DrTextB(char *text, int x, int y)
+void IN_DrTextB(const char *text, int x, int y)
 {
 	char c;
 	patch_t *p;
@@ -1092,3 +1092,4 @@ void IN_DrTextB(char *text, int x, int y)
 		}
 	}
 }
+

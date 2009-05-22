@@ -187,9 +187,9 @@ anim_t anims[MAXANIMS];
 anim_t *lastanim;
 
 int *TerrainTypes;
-struct
+static struct
 {
-	char *name;
+	const char *name;
 	int type;
 } TerrainTypeDefs[] =
 {

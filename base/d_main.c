@@ -89,7 +89,8 @@ static char *wadfiles[MAXWADFILES] =
 	"heretic.wad",
 	"texture1.lmp",
 	"texture2.lmp",
-	"pnames.lmp"
+	"pnames.lmp",
+	NULL	/* the last entry MUST be NULL */
 };
 
 // CODE --------------------------------------------------------------------
@@ -573,17 +574,19 @@ void D_CheckRecordFrom (void)
 
 void D_AddFile(char *file)
 {
-	int numwadfiles;
+	int i = 0;
 	char *newwad;
 
-	for (numwadfiles = 0; wadfiles[numwadfiles]; numwadfiles++)
+	while (wadfiles[i])
 	{
-		if (numwadfiles == MAXWADFILES)
+		if (++i == MAXWADFILES)
 			I_Error ("MAXWADFILES reached for %s", file);
 	}
 	newwad = (char *) malloc(strlen(file) + 1);
 	strcpy(newwad, file);
-	wadfiles[numwadfiles] = newwad;
+	wadfiles[i] = newwad;
+	if (++i < MAXWADFILES)
+		wadfiles[i] = NULL;
 }
 
 //==========================================================

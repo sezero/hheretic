@@ -71,8 +71,6 @@ static char plr_lastmsg[MAXPLAYERS][MESSAGESIZE+9]; /* add in the length of the 
 static int msgptr[MAXPLAYERS];
 static int msglen[MAXPLAYERS];
 
-static boolean cheated;
-
 static int FontABaseLump;
 
 static const char *CT_FromPlrText[MAXPLAYERS] =

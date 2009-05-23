@@ -51,7 +51,6 @@ void D_PageDrawer (void);
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
-extern boolean finalestage;
 extern boolean MenuActive;
 extern boolean askforquit;
 

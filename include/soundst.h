@@ -6,8 +6,8 @@
 #ifndef __SOUNDSTH__
 #define __SOUNDSTH__
 
-extern int snd_MaxVolume;
-extern int snd_MusicVolume;
+extern	int		snd_MaxVolume;
+extern	int		snd_MusicVolume;
 
 void S_Start(void);
 void S_StartSound(mobj_t *origin, int sound_id);
@@ -22,4 +22,5 @@ void S_GetChannelInfo(SoundInfo_t *s);
 void S_SetMaxVolume(boolean fullprocess);
 void S_SetMusicVolume(void);
 
-#endif
+#endif	/* __SOUNDSTH__ */
+

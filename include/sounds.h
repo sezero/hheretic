@@ -6,10 +6,10 @@
 #ifndef __SOUNDSH__
 #define __SOUNDSH__
 
-#define MAX_SND_DIST 	1600
+#define MAX_SND_DIST	1600
 #define MAX_CHANNELS	16
 
-// Music identifiers
+/* ---- Music identifiers ---- */
 
 typedef enum
 {
@@ -75,48 +75,48 @@ typedef enum
 
 typedef struct
 {
-	const char name[8];
-	int p1;
+	const char	name[8];
+	int		p1;
 } musicinfo_t;
 
 typedef struct sfxinfo_s
 {
-	const char name[8];
-	struct sfxinfo_s *link; // Make alias for another sound
-	unsigned short priority; // Higher priority takes precendence
-	int usefulness; // Determines when a sound should be cached out
-	void *snd_ptr;
-	int lumpnum;
-	int numchannels; // total number of channels a sound type may occupy
+	const char	name[8];
+	struct sfxinfo_s *link;	/* Make alias for another sound */
+	unsigned short priority; /* Higher priority takes precendence */
+	int	usefulness;	/* Determines when a sound should be cached out */
+	void	*snd_ptr;
+	int	lumpnum;
+	int	numchannels;	/* total number of channels a sound type may occupy */
 } sfxinfo_t;
 
 typedef struct
 {
-	mobj_t *mo;
-	long sound_id;
-	long handle;
-	long pitch;
-	int priority;
+	mobj_t		*mo;
+	int		sound_id;
+	int		handle;
+	int		pitch;
+	int		priority;
 } channel_t;
 
 typedef struct
 {
-	int id;
-	unsigned short priority;
-	const char *name;
-	mobj_t *mo;
-	int distance;
+	int		id;
+	unsigned short	priority;
+	const char	*name;
+	mobj_t		*mo;
+	int		distance;
 } ChanInfo_t;
 
 typedef	struct
 {
-	int channelCount;
-	int musicVolume;
-	int soundVolume;
-	ChanInfo_t chan[8];
+	int	channelCount;
+	int	musicVolume;
+	int	soundVolume;
+	ChanInfo_t	chan[8];
 } SoundInfo_t;
 
-// Sound identifiers
+/* ---- Sound identifiers ---- */
 
 typedef enum
 {
@@ -211,10 +211,10 @@ typedef enum
 	sfx_sbtpai,
 	sfx_plroof,
 	sfx_plrpai,
-	sfx_plrdth,		// Normal
-	sfx_gibdth,		// Extreme
-	sfx_plrwdth,	// Wimpy
-	sfx_plrcdth,	// Crazy
+	sfx_plrdth,	/* Normal */
+	sfx_gibdth,	/* Extreme */
+	sfx_plrwdth,	/* Wimpy */
+	sfx_plrcdth,	/* Crazy */
 	sfx_itemup,
 	sfx_wpnup,
 	sfx_telept,
@@ -251,7 +251,7 @@ typedef enum
 	sfx_gfrag,
 	sfx_waterfl,
 
-	// Monophonic sounds
+	/* Monophonic sounds */
 
 	sfx_wind,
 	sfx_amb1,
@@ -268,4 +268,5 @@ typedef enum
 	NUMSFX
 } sfxenum_t;
 
-#endif
+#endif	/* __SOUNDSH__ */
+

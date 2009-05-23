@@ -791,7 +791,6 @@ extern	int		nettics[MAXNETNODES];
 
 #define	SAVEGAMESIZE	0x30000
 #define	SAVESTRINGSIZE		24
-extern	void		*savebuffer;
 extern	byte		*save_p;
 
 extern	mapthing_t	*deathmatch_p;

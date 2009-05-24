@@ -49,7 +49,9 @@ typedef struct Cheat_s
 // Private Functions
 
 static void DrawSoundInfo(void);
+#ifndef RENDER3D
 static void ShadeLine(int x, int y, int height, int shade);
+#endif
 static void ShadeChain(void);
 static void DrINumber(signed int val, int x, int y);
 static void DrBNumber(signed int val, int x, int y);
@@ -576,19 +578,21 @@ static void DrSmallNumber(int val, int x, int y)
 //
 //---------------------------------------------------------------------------
 
+#ifndef RENDER3D
 static void ShadeLine(int x, int y, int height, int shade)
 {
 	byte *dest;
 	byte *shades;
 
-	shades = colormaps+9*256+shade*2*256;
-	dest = screen+y*SCREENWIDTH+x;
-	while(height--)
+	shades = colormaps + 9*256 + shade*2*256;
+	dest = screen + y*SCREENWIDTH + x;
+	while (height--)
 	{
-		*(dest) = *(shades+*dest);
+		*(dest) = *(shades + *dest);
 		dest += SCREENWIDTH;
 	}
 }
+#endif
 
 //---------------------------------------------------------------------------
 //
@@ -600,10 +604,15 @@ static void ShadeChain(void)
 {
 	int i;
 
-	for(i = 0; i < 16; i++)
+	for (i = 0; i < 16; i++)
 	{
-		ShadeLine(277+i, 190, 10, i/2);
-		ShadeLine(19+i, 190, 10, 7-(i/2));
+#ifndef RENDER3D
+		ShadeLine(277+ i, 190, 10,      i/2 );
+		ShadeLine(19 + i, 190, 10, 7 - (i/2));
+#else
+		OGL_ShadeRect(277+ i, 190, 1, 10, (float)(9 + i     ) / 32.0f);
+		OGL_ShadeRect(19 + i, 190, 1, 10, (float)(9 + 15 - i) / 32.0f);
+#endif
 	}
 }
 

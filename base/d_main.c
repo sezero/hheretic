@@ -830,7 +830,6 @@ void D_DoomMain(void)
 {
 	int p, e, m;
 	char file[MAX_OSPATH];
-	FILE *fp;
 	boolean devMap;
 
 	M_FindResponseFile();
@@ -846,12 +845,7 @@ void D_DoomMain(void)
 	autostart = false;
 
 	// wadfiles[0] is a char * to the main wad
-	fp = fopen(wadfiles[0], "rb");
-	if (fp)
-	{
-		fclose(fp);
-	}
-	else
+	if (!W_IsWadPresent(wadfiles[0]))
 	{ // Change to look for shareware wad
 		wadfiles[0] = SHAREWAREWADNAME;
 	}

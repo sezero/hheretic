@@ -992,6 +992,7 @@ COMPILE_TIME_ASSERT(lumpinfo_t, sizeof(lumpinfo_t) == 20);
 extern	lumpinfo_t	*lumpinfo;
 extern	int		numlumps;
 
+boolean W_IsWadPresent(const char *filename);
 void W_InitMultipleFiles(const char **filenames);
 int W_CheckNumForName(const char *name);
 int W_GetNumForName(const char *name);

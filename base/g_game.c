@@ -1533,8 +1533,6 @@ static void G_DoNewGame (void)
 	gameaction = ga_nothing;
 }
 
-extern int skytexture;
-
 void G_InitNew(skill_t skill, int episode, int map)
 {
 	int i;

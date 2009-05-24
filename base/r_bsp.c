@@ -3,6 +3,9 @@
 // $Date$
 
 #include "h2stdinc.h"
+
+#ifndef RENDER3D
+
 #include "doomdef.h"
 #include "r_local.h"
 
@@ -474,4 +477,5 @@ void R_RenderBSPNode (int bspnum)
 		R_RenderBSPNode (bsp->children[side^1]);
 }
 
+#endif	/* RENDER3D */
 

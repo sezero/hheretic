@@ -198,6 +198,7 @@ static void F_TextWrite (void)
 
 static void F_DemonScroll(void)
 {
+#ifndef RENDER3D	/* FIXME: need an opengl version! */
 	byte *p1, *p2;
 	static int yval = 0;
 	static int nextscroll = 0;
@@ -225,6 +226,7 @@ static void F_DemonScroll(void)
 	{ //else, we'll just sit here and wait, for now
 		memcpy(screen, p2, SCREENWIDTH*SCREENHEIGHT);
 	}
+#endif	/* ! RENDER3D */
 }
 
 static void F_DrawUnderwater(void)

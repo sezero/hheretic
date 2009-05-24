@@ -42,6 +42,11 @@ extern byte		topLineRGB[3];
 
 // PUBLIC DATA DEFINITIONS -------------------------------------------------
 
+int			skytexture;
+int			skyflatnum;
+int			skytexturemid;
+fixed_t			skyiscale;
+
 int			skyDetail = 1;
 int			skyhemispheres;
 fadeout_t		fadeOut[2];	/* For both skies. */
@@ -248,5 +253,21 @@ void R_RenderSkyHemispheres(int hemis)
 	// Enable the disabled things.
 	glPopAttrib();
 	glDepthMask(GL_TRUE);
+}
+
+
+// THESE COPIED OVER FROM R_PLANES.C ---------------------------------------
+
+// R_InitSkyMap - Called whenever the view size changes.
+void R_InitSkyMap (void)
+{
+	skyflatnum = R_FlatNumForName("F_SKY1");
+	skytexturemid = 200*FRACUNIT;
+	skyiscale = FRACUNIT;
+}
+
+// R_InitPlanes - Called at game startup.
+void R_InitPlanes(void)
+{
 }
 

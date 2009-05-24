@@ -33,14 +33,18 @@ This is not the same as the angle, which increases counter clockwise
 fixed_t			pspritescale, pspriteiscale;
 
 // constant arrays used for psprite clipping and initializing clipping
+#ifndef RENDER3D
 short			negonearray[SCREENWIDTH];
 short			screenheightarray[SCREENWIDTH];
+#endif
 
 // variables used to look up and range check thing_t sprites patches
 spritedef_t		*sprites;
 int			numsprites;
 
+#ifndef RENDER3D
 static lighttable_t	**spritelights;
+#endif
 
 static spriteframe_t	sprtemp[26];
 static int		maxframe;
@@ -251,13 +255,14 @@ vissprite_t	vissprites[MAXVISSPRITES], *vissprite_p;
 
 void R_InitSprites (const char **namelist)
 {
+#ifndef RENDER3D
 	int		i;
 
 	for (i = 0; i < SCREENWIDTH; i++)
 	{
 		negonearray[i] = -1;
 	}
-
+#endif
 	R_InitSpriteDefs (namelist);
 }
 
@@ -659,6 +664,7 @@ void R_AddSprites (sector_t *sec)
 	else
 	{
 		mobj_t		*thing;
+#ifndef RENDER3D
 		int		lightnum;
 
 		lightnum = (sec->lightlevel >> LIGHTSEGSHIFT) + extralight;
@@ -668,6 +674,7 @@ void R_AddSprites (sector_t *sec)
 			spritelights = scalelight[LIGHTLEVELS-1];
 		else
 			spritelights = scalelight[lightnum];
+#endif
 
 		sec->validcount = validcount;
 
@@ -749,6 +756,7 @@ void R_DrawPSprite (pspdef_t *psp)
 		tempangle = 0;
 	}
 	x1 = (centerxfrac + FixedMul (tx,pspritescale)+tempangle ) >>FRACBITS;
+
 #ifdef RENDER3D
 	// Set the OpenGL color & alpha.
 	light = 1;
@@ -881,6 +889,7 @@ void R_DrawPlayerSprites (void)
 {
 	int		i;
 	pspdef_t	*psp;
+#ifndef RENDER3D
 	int		lightnum;
 
 //
@@ -896,7 +905,6 @@ void R_DrawPlayerSprites (void)
 //
 // clip to screen bounds
 //
-#ifndef RENDER3D
 	mfloorclip = screenheightarray;
 	mceilingclip = negonearray;
 #endif

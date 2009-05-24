@@ -4,51 +4,42 @@
 
 #include "h2stdinc.h"
 #include <math.h>
+
+#ifndef RENDER3D
+
 #include "doomdef.h"
 #include "r_local.h"
-#ifdef RENDER3D
-#include "ogl_def.h"
-#endif
-
-#ifdef RENDER3D
-extern void R_RenderMap();
-extern void R_DrawPlayerSprites();
-#endif
 
 int			viewangleoffset;
 
 #ifdef __WATCOMC__
-int newViewAngleOff;
+int			newViewAngleOff;
 #endif
 
 int			validcount = 1;		// increment every time a check is made
 
-lighttable_t	*fixedcolormap;
+lighttable_t		*fixedcolormap;
 extern	lighttable_t	**walllights;
 
-int				centerx, centery;
+int			centerx, centery;
 fixed_t			centerxfrac, centeryfrac;
 fixed_t			projection;
 
-int				framecount;		// just for profiling purposes
+int			framecount;		// just for profiling purposes
 
-int		sscount, linecount, loopcount;
+int			sscount, linecount, loopcount;
 
-fixed_t		viewx, viewy, viewz;
-angle_t		viewangle;
-fixed_t		viewcos, viewsin;
-player_t	*viewplayer;
+fixed_t			viewx, viewy, viewz;
+angle_t			viewangle;
+fixed_t			viewcos, viewsin;
+player_t		*viewplayer;
 
-#ifdef RENDER3D
-float       viewpitch;          // player->lookdir, global version
-#endif
-
-int				detailshift;		// 0 = high, 1 = low
+int			detailshift;		// 0 = high, 1 = low
 
 //
 // precalculated math tables
 //
-angle_t		clipangle;
+angle_t			clipangle;
 
 // The viewangletox[viewangle + FINEANGLES/4] lookup maps the visible view
 // angles  to screen X coordinates, flattening the arc to a flat projection
@@ -57,27 +48,26 @@ int			viewangletox[FINEANGLES/2];
 
 // The xtoviewangleangle[] table maps a screen pixel to the lowest viewangle
 // that maps back to x ranges from clipangle to -clipangle
-angle_t		xtoviewangle[SCREENWIDTH+1];
+angle_t			xtoviewangle[SCREENWIDTH+1];
 
 // the finetangentgent[angle+FINEANGLES/4] table holds the fixed_t tangent
 // values for view angles, ranging from H2MININT to 0 to H2MAXINT.
 // fixed_t		finetangent[FINEANGLES/2];
 
 // fixed_t		finesine[5*FINEANGLES/4];
-fixed_t		*finecosine = &finesine[FINEANGLES/4];
+fixed_t			*finecosine = &finesine[FINEANGLES/4];
 
+lighttable_t		*scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+lighttable_t		*scalelightfixed[MAXLIGHTSCALE];
+lighttable_t		*zlight[LIGHTLEVELS][MAXLIGHTZ];
 
-lighttable_t	*scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
-lighttable_t	*scalelightfixed[MAXLIGHTSCALE];
-lighttable_t	*zlight[LIGHTLEVELS][MAXLIGHTZ];
+int			extralight;		// bumped light from gun blasts
 
-int			extralight;			// bumped light from gun blasts
-
-void		(*colfunc) (void);
-void		(*basecolfunc) (void);
-void		(*fuzzcolfunc) (void);
-void		(*transcolfunc) (void);
-void		(*spanfunc) (void);
+void			(*colfunc) (void);
+void			(*basecolfunc) (void);
+void			(*fuzzcolfunc) (void);
+void			(*transcolfunc) (void);
+void			(*spanfunc) (void);
 
 /*
 ===================
@@ -89,16 +79,15 @@ void		(*spanfunc) (void);
 
 void R_AddPointToBox (int x, int y, fixed_t *box)
 {
-	if (x< box[BOXLEFT])
+	if (x < box[BOXLEFT])
 		box[BOXLEFT] = x;
-	if (x> box[BOXRIGHT])
+	if (x > box[BOXRIGHT])
 		box[BOXRIGHT] = x;
-	if (y< box[BOXBOTTOM])
+	if (y < box[BOXBOTTOM])
 		box[BOXBOTTOM] = y;
-	if (y> box[BOXTOP])
+	if (y > box[BOXTOP])
 		box[BOXTOP] = y;
 }
-
 
 
 /*
@@ -112,7 +101,7 @@ void R_AddPointToBox (int x, int y, fixed_t *box)
 
 int	R_PointOnSide (fixed_t x, fixed_t y, node_t *node)
 {
-	fixed_t	dx,dy;
+	fixed_t	dx, dy;
 	fixed_t	left, right;
 
 	if (!node->dx)
@@ -132,15 +121,15 @@ int	R_PointOnSide (fixed_t x, fixed_t y, node_t *node)
 	dy = (y - node->y);
 
 // try to quickly decide by looking at sign bits
-	if ( (node->dy ^ node->dx ^ dx ^ dy)&0x80000000 )
+	if ((node->dy ^ node->dx ^ dx ^ dy) & 0x80000000)
 	{
-		if  ( (node->dy ^ dx) & 0x80000000 )
+		if ((node->dy ^ dx) & 0x80000000)
 			return 1;	// (left is negative)
 		return 0;
 	}
 
-	left = FixedMul ( node->dy>>FRACBITS , dx );
-	right = FixedMul ( dy , node->dx>>FRACBITS );
+	left = FixedMul (node->dy>>FRACBITS , dx);
+	right = FixedMul (dy , node->dx>>FRACBITS);
 
 	if (right < left)
 		return 0;		// front side
@@ -152,7 +141,7 @@ int	R_PointOnSegSide (fixed_t x, fixed_t y, seg_t *line)
 {
 	fixed_t	lx, ly;
 	fixed_t	ldx, ldy;
-	fixed_t	dx,dy;
+	fixed_t	dx, dy;
 	fixed_t	left, right;
 
 	lx = line->v1->x;
@@ -178,15 +167,15 @@ int	R_PointOnSegSide (fixed_t x, fixed_t y, seg_t *line)
 	dy = (y - ly);
 
 // try to quickly decide by looking at sign bits
-	if ( (ldy ^ ldx ^ dx ^ dy)&0x80000000 )
+	if ((ldy ^ ldx ^ dx ^ dy) & 0x80000000)
 	{
-		if  ( (ldy ^ dx) & 0x80000000 )
+		if ((ldy ^ dx) & 0x80000000)
 			return 1;	// (left is negative)
 		return 0;
 	}
 
-	left = FixedMul ( ldy>>FRACBITS , dx );
-	right = FixedMul ( dy , ldx>>FRACBITS );
+	left = FixedMul (ldy>>FRACBITS, dx);
+	right = FixedMul (dy, ldx>>FRACBITS);
 
 	if (right < left)
 		return 0;		// front side
@@ -211,17 +200,16 @@ int	R_PointOnSegSide (fixed_t x, fixed_t y, seg_t *line)
 #define	SLOPEBITS	11
 #define	DBITS		(FRACBITS-SLOPEBITS)
 
-
 extern	int	tantoangle[SLOPERANGE+1];		// get from tables.c
 
-// int	tantoangle[SLOPERANGE+1];
+//int	tantoangle[SLOPERANGE+1];
 
-int SlopeDiv (unsigned num, unsigned den)
+static int SlopeDiv (unsigned num, unsigned den)
 {
 	unsigned ans;
 	if (den < 512)
 		return SLOPERANGE;
-	ans = (num<<3)/(den>>8);
+	ans = (num<<3) / (den>>8);
 	return ans <= SLOPERANGE ? ans : SLOPERANGE;
 }
 
@@ -231,41 +219,41 @@ angle_t R_PointToAngle (fixed_t x, fixed_t y)
 	y -= viewy;
 	if ( (!x) && (!y) )
 		return 0;
-	if (x>= 0)
-	{	// x >=0
-		if (y>= 0)
-		{	// y>= 0
-			if (x>y)
-				return tantoangle[ SlopeDiv(y,x)];     // octant 0
+	if (x >= 0)
+	{	// x >= 0
+		if (y >= 0)
+		{	// y >= 0
+			if (x > y)
+				return tantoangle[SlopeDiv(y,x)];	// octant 0
 			else
-				return ANG90-1-tantoangle[ SlopeDiv(x,y)];  // octant 1
+				return ANG90 - 1 - tantoangle[SlopeDiv(x,y)];	// octant 1
 		}
 		else
-		{	// y<0
+		{	// y < 0
 			y = -y;
-			if (x>y)
-				return -tantoangle[SlopeDiv(y,x)];  // octant 8
+			if (x > y)
+				return -tantoangle[SlopeDiv(y,x)];	// octant 8
 			else
-				return ANG270+tantoangle[ SlopeDiv(x,y)];  // octant 7
+				return ANG270 + tantoangle[SlopeDiv(x,y)];	// octant 7
 		}
 	}
 	else
-	{	// x<0
+	{	// x < 0
 		x = -x;
-		if (y>= 0)
-		{	// y>= 0
-			if (x>y)
-				return ANG180-1-tantoangle[ SlopeDiv(y,x)]; // octant 3
+		if (y >= 0)
+		{	// y >= 0
+			if (x > y)
+				return ANG180 - 1 - tantoangle[SlopeDiv(y,x)];	// octant 3
 			else
-				return ANG90+ tantoangle[ SlopeDiv(x,y)];  // octant 2
+				return ANG90 + tantoangle[SlopeDiv(x,y)];	// octant 2
 		}
 		else
-		{	// y<0
+		{	// y < 0
 			y = -y;
-			if (x>y)
-				return ANG180+tantoangle[ SlopeDiv(y,x)];  // octant 4
+			if (x > y)
+				return ANG180 + tantoangle[SlopeDiv(y,x)];	// octant 4
 			else
-				return ANG270-1-tantoangle[ SlopeDiv(x,y)];  // octant 5
+				return ANG270 - 1 - tantoangle[SlopeDiv(x,y)];	// octant 5
 		}
 	}
 
@@ -290,7 +278,7 @@ fixed_t	R_PointToDist (fixed_t x, fixed_t y)
 	dx = abs(x - viewx);
 	dy = abs(y - viewy);
 
-	if (dy>dx)
+	if (dy > dx)
 	{
 		temp = dx;
 		dx = dy;
@@ -299,11 +287,10 @@ fixed_t	R_PointToDist (fixed_t x, fixed_t y)
 
 	angle = (tantoangle[ FixedDiv(dy,dx)>>DBITS ]+ANG90) >> ANGLETOFINESHIFT;
 
-	dist = FixedDiv (dx, finesine[angle] );	// use as cosine
+	dist = FixedDiv (dx, finesine[angle]);	// use as cosine
 
 	return dist;
 }
-
 
 
 /*
@@ -324,10 +311,10 @@ void R_InitPointToAngle (void)
 //
 // slope (tangent) to angle lookup
 //
-	for (i=0 ; i<=SLOPERANGE ; i++)
+	for (i = 0; i <= SLOPERANGE; i++)
 	{
-		f = atan( (float)i/SLOPERANGE )/(3.141592657*2);
-		t = 0xffffffff*f;
+		f = atan((float)i / SLOPERANGE) / (3.141592657*2);
+		t = 0xffffffff * f;
 		tantoangle[i] = t;
 	}
 #endif
@@ -348,31 +335,31 @@ void R_InitPointToAngle (void)
 fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 {
 	fixed_t		scale;
-	int			anglea, angleb;
-	int			sinea, sineb;
-	fixed_t		num,den;
+	int		anglea, angleb;
+	int		sinea, sineb;
+	fixed_t		num, den;
 
 #if 0
 {
-	fixed_t		dist,z;
+	fixed_t		dist, z;
 	fixed_t		sinv, cosv;
 
-	sinv = finesine[(visangle-rw_normalangle)>>ANGLETOFINESHIFT];
+	sinv = finesine[(visangle - rw_normalangle)>>ANGLETOFINESHIFT];
 	dist = FixedDiv (rw_distance, sinv);
-	cosv = finecosine[(viewangle-visangle)>>ANGLETOFINESHIFT];
+	cosv = finecosine[(viewangle - visangle)>>ANGLETOFINESHIFT];
 	z = abs(FixedMul (dist, cosv));
 	scale = FixedDiv(projection, z);
 	return scale;
 }
 #endif
 
-	anglea = ANG90 + (visangle-viewangle);
-	angleb = ANG90 + (visangle-rw_normalangle);
+	anglea = ANG90 + (visangle - viewangle);
+	angleb = ANG90 + (visangle - rw_normalangle);
 // bothe sines are allways positive
 	sinea = finesine[anglea>>ANGLETOFINESHIFT];
 	sineb = finesine[angleb>>ANGLETOFINESHIFT];
-	num = FixedMul(projection,sineb)<<detailshift;
-	den = FixedMul(rw_distance,sinea);
+	num = FixedMul(projection, sineb)<<detailshift;
+	den = FixedMul(rw_distance, sinea);
 	if (den > num>>16)
 	{
 		scale = FixedDiv (num, den);
@@ -386,7 +373,6 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 
 	return scale;
 }
-
 
 
 /*
@@ -403,15 +389,15 @@ void R_InitTables (void)
 #if 0
 	int		i;
 	float		a, fv;
-	int			t;
+	int		t;
 
 //
 // viewangle tangent table
 //
-	for (i=0 ; i<FINEANGLES/2 ; i++)
+	for (i = 0; i < FINEANGLES/2; i++)
 	{
-		a = (i-FINEANGLES/4+0.5)*PI*2/FINEANGLES;
-		fv = FRACUNIT*tan (a);
+		a = (i - FINEANGLES/4 + 0.5) * PI * 2 / FINEANGLES;
+		fv = FRACUNIT * tan(a);
 		t = fv;
 		finetangent[i] = t;
 	}
@@ -419,15 +405,14 @@ void R_InitTables (void)
 //
 // finesine table
 //
-	for (i=0 ; i<5*FINEANGLES/4 ; i++)
+	for (i = 0; i < 5*FINEANGLES/4; i++)
 	{
 // OPTIMIZE: mirror...
-		a = (i+0.5)*PI*2/FINEANGLES;
-		t = FRACUNIT*sin (a);
+		a = (i + 0.5) * PI * 2 / FINEANGLES;
+		t = FRACUNIT * sin(a);
 		finesine[i] = t;
 	}
 #endif
-
 }
 
 
@@ -446,29 +431,27 @@ void R_InitTextureMapping (void)
 	int			t;
 	fixed_t		focallength;
 
-
 //
 // use tangent table to generate viewangletox
 // viewangletox will give the next greatest x after the view angle
 //
 	// calc focallength so FIELDOFVIEW angles covers SCREENWIDTH
-	focallength = FixedDiv (centerxfrac
-	, finetangent[FINEANGLES/4+FIELDOFVIEW/2] );
+	focallength = FixedDiv (centerxfrac, finetangent[FINEANGLES/4 + FIELDOFVIEW/2]);
 
-	for (i=0 ; i<FINEANGLES/2 ; i++)
+	for (i = 0; i < FINEANGLES/2; i++)
 	{
 		if (finetangent[i] > FRACUNIT*2)
 			t = -1;
 		else if (finetangent[i] < -FRACUNIT*2)
-			t = viewwidth+1;
+			t = viewwidth + 1;
 		else
 		{
 			t = FixedMul (finetangent[i], focallength);
-			t = (centerxfrac - t+FRACUNIT-1)>>FRACBITS;
+			t = (centerxfrac - t + FRACUNIT - 1)>>FRACBITS;
 			if (t < -1)
 				t = -1;
-			else if (t>viewwidth+1)
-				t = viewwidth+1;
+			else if (t > viewwidth + 1)
+				t = viewwidth + 1;
 		}
 		viewangletox[i] = t;
 	}
@@ -477,24 +460,24 @@ void R_InitTextureMapping (void)
 // scan viewangletox[] to generate xtoviewangleangle[]
 //
 // xtoviewangle will give the smallest view angle that maps to x
-	for (x=0;x<=viewwidth;x++)
+	for (x = 0; x <= viewwidth; x++)
 	{
 		i = 0;
-		while (viewangletox[i]>x)
+		while (viewangletox[i] > x)
 			i++;
-		xtoviewangle[x] = (i<<ANGLETOFINESHIFT)-ANG90;
+		xtoviewangle[x] = (i<<ANGLETOFINESHIFT) - ANG90;
 	}
 
 //
 // take out the fencepost cases from viewangletox
 //
-	for (i=0 ; i<FINEANGLES/2 ; i++)
+	for (i = 0; i < FINEANGLES/2; i++)
 	{
 		t = FixedMul (finetangent[i], focallength);
 		t = centerx - t;
 		if (viewangletox[i] == -1)
 			viewangletox[i] = 0;
-		else if (viewangletox[i] == viewwidth+1)
+		else if (viewangletox[i] == viewwidth + 1)
 			viewangletox[i]  = viewwidth;
 	}
 
@@ -514,7 +497,7 @@ void R_InitTextureMapping (void)
 ====================
 */
 
-#define		DISTMAP	2
+#define	DISTMAP		2
 
 void R_InitLightTables (void)
 {
@@ -524,12 +507,12 @@ void R_InitLightTables (void)
 //
 // Calculate the light levels to use for each level / distance combination
 //
-	for (i=0 ; i< LIGHTLEVELS ; i++)
+	for (i = 0; i < LIGHTLEVELS; i++)
 	{
-		start_map = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
-		for (j=0 ; j<MAXLIGHTZ ; j++)
+		start_map = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
+		for (j = 0; j < MAXLIGHTZ; j++)
 		{
-			scale = FixedDiv ((SCREENWIDTH/2*FRACUNIT), (j+1)<<LIGHTZSHIFT);
+			scale = FixedDiv ((SCREENWIDTH/2*FRACUNIT), (j + 1)<<LIGHTZSHIFT);
 			scale >>= LIGHTSCALESHIFT;
 			level = start_map - scale/DISTMAP;
 			if (level < 0)
@@ -553,8 +536,8 @@ void R_InitLightTables (void)
 ==============
 */
 
-boolean	setsizeneeded;
-int		setblocks, setdetail;
+static int	setblocks, setdetail;
+boolean		setsizeneeded;
 
 void R_SetViewSize (int blocks, int detail)
 {
@@ -586,11 +569,7 @@ void R_ExecuteSetViewSize (void)
 	else
 	{
 		scaledviewwidth = setblocks*32;
-#ifdef RENDER3D
-        viewheight = (setblocks*(200-SBARHEIGHT*sbarscale/20)/10);
-#else
 		viewheight = (setblocks*158/10);
-#endif
 	}
 
 	detailshift = setdetail;
@@ -602,7 +581,6 @@ void R_ExecuteSetViewSize (void)
 	centeryfrac = centery<<FRACBITS;
 	projection = centerxfrac;
 
-#ifndef RENDER3D
 	if (!detailshift)
 	{
 		colfunc = basecolfunc = R_DrawColumn;
@@ -617,7 +595,6 @@ void R_ExecuteSetViewSize (void)
 		transcolfunc = R_DrawTranslatedColumn;
 		spanfunc = R_DrawSpanLow;
 	}
-#endif
 
 	R_InitBuffer (scaledviewwidth, viewheight);
 
@@ -632,32 +609,32 @@ void R_ExecuteSetViewSize (void)
 //
 // thing clipping
 //
-	for (i=0 ; i<viewwidth ; i++)
+	for (i = 0; i < viewwidth; i++)
 		screenheightarray[i] = viewheight;
 
 //
 // planes
 //
-	for (i=0 ; i<viewheight ; i++)
+	for (i = 0; i < viewheight; i++)
 	{
-		dy = ((i-viewheight/2)<<FRACBITS)+FRACUNIT/2;
+		dy = ((i - viewheight/2)<<FRACBITS) + FRACUNIT/2;
 		dy = abs(dy);
-		yslope[i] = FixedDiv ( (viewwidth<<detailshift)/2*FRACUNIT, dy);
+		yslope[i] = FixedDiv ((viewwidth<<detailshift)/2*FRACUNIT, dy);
 	}
 
-	for (i=0 ; i<viewwidth ; i++)
+	for (i = 0; i < viewwidth; i++)
 	{
 		cosadj = abs(finecosine[xtoviewangle[i]>>ANGLETOFINESHIFT]);
-		distscale[i] = FixedDiv (FRACUNIT,cosadj);
+		distscale[i] = FixedDiv (FRACUNIT, cosadj);
 	}
 
 //
 // Calculate the light levels to use for each level / scale combination
 //
-	for (i=0 ; i< LIGHTLEVELS ; i++)
+	for (i = 0; i < LIGHTLEVELS; i++)
 	{
-		start_map = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
-		for (j=0 ; j<MAXLIGHTSCALE ; j++)
+		start_map = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
+		for (j = 0; j < MAXLIGHTSCALE; j++)
 		{
 			level = start_map - j*SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
 			if (level < 0)
@@ -671,7 +648,7 @@ void R_ExecuteSetViewSize (void)
 //
 // draw the border
 //
-	R_DrawViewBorder ();    // erase old menu stuff
+	R_DrawViewBorder ();	// erase old menu stuff
 }
 
 
@@ -683,39 +660,28 @@ void R_ExecuteSetViewSize (void)
 ==============
 */
 
-int	detailLevel;
-int	screenblocks;
+int		detailLevel;
+int		screenblocks;
 
-void R_Init (void)
+void R_Init(void)
 {
 	tprintf("R_InitData ",1);
-	R_InitData ();
-//printf (".");
+	R_InitData();
 	tprintf("R_InitPointToAngle\n",0);
-	R_InitPointToAngle ();
-//printf (".");
+	R_InitPointToAngle();
 	tprintf("R_InitTables ",0);
-	R_InitTables ();
+	R_InitTables();
 	// viewwidth / viewheight / detailLevel are set by the defaults
-//printf (".");
-	R_SetViewSize (screenblocks, detailLevel);
+	R_SetViewSize(screenblocks, detailLevel);
 	tprintf("R_InitPlanes\n",0);
-	R_InitPlanes ();
-//printf (".");
+	R_InitPlanes();
 	tprintf("R_InitLightTables ",0);
-	R_InitLightTables ();
-//printf (".");
+	R_InitLightTables();
 	tprintf("R_InitSkyMap\n",0);
-	R_InitSkyMap ();
-//printf (".");
-#ifndef RENDER3D
+	R_InitSkyMap();
 	R_InitTranslationTables();
-#else
-    OGL_InitData();
-#endif
 	framecount = 0;
 }
-
 
 /*
 ==============
@@ -730,10 +696,10 @@ subsector_t *R_PointInSubsector (fixed_t x, fixed_t y)
 	node_t	*node;
 	int		side, nodenum;
 
-	if (!numnodes)				// single subsector is a special case
+	if (!numnodes)	// single subsector is a special case
 		return subsectors;
 
-	nodenum = numnodes-1;
+	nodenum = numnodes - 1;
 
 	while (! (nodenum & NF_SUBSECTOR) )
 	{
@@ -743,7 +709,6 @@ subsector_t *R_PointInSubsector (fixed_t x, fixed_t y)
 	}
 
 	return &subsectors[nodenum & ~NF_SUBSECTOR];
-
 }
 
 //----------------------------------------------------------------------------
@@ -758,53 +723,45 @@ void R_SetupFrame(player_t *player)
 	int tableAngle;
 	int tempCentery;
 
-	//drawbsp = 1;
 	viewplayer = player;
 #ifdef __WATCOMC__
 	viewangleoffset = newViewAngleOff<<ANGLETOFINESHIFT;
 #endif
-	viewangle = player->mo->angle+viewangleoffset;
-#ifdef RENDER3D
-    viewpitch = player->lookdir;
-#endif
+	viewangle = player->mo->angle + viewangleoffset;
 	tableAngle = viewangle>>ANGLETOFINESHIFT;
-	if(player->chickenTics && player->chickenPeck)
+	if (player->chickenTics && player->chickenPeck)
 	{ // Set chicken attack view position
-		viewx = player->mo->x+player->chickenPeck*finecosine[tableAngle];
-		viewy = player->mo->y+player->chickenPeck*finesine[tableAngle];
+		viewx = player->mo->x + player->chickenPeck*finecosine[tableAngle];
+		viewy = player->mo->y + player->chickenPeck*finesine[tableAngle];
 	}
 	else
 	{ // Normal view position
 		viewx = player->mo->x;
 		viewy = player->mo->y;
 	}
+
 	extralight = player->extralight;
 	viewz = player->viewz;
-	
-#ifdef RENDER3D
-        tempCentery = viewheight/2;
-#else
-	tempCentery = viewheight/2+(player->lookdir)*screenblocks/10;
-#endif
-	if(centery != tempCentery)
+
+	tempCentery = viewheight/2 + (player->lookdir)*screenblocks/10;
+	if (centery != tempCentery)
 	{
 		centery = tempCentery;
 		centeryfrac = centery<<FRACBITS;
-		for(i = 0; i < viewheight; i++)
+		for (i = 0; i < viewheight; i++)
 		{
-			yslope[i] = FixedDiv ((viewwidth<<detailshift)/2*FRACUNIT,
-				abs(((i-centery)<<FRACBITS)+FRACUNIT/2));
+			yslope[i] = FixedDiv (  (viewwidth<<detailshift)/2*FRACUNIT,
+						abs(((i - centery)<<FRACBITS) + FRACUNIT/2) );
 		}
 	}
 	viewsin = finesine[tableAngle];
 	viewcos = finecosine[tableAngle];
 	sscount = 0;
-	if(player->fixedcolormap)
+	if (player->fixedcolormap)
 	{
-		fixedcolormap = colormaps+player->fixedcolormap
-			*256*sizeof(lighttable_t);
+		fixedcolormap = colormaps + player->fixedcolormap*256*sizeof(lighttable_t);
 		walllights = scalelightfixed;
-		for(i = 0; i < MAXLIGHTSCALE; i++)
+		for (i = 0; i < MAXLIGHTSCALE; i++)
 		{
 			scalelightfixed[i] = fixedcolormap;
 		}
@@ -815,23 +772,19 @@ void R_SetupFrame(player_t *player)
 	}
 	framecount++;
 	validcount++;
-	if(BorderNeedRefresh)
+	if (BorderNeedRefresh)
 	{
-#ifdef RENDER3D
-        R_DrawViewBorder();
-#else
-		if(setblocks < 10)
+		if (setblocks < 10)
 		{
 			R_DrawViewBorder();
 		}
-#endif
 		BorderNeedRefresh = false;
 		BorderTopRefresh = false;
 		UpdateState |= I_FULLSCRN;
 	}
-	if(BorderTopRefresh)
+	if (BorderTopRefresh)
 	{
-		if(setblocks < 10)
+		if (setblocks < 10)
 		{
 			R_DrawTopBorder();
 		}
@@ -839,19 +792,15 @@ void R_SetupFrame(player_t *player)
 		UpdateState |= I_MESSAGES;
 	}
 
-#ifdef __NeXT__
-	RD_ClearMapWindow ();
-#endif
 #ifdef __WATCOMC__
-	destview = destscreen+(viewwindowx>>2)+viewwindowy*80;
+	destview = destscreen + (viewwindowx>>2) + viewwindowy*80;
 #endif
-
 #if 0
-{
-static int frame;
-memset (screen, frame, SCREENWIDTH*SCREENHEIGHT);
-frame++;
-}
+	{
+		static int frame;
+		memset (screen, frame, SCREENWIDTH*SCREENHEIGHT);
+		frame++;
+	}
 #endif
 }
 
@@ -867,39 +816,22 @@ void R_RenderPlayerView (player_t *player)
 {
 	R_SetupFrame (player);
 
-#ifndef RENDER3D
-        R_ClearClipSegs ();
-        R_ClearDrawSegs ();
-        R_ClearPlanes ();
-#endif
+	R_ClearClipSegs ();
+	R_ClearDrawSegs ();
+	R_ClearPlanes ();
+
 	R_ClearSprites ();
-	NetUpdate ();					// check for new console commands
+	NetUpdate ();	// check for new console commands
 
-#ifdef RENDER3D
-    OGL_SwitchTo3DState();
-#endif
-#ifdef RENDER3D
-        R_RenderMap();
-#else
-	R_RenderBSPNode (numnodes-1);	// the head node is the last node output
-#endif
-	NetUpdate ();					// check for new console commands
-#ifndef RENDER3D
+	R_RenderBSPNode (numnodes - 1);	// the head node is the last node output
+	NetUpdate ();	// check for new console commands
+
 	R_DrawPlanes ();
-	NetUpdate ();					// check for new console commands
-#endif
+	NetUpdate ();	// check for new console commands
+
 	R_DrawMasked ();
-	NetUpdate ();					// check for new console commands
-#ifdef RENDER3D
-    OGL_Restore2DState(1);
-
-    // Draw psprites.
-    if( viewangleoffset <= 1024<<ANGLETOFINESHIFT || viewangleoffset >=
-        -1024<<ANGLETOFINESHIFT )
-    {   // don't draw on side views
-        R_DrawPlayerSprites();
-    }
-
-    OGL_Restore2DState(2);
-#endif
+	NetUpdate ();	// check for new console commands
 }
+
+#endif	/* RENDER3D */
+

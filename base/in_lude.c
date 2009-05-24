@@ -1010,11 +1010,11 @@ static void IN_DrawNumber(int val, int x, int y, int digits)
 	{
 #ifdef RENDER3D
 		patch = FontB3DNumbers[val/1000];
-		witdth = SHORT(patch->width) / 2;
+		width = SHORT(patch->width) / 2;
 		OGL_DrawShadowedPatch(xpos + 6 - width - 12, y, FontBNumbers[val/1000]);
 #else
 		patch = FontBNumbers[val/1000];
-		witdth = SHORT(patch->width) / 2;
+		width = SHORT(patch->width) / 2;
 		V_DrawShadowedPatch(xpos + 6 - width - 12, y, patch);
 #endif
 	}
@@ -1024,11 +1024,11 @@ static void IN_DrawNumber(int val, int x, int y, int digits)
 		{
 #ifdef RENDER3D
 			patch = FontB3DNumbers[val/100];
-			witdth = SHORT(patch->width) / 2;
+			width = SHORT(patch->width) / 2;
 			OGL_DrawShadowedPatch(xpos + 6 - width, y, FontBNumbers[val/100]);
 #else
 			patch = FontBNumbers[val/100];
-			witdth = SHORT(patch->width) / 2;
+			width = SHORT(patch->width) / 2;
 			V_DrawShadowedPatch(xpos + 6 - width, y, patch);
 #endif
 		}
@@ -1041,11 +1041,11 @@ static void IN_DrawNumber(int val, int x, int y, int digits)
 		{
 #ifdef RENDER3D
 			patch = FontB3DNumbers[val/10];
-			witdth = SHORT(patch->width) / 2;
+			width = SHORT(patch->width) / 2;
 			OGL_DrawShadowedPatch(xpos + 6 - width, y, FontBNumbers[val/10]);
 #else
 			patch = FontBNumbers[val/10];
-			witdth = SHORT(patch->width) / 2;
+			width = SHORT(patch->width) / 2;
 			V_DrawShadowedPatch(xpos + 6 - width, y, patch);
 #endif
 		}
@@ -1058,22 +1058,22 @@ static void IN_DrawNumber(int val, int x, int y, int digits)
 	val = val % 10;
 #ifdef RENDER3D
 	patch = FontB3DNumbers[val];
-	witdth = SHORT(patch->width) / 2;
+	width = SHORT(patch->width) / 2;
 	OGL_DrawShadowedPatch(xpos + 6 - width, y, FontBNumbers[val]);
 #else
 	patch = FontBNumbers[val];
-	witdth = SHORT(patch->width) / 2;
+	width = SHORT(patch->width) / 2;
 	V_DrawShadowedPatch(xpos + 6 - width, y, patch);
 #endif
 	if (neg)
 	{
 #ifdef RENDER3D
 		patch = FontB3DNegative;
-		witdth = SHORT(patch->width) / 2;
+		width = SHORT(patch->width) / 2;
 		OGL_DrawShadowedPatch(xpos + 6 - width - 12*(realdigits), y, FontBNegative);
 #else
 		patch = FontBNegative;
-		witdth = SHORT(patch->width) / 2;
+		width = SHORT(patch->width) / 2;
 		V_DrawShadowedPatch(xpos + 6 - width - 12*(realdigits), y, patch);
 #endif
 	}

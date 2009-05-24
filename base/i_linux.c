@@ -1062,6 +1062,7 @@ void I_CheckExternDriver (void)
 //=========================================================================
 
 static char base[MAX_OSPATH];
+static const char datadir[] = SHARED_DATAPATH;	/* set by 'configure' */
 
 static void CreateBasePath (void)
 {
@@ -1077,6 +1078,26 @@ static void CreateBasePath (void)
 		I_Error ("Unable to create hheretic user directory");
 }
 
+static void InitializeWaddir (void)
+{
+	int i;
+	const char *_waddir;
+
+	_waddir = NULL;
+	i = M_CheckParm("-waddir");
+	if (i && i < myargc - 1)
+		_waddir = myargv[i + 1];
+	if (_waddir == NULL)
+		_waddir = getenv(DATA_ENVVAR);
+	if (_waddir == NULL)
+	{
+		if (datadir[0])
+			_waddir = datadir;
+	}
+	waddir = _waddir;
+	if (waddir && *waddir)
+		printf ("Shared data path: %s\n", waddir);
+}
 
 static void PrintVersion (void)
 {
@@ -1107,14 +1128,13 @@ static void PrintHelp (const char *name)
 	printf ("\n");
 }
 
-static const char datadir[] = SHARED_DATAPATH;
-
 int main (int argc, char **argv)
 {
-	char *waddir;
 	PrintVersion ();
+
 	myargc = argc;
 	myargv = (const char **) argv;
+
 	if (M_CheckParm("--version") || M_CheckParm("-v"))
 		return 0;
 	if (M_CheckParm("--help") || M_CheckParm("-h") || M_CheckParm("-?"))
@@ -1124,20 +1144,10 @@ int main (int argc, char **argv)
 	}
 
 	CreateBasePath();
-
-	waddir = getenv(DATA_ENVVAR);
-	if (waddir == NULL)
-	{
-		if (datadir[0])
-		{
-			setenv (DATA_ENVVAR, datadir, 0);
-			waddir = getenv(DATA_ENVVAR);
-		}
-	}
-	if (waddir && *waddir)
-		printf ("%s environment: %s\n", DATA_ENVVAR, waddir);
+	InitializeWaddir();
 
 	D_DoomMain();
+
 	return 0;
 }
 

@@ -354,9 +354,15 @@ void I_GetEvent(SDL_Event *Event)
 			if (Event->key.keysym.sym == 'g')
 			{
 				if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF)
+				{
+					grabMouse = 1;
 					SDL_WM_GrabInput (SDL_GRAB_ON);
+				}
 				else
+				{
+					grabMouse = 0;
 					SDL_WM_GrabInput (SDL_GRAB_OFF);
+				}
 				break;
 			}
 		}

@@ -27,11 +27,12 @@
 #define DOSY		"(press y to quit to dos.)"
 #define DETAILHI	"High detail"
 #define DETAILLO	"Low detail"
-#define GAMMALVL0	"Gamma correction OFF"
-#define GAMMALVL1	"Gamma correction level 1"
-#define GAMMALVL2	"Gamma correction level 2"
-#define GAMMALVL3	"Gamma correction level 3"
-#define GAMMALVL4	"Gamma correction level 4"
+
+#define GAMMALVL0	"GAMMA CORRECTION OFF"
+#define GAMMALVL1	"GAMMA CORRECTION LEVEL 1"
+#define GAMMALVL2	"GAMMA CORRECTION LEVEL 2"
+#define GAMMALVL3	"GAMMA CORRECTION LEVEL 3"
+#define GAMMALVL4	"GAMMA CORRECTION LEVEL 4"
 
 #define	EMPTYSTRING	"empty slot"
 

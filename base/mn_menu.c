@@ -404,6 +404,15 @@ static const char *stupidtable[] =
 	"Z"
 };
 
+static const char *GammaText[] =
+{
+	GAMMALVL0,
+	GAMMALVL1,
+	GAMMALVL2,
+	GAMMALVL3,
+	GAMMALVL4
+};
+
 // CODE --------------------------------------------------------------------
 
 static const char *Key2String (int key)
@@ -1743,6 +1752,7 @@ boolean MN_Responder(event_t *event)
 #else
 			I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 #endif
+			P_SetMessage(&players[consoleplayer], GammaText[usegamma], false);
 			return true;
 		case KEY_F12: // S.A.: made F12 Screenshot
 			G_ScreenShot();

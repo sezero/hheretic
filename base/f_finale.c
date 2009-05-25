@@ -6,21 +6,14 @@
 #include <ctype.h>
 #include "doomdef.h"
 #include "soundst.h"
-#ifdef RENDER3D
-#include "ogl_def.h"
-#endif
+#include "v_compat.h"
 
 #define TEXTSPEED	3
 #define TEXTWAIT	250
 
-#include "v_compat.h"
-
 #ifdef RENDER3D
-#define WR_CacheLumpName(a,b)		W_GetNumForName((a))
 #define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
 #define V_DrawRawScreen(a)		OGL_DrawRawScreen((a))
-#else
-#define WR_CacheLumpName(a,b)		W_CacheLumpName((a),(b))
 #endif
 
 extern boolean	viewactive;

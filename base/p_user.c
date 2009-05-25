@@ -7,14 +7,13 @@
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
+#include "v_compat.h"	/* V_SetPaletteXXX() macros */
 
 void P_PlayerNextArtifact(player_t *player);
 
 // Macros
 
 #define MAXBOB		0x100000	/* 16 pixels of bob */
-
-#include "v_compat.h"	/* V_SetPaletteXXX() macros */
 
 // Data
 

@@ -9,24 +9,16 @@
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
-#ifdef RENDER3D
-#include "ogl_def.h"
-#endif
+
+#define PLAYPAL_NUM		playpalette
+#include "v_compat.h"
 
 // MACROS ------------------------------------------------------------------
 
-#define PLAYPAL_NUM		playpalette
-
-#include "v_compat.h"
-
 #ifdef RENDER3D
-#define W_CacheLumpName(a,b)		W_GetNumForName((a))
-#define WR_CacheLumpNum(a,b)		(a)
 #define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
 #define V_DrawFuzzPatch(x,y,p)		OGL_DrawFuzzPatch((x),(y),(p))
 #define V_DrawAltFuzzPatch(x,y,p)	OGL_DrawAltFuzzPatch((x),(y),(p))
-#else
-#define WR_CacheLumpNum(a,b)		W_CacheLumpNum((a),(b))
 #endif
 
 #define CHEAT_ENCRYPT(a)		\
@@ -356,43 +348,43 @@ void SB_Init(void)
 	int i;
 	int startLump;
 
-	PatchLTFACE  = (PATCH_REF) W_CacheLumpName("LTFACE", PU_STATIC);
-	PatchRTFACE  = (PATCH_REF) W_CacheLumpName("RTFACE", PU_STATIC);
-	PatchBARBACK = (PATCH_REF) W_CacheLumpName("BARBACK", PU_STATIC);
-	PatchINVBAR  = (PATCH_REF) W_CacheLumpName("INVBAR", PU_STATIC);
-	PatchCHAIN   = (PATCH_REF) W_CacheLumpName("CHAIN", PU_STATIC);
+	PatchLTFACE  = (PATCH_REF) WR_CacheLumpName("LTFACE", PU_STATIC);
+	PatchRTFACE  = (PATCH_REF) WR_CacheLumpName("RTFACE", PU_STATIC);
+	PatchBARBACK = (PATCH_REF) WR_CacheLumpName("BARBACK", PU_STATIC);
+	PatchINVBAR  = (PATCH_REF) WR_CacheLumpName("INVBAR", PU_STATIC);
+	PatchCHAIN   = (PATCH_REF) WR_CacheLumpName("CHAIN", PU_STATIC);
 	if (deathmatch)
 	{
-		PatchSTATBAR = (PATCH_REF) W_CacheLumpName("STATBAR", PU_STATIC);
+		PatchSTATBAR = (PATCH_REF) WR_CacheLumpName("STATBAR", PU_STATIC);
 	}
 	else
 	{
-		PatchSTATBAR = (PATCH_REF) W_CacheLumpName("LIFEBAR", PU_STATIC);
+		PatchSTATBAR = (PATCH_REF) WR_CacheLumpName("LIFEBAR", PU_STATIC);
 	}
 	if (!netgame)
 	{ // single player game uses red life gem
-	  PatchLIFEGEM = (PATCH_REF) W_CacheLumpName("LIFEGEM2", PU_STATIC);
+	  PatchLIFEGEM = (PATCH_REF) WR_CacheLumpName("LIFEGEM2", PU_STATIC);
 	}
 	else
 	{
 	  PatchLIFEGEM = (PATCH_REF) WR_CacheLumpNum(W_GetNumForName("LIFEGEM0") + consoleplayer, PU_STATIC);
 	}
-	PatchLTFCTOP   = (PATCH_REF) W_CacheLumpName("LTFCTOP", PU_STATIC);
-	PatchRTFCTOP   = (PATCH_REF) W_CacheLumpName("RTFCTOP", PU_STATIC);
-	PatchSELECTBOX = (PATCH_REF) W_CacheLumpName("SELECTBOX", PU_STATIC);
-	PatchINVLFGEM1 = (PATCH_REF) W_CacheLumpName("INVGEML1", PU_STATIC);
-	PatchINVLFGEM2 = (PATCH_REF) W_CacheLumpName("INVGEML2", PU_STATIC);
-	PatchINVRTGEM1 = (PATCH_REF) W_CacheLumpName("INVGEMR1", PU_STATIC);
-	PatchINVRTGEM2 = (PATCH_REF) W_CacheLumpName("INVGEMR2", PU_STATIC);
-	PatchBLACKSQ   = (PATCH_REF) W_CacheLumpName("BLACKSQ", PU_STATIC);
-	PatchARMCLEAR  = (PATCH_REF) W_CacheLumpName("ARMCLEAR", PU_STATIC);
-	PatchCHAINBACK = (PATCH_REF) W_CacheLumpName("CHAINBACK", PU_STATIC);
+	PatchLTFCTOP   = (PATCH_REF) WR_CacheLumpName("LTFCTOP", PU_STATIC);
+	PatchRTFCTOP   = (PATCH_REF) WR_CacheLumpName("RTFCTOP", PU_STATIC);
+	PatchSELECTBOX = (PATCH_REF) WR_CacheLumpName("SELECTBOX", PU_STATIC);
+	PatchINVLFGEM1 = (PATCH_REF) WR_CacheLumpName("INVGEML1", PU_STATIC);
+	PatchINVLFGEM2 = (PATCH_REF) WR_CacheLumpName("INVGEML2", PU_STATIC);
+	PatchINVRTGEM1 = (PATCH_REF) WR_CacheLumpName("INVGEMR1", PU_STATIC);
+	PatchINVRTGEM2 = (PATCH_REF) WR_CacheLumpName("INVGEMR2", PU_STATIC);
+	PatchBLACKSQ   = (PATCH_REF) WR_CacheLumpName("BLACKSQ", PU_STATIC);
+	PatchARMCLEAR  = (PATCH_REF) WR_CacheLumpName("ARMCLEAR", PU_STATIC);
+	PatchCHAINBACK = (PATCH_REF) WR_CacheLumpName("CHAINBACK", PU_STATIC);
 	startLump = W_GetNumForName("IN0");
 	for (i = 0; i < 10; i++)
 	{
 		PatchINumbers[i] = (PATCH_REF) WR_CacheLumpNum(startLump + i, PU_STATIC);
 	}
-	PatchNEGATIVE = (PATCH_REF) W_CacheLumpName("NEGNUM", PU_STATIC);
+	PatchNEGATIVE = (PATCH_REF) WR_CacheLumpName("NEGNUM", PU_STATIC);
 	FontBNumBase = W_GetNumForName("FONTB16");
 	startLump = W_GetNumForName("SMALLIN0");
 	for (i = 0; i < 10; i++)
@@ -474,7 +466,7 @@ static void DrINumber(signed int val, int x, int y)
 	{
 		if (val < -9)
 		{
-			V_DrawPatch(x + 1, y + 1, W_CacheLumpName("LAME", PU_CACHE));
+			V_DrawPatch(x + 1, y + 1, (PATCH_REF)WR_CacheLumpName("LAME", PU_CACHE));
 		}
 		else
 		{
@@ -758,8 +750,8 @@ void SB_Drawer(void)
 			V_DrawPatch(0, 158, PatchBARBACK);
 			if (players[consoleplayer].cheats & CF_GODMODE)
 			{
-				V_DrawPatch(16, 167, (PATCH_REF)W_CacheLumpName("GOD1", PU_CACHE));
-				V_DrawPatch(287, 167, (PATCH_REF)W_CacheLumpName("GOD2", PU_CACHE));
+				V_DrawPatch(16, 167, (PATCH_REF)WR_CacheLumpName("GOD1", PU_CACHE));
+				V_DrawPatch(287, 167, (PATCH_REF)WR_CacheLumpName("GOD2", PU_CACHE));
 			}
 			oldhealth = -1;
 #ifndef RENDER3D
@@ -861,7 +853,7 @@ void SB_Drawer(void)
 	if (CPlayer->powers[pw_weaponlevel2] > BLINKTHRESHOLD
 		|| (CPlayer->powers[pw_weaponlevel2] & 8))
 	{
-		V_DrawPatch(291, 0, (PATCH_REF)W_CacheLumpName("ARTIPWBK", PU_CACHE));
+		V_DrawPatch(291, 0, (PATCH_REF)WR_CacheLumpName("ARTIPWBK", PU_CACHE));
 	}
 	else
 	{
@@ -980,7 +972,7 @@ void DrawMainBar(void)
 #endif
 		if (CPlayer->readyArtifact > 0)
 		{
-			V_DrawPatch(179,160, W_CacheLumpName(patcharti[CPlayer->readyArtifact], PU_CACHE));
+			V_DrawPatch(179,160, (PATCH_REF)WR_CacheLumpName(patcharti[CPlayer->readyArtifact], PU_CACHE));
 			DrSmallNumber(CPlayer->inventory[inv_ptr].count, 201, 182);
 		}
 		oldarti = CPlayer->readyArtifact;
@@ -1041,15 +1033,15 @@ void DrawMainBar(void)
 #endif
 		if (CPlayer->keys[key_yellow])
 		{
-			V_DrawPatch(153, 164, (PATCH_REF)W_CacheLumpName("ykeyicon", PU_CACHE));
+			V_DrawPatch(153, 164, (PATCH_REF)WR_CacheLumpName("ykeyicon", PU_CACHE));
 		}
 		if (CPlayer->keys[key_green])
 		{
-			V_DrawPatch(153, 172, (PATCH_REF)W_CacheLumpName("gkeyicon", PU_CACHE));
+			V_DrawPatch(153, 172, (PATCH_REF)WR_CacheLumpName("gkeyicon", PU_CACHE));
 		}
 		if (CPlayer->keys[key_blue])
 		{
-			V_DrawPatch(153, 180, (PATCH_REF)W_CacheLumpName("bkeyicon", PU_CACHE));
+			V_DrawPatch(153, 180, (PATCH_REF)WR_CacheLumpName("bkeyicon", PU_CACHE));
 		}
 #ifndef RENDER3D
 		oldkeys = playerkeys;
@@ -1066,7 +1058,7 @@ void DrawMainBar(void)
 		if (temp && CPlayer->readyweapon > 0 && CPlayer->readyweapon < 7)
 		{
 			DrINumber(temp, 109, 162);
-			V_DrawPatch(111, 172, (PATCH_REF)W_CacheLumpName(
+			V_DrawPatch(111, 172, (PATCH_REF)WR_CacheLumpName(
 				ammopic[CPlayer->readyweapon-1], PU_CACHE));
 		}
 #ifndef RENDER3D
@@ -1102,11 +1094,11 @@ void DrawInventoryBar(void)
 	V_DrawPatch(34, 160, PatchINVBAR);
 	for (i = 0; i < 7; i++)
 	{
-		//V_DrawPatch(50 + i*31, 160, (PATCH_REF)W_CacheLumpName("ARTIBOX", PU_CACHE));
+		//V_DrawPatch(50 + i*31, 160, (PATCH_REF)WR_CacheLumpName("ARTIBOX", PU_CACHE));
 		if (CPlayer->inventorySlotNum > x + i
 			&& CPlayer->inventory[x + i].type != arti_none)
 		{
-			V_DrawPatch(50 + i*31, 160, (PATCH_REF)W_CacheLumpName(
+			V_DrawPatch(50 + i*31, 160, (PATCH_REF)WR_CacheLumpName(
 				patcharti[CPlayer->inventory[x+i].type], PU_CACHE));
 			DrSmallNumber(CPlayer->inventory[x+i].count, 69+i*31, 182);
 		}
@@ -1153,8 +1145,8 @@ void DrawFullScreenStuff(void)
 	{
 		if (CPlayer->readyArtifact > 0)
 		{
-			V_DrawFuzzPatch(286, 170, (PATCH_REF)W_CacheLumpName("ARTIBOX", PU_CACHE));
-			V_DrawPatch(286, 170, (PATCH_REF)W_CacheLumpName(patcharti[CPlayer->readyArtifact], PU_CACHE));
+			V_DrawFuzzPatch(286, 170, (PATCH_REF)WR_CacheLumpName("ARTIBOX", PU_CACHE));
+			V_DrawPatch(286, 170, (PATCH_REF)WR_CacheLumpName(patcharti[CPlayer->readyArtifact], PU_CACHE));
 			DrSmallNumber(CPlayer->inventory[inv_ptr].count, 307, 192);
 		}
 	}
@@ -1163,11 +1155,11 @@ void DrawFullScreenStuff(void)
 		x = inv_ptr - curpos;
 		for (i = 0; i < 7; i++)
 		{
-			V_DrawFuzzPatch(50 + i*31, 168, (PATCH_REF)W_CacheLumpName("ARTIBOX", PU_CACHE));
+			V_DrawFuzzPatch(50 + i*31, 168, (PATCH_REF)WR_CacheLumpName("ARTIBOX", PU_CACHE));
 			if (CPlayer->inventorySlotNum > x + i
 				&& CPlayer->inventory[x + i].type != arti_none)
 			{
-				V_DrawPatch(50 + i*31, 168, (PATCH_REF)W_CacheLumpName(patcharti[CPlayer->inventory[x + i].type], PU_CACHE));
+				V_DrawPatch(50 + i*31, 168, (PATCH_REF)WR_CacheLumpName(patcharti[CPlayer->inventory[x + i].type], PU_CACHE));
 				DrSmallNumber(CPlayer->inventory[x + i].count, 69 + i*31, 190);
 			}
 		}

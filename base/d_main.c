@@ -309,10 +309,17 @@ void D_Display(void)
 	case GS_LEVEL:
 		if (!gametic)
 			break;
+#if  AM_TRANSPARENT
+		R_RenderPlayerView (&players[displayplayer]);
+#endif
 		if (automapactive)
 			AM_Drawer ();
+#if !AM_TRANSPARENT
 		else
+		{
 			R_RenderPlayerView (&players[displayplayer]);
+		}
+#endif
 		CT_Drawer();
 		UpdateState |= I_FULLVIEW;
 		SB_Drawer();

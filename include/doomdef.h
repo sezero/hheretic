@@ -1365,6 +1365,9 @@ int MN_TextBWidth(const char *text);
 
 /* --- AUTOMAP---- */
 
+#define	AM_TRANSPARENT	1	/* compile time option. 0: old style map drawn	*/
+				/* onto solid background.  1:  transparent map.	*/
+
 extern	boolean		automapactive;
 
 

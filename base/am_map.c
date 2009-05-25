@@ -127,10 +127,6 @@ static fixed_t scale_ftom;
 static player_t *plr; // the player represented by an arrow
 static vertex_t oldplr;
 
-//static patch_t *marknums[10]; // numbers used for marking by the automap
-//static mpoint_t markpoints[AM_NUMMARKPOINTS]; // where the points are
-//static int markpointnum = 0; // next point to be assigned
-
 static int followplayer = 1; // specifies whether to follow the player around
 
 static char cheat_amap[] = { 'r','a','v','m','a','p' };
@@ -164,9 +160,6 @@ static byte *fb;	// pseudo-frame buffer
 static short mapystart = 0; // y-value for the start of the map bitmap...used in
 							//the parallax stuff.
 static short mapxstart = 0; //x-value for the bitmap.
-
-//byte screens[][SCREENWIDTH*SCREENHEIGHT];
-//void V_MarkRect (int x, int y, int width, int height);
 
 // Functions
 
@@ -240,15 +233,6 @@ static void AM_restoreScaleAndLoc(void)
 	scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
 }
 
-// adds a marker at the current location
-/*
-static void AM_addMark(void)
-{
-	markpoints[markpointnum].x = m_x + m_w/2;
-	markpoints[markpointnum].y = m_y + m_h/2;
-	markpointnum = (markpointnum + 1) % AM_NUMMARKPOINTS;
-}
-*/
 static void AM_findMinMaxBoundaries(void)
 {
 	int i;
@@ -331,7 +315,6 @@ static void AM_initVariables(void)
 	int pnum;
 	thinker_t *think;
 	mobj_t *mo;
-//	static event_t st_notify = { ev_keyup, AM_MSGENTERED };
 
 	automapactive = true;
 #ifndef RENDER3D
@@ -399,9 +382,6 @@ static void AM_initVariables(void)
 			}
 		}
 	}
-
-// inform the status bar of the change
-//c	ST_Responder(&st_notify);
 }
 
 static void AM_loadPics(void)
@@ -412,24 +392,6 @@ static void AM_loadPics(void)
 	maplump = (byte *) W_CacheLumpName("AUTOPAGE", PU_STATIC);
 #endif
 }
-
-/*
-static void AM_unloadPics(void)
-{
-	int i;
-	for (i = 0; i < 10; i++)
-		Z_ChangeTag(marknums[i], PU_CACHE);
-}
-*/
-/*
-static void AM_clearMarks(void)
-{
-	int i;
-	for (i = 0; i < AM_NUMMARKPOINTS; i++)
-		markpoints[i].x = -1; // means empty
-	markpointnum = 0;
-}
-*/
 
 // should be called at the start of every level
 // right now, i figure it out myself
@@ -443,8 +405,6 @@ static void AM_LevelInit(void)
 	f_h = finit_height;
 	mapxstart = mapystart = 0;
 
-//	AM_clearMarks();
-
 	AM_findMinMaxBoundaries();
 	scale_mtof = FixedDiv(min_scale_mtof, (int) (0.7*FRACUNIT));
 	if (scale_mtof > max_scale_mtof)
@@ -456,11 +416,7 @@ static boolean stopped = true;
 
 void AM_Stop (void)
 {
-//	static event_t st_notify = { 0, ev_keyup, AM_MSGEXITED };
-
-//	AM_unloadPics();
 	automapactive = false;
-//	ST_Responder(&st_notify);
 	stopped = true;
 	BorderNeedRefresh = true;
 }
@@ -578,21 +534,6 @@ boolean AM_Responder (event_t *ev)
 			P_SetMessage(plr, 
 				followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF, true);
 			break;
-		/*
-		case AM_GRIDKEY:
-			grid = !grid;
-			plr->message = grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
-			break;
-		case AM_MARKKEY:
-			sprintf(buffer, "%s %d", AMSTR_MARKEDSPOT, markpointnum);
-			plr->message = buffer;
-			AM_addMark();
-			break;
-		case AM_CLEARMARKKEY:
-			AM_clearMarks();
-			plr->message = AMSTR_MARKSCLEARED;
-			break;
-		*/
 		default:
 			cheatstate = 0;
 			rc = false;
@@ -740,7 +681,9 @@ static void AM_clearFB(int color)
 	float scaler;
 	int lump;
 #else
+# if !AM_TRANSPARENT
 	int i, j;
+# endif
 #endif
 
 	if (followplayer)
@@ -797,12 +740,15 @@ static void AM_clearFB(int color)
 	OGL_DrawCutRectTiled(0, finit_height, 320, 4,
 				lumptexsizes[lump].w, lumptexsizes[lump].h,
 				160-160*scaler+1, finit_height, 320*scaler-2, 4);
+# if !AM_TRANSPARENT
 	OGL_SetRawImage(maplumpnum, 0);	// We only want the left portion.
 	OGL_DrawRectTiled(0, 0, finit_width,
 				/*(sbarscale<20)?200:*/ finit_height, 128, 128);
+# endif
 
 #else	/* RENDER3D */
 
+# if !AM_TRANSPARENT
 	// blit the automap background to the screen.
 	j = mapystart*finit_width;
 	for (i = 0; i < finit_height; i++)
@@ -813,6 +759,7 @@ static void AM_clearFB(int color)
 		if (j >= finit_height*finit_width)
 			j = 0;
 	}
+# endif
 #endif	/* !RENDER3D */
 }
 
@@ -1202,14 +1149,20 @@ static void AM_drawMline(mline_t *ml, int color)
 #ifdef RENDER3D
 static void AM_drawMline(mline_t *ml, int color)
 {
+	/* bbm: disabled this. doing it more directly below.
 	byte	*palette = (byte *) W_CacheLumpName("PLAYPAL", PU_CACHE);
 	byte	r = palette[color*3],
 		g = palette[color*3 + 1],
 		b = palette[color*3 + 2];
 
 	OGL_DrawLine(FIX2FLT(CXMTOFX(ml->a.x)), FIX2FLT(CYMTOFX(ml->a.y))/1.2,
-		     FIX2FLT(CXMTOFX(ml->b.x)), FIX2FLT(CYMTOFX(ml->b.y))/1.2, 
-		     r/255.0, g/255.0, b/255.0, 1); 
+		     FIX2FLT(CXMTOFX(ml->b.x)), FIX2FLT(CYMTOFX(ml->b.y))/1.2,
+		     r/255.0, g/255.0, b/255.0, 1);
+	*/
+	OGL_SetColor(color);
+	// Draw the line. 1.2 is the to-square aspect corrector.
+	glVertex2f(FIX2FLT(CXMTOFX(ml->a.x)), FIX2FLT(CYMTOFX(ml->a.y))/1.2);
+	glVertex2f(FIX2FLT(CXMTOFX(ml->b.x)), FIX2FLT(CYMTOFX(ml->b.y))/1.2);
 }
 #endif	/* RENDER3D */
 
@@ -1257,10 +1210,11 @@ static void AM_drawWalls(void)
 	int i;
 
 #ifdef RENDER3D
-	glDisable( GL_TEXTURE_2D );
-
+	/* bbm: disabled this to draw all lines at once, see AM_Drawer()
+	glDisable(GL_TEXTURE_2D);
 	glLineWidth(2.5);
-	glBegin(GL_LINES);  // We'll draw pretty much all of them.
+	glBegin(GL_LINES);	// We'll draw pretty much all of them.
+	*/
 	for (i = 0; i < numlines; i++)
 	{
 		if (cheating || (lines[i].flags & ML_MAPPED))
@@ -1324,9 +1278,11 @@ static void AM_drawWalls(void)
 		glVertex2f (FIX2FLT(CXMTOFX(lines[i].v2->x)),
 			    FIX2FLT(CYMTOFX(lines[i].v2->y))/1.2);
 	}
+	/* bbm .
 	glEnd();
 	glLineWidth(1.0);
-	glEnable( GL_TEXTURE_2D );
+	glEnable(GL_TEXTURE_2D);
+	*/
 #else
 	static mline_t l;
 
@@ -1503,26 +1459,6 @@ static void AM_drawThings(int colors, int colorrange)
 	}
 }
 
-/*
-static void AM_drawMarks(void)
-{
-	int i, fx, fy, w, h;
-
-	for (i = 0; i < AM_NUMMARKPOINTS; i++)
-	{
-		if (markpoints[i].x != -1)
-		{
-			w = SHORT(marknums[i]->width);
-			h = SHORT(marknums[i]->height);
-			fx = CXMTOF(markpoints[i].x);
-			fy = CYMTOF(markpoints[i].y);
-			if (fx >= f_x && fx <= f_w - w && fy >= f_y && fy <= f_h - h)
-				V_DrawPatch(fx, fy, marknums[i]);
-		}
-	}
-}
-*/
-
 static void AM_drawkeys(void)
 {
 	if (KeyPoints[0].x != 0 || KeyPoints[0].y != 0)
@@ -1541,17 +1477,6 @@ static void AM_drawkeys(void)
 			KeyPoints[2].x, KeyPoints[2].y);
 	}
 }
-
-/*
-static void AM_drawCrosshair(int color)
-{
-#ifndef RENDER3D
-	fb[(f_w*(f_h+1))/2] = color; // single point for now
-#else
-	FIXME!!!
-#endif
-}
-*/
 
 
 #ifdef RENDER3D
@@ -1587,6 +1512,13 @@ void AM_Drawer (void)
 
 	AM_clearFB(BACKGROUND);
 
+#ifdef RENDER3D
+	/* bbm 3/9/2003: start drawing all lines at once */
+	glDisable(GL_TEXTURE_2D);
+	glLineWidth(1.0);
+	glBegin(GL_LINES);
+#endif
+
 	if (grid)
 		AM_drawGrid(GRIDCOLORS);
 	AM_drawWalls();
@@ -1595,14 +1527,17 @@ void AM_Drawer (void)
 	if (cheating == 2)
 		AM_drawThings(THINGCOLORS, THINGRANGE);
 
-//	AM_drawCrosshair(XHAIRCOLORS);
-//	AM_drawMarks();
 	if (gameskill == sk_baby)
 	{
 		AM_drawkeys();
 	}
 
 #ifdef RENDER3D
+	/* bbm: finish drawing all lines at once */
+	glEnd();
+	glLineWidth(1.0);
+	glEnable(GL_TEXTURE_2D);
+
 	AM_OGL_RestoreState();
 #endif
 
@@ -1610,7 +1545,5 @@ void AM_Drawer (void)
 	{
 		MN_DrTextA(LevelNames[(gameepisode-1)*9+gamemap-1], 20, 145);
 	}
-//	I_Update();
-//	V_MarkRect(f_x, f_y, f_w, f_h);
 }
 

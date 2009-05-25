@@ -892,7 +892,7 @@ void D_DoomMain(void)
 	}
 	if (p && p < myargc-1)
 	{
-		sprintf(file, "%s.lmp", myargv[p+1]);
+		snprintf(file, sizeof(file), "%s.lmp", myargv[p+1]);
 		D_AddFile(file);
 		printf("Playing demo %s.lmp.\n", myargv[p+1]);
 	}
@@ -971,8 +971,8 @@ void D_DoomMain(void)
 	if (autostart)
 	{
 		char temp[64];
-		sprintf(temp, "Warp to Episode %d, Map %d, Skill %d ",
-			startepisode, startmap, startskill + 1);
+		snprintf(temp, sizeof(temp), "Warp to Episode %d, Map %d, Skill %d ",
+					startepisode, startmap, startskill + 1);
 		status(temp);
 	}
 

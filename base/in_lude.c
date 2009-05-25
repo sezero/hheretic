@@ -13,12 +13,15 @@
 #include "h2stdinc.h"
 #include "doomdef.h"
 #include "soundst.h"
+#ifdef RENDER3D
+#include "ogl_def.h"
+#endif
 
 // MACROS ------------------------------------------------------------------
 
+#include "v_compat.h"
+
 #ifdef RENDER3D
-#include "ogl_def.h"
-#define PATCH_REF			int
 #define WR_CacheLumpName(a,b)		W_GetNumForName((a))
 #define ZR_ChangeTag(a,b)
 #define WR_CacheLumpNum(a,b)		(a)
@@ -30,7 +33,6 @@
 #define ZR_ChangeTag(a,b)		Z_ChangeTag((a),(b))
 #define WR_CacheLumpName(a,b)		W_CacheLumpName((a),(b))
 #define WR_CacheLumpNum(a,b)		W_CacheLumpNum((a),(b))
-#define PATCH_REF			patch_t*
 #endif
 
 // TYPES -------------------------------------------------------------------
@@ -176,7 +178,7 @@ static yahpt_t YAHspot[3][9] =
 
 void IN_Start(void)
 {
-	I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
+	V_SetPaletteBase();
 	IN_LoadPics();
 	IN_InitStats();
 	intermission = true;
@@ -716,11 +718,7 @@ static void IN_DrawSingleStats(void)
 		sounds++;
 	}
 	IN_DrawNumber(players[consoleplayer].killcount, 200, 65, 3);
-#ifdef RENDER3D
-	OGL_DrawShadowedPatch(237, 65, FontBSlash);
-#else
 	V_DrawShadowedPatch(237, 65, FontBSlash);
-#endif
 	IN_DrawNumber(totalkills, 248, 65, 3);
 	if (intertime < 60)
 	{
@@ -732,11 +730,7 @@ static void IN_DrawSingleStats(void)
 		sounds++;
 	}
 	IN_DrawNumber(players[consoleplayer].itemcount, 200, 90, 3);
-#ifdef RENDER3D
-	OGL_DrawShadowedPatch(237, 90, FontBSlash);
-#else
 	V_DrawShadowedPatch(237, 90, FontBSlash);
-#endif
 	IN_DrawNumber(totalitems, 248, 90, 3);
 	if (intertime < 90)
 	{
@@ -748,11 +742,7 @@ static void IN_DrawSingleStats(void)
 		sounds++;
 	}
 	IN_DrawNumber(players[consoleplayer].secretcount, 200, 115, 3);
-#ifdef RENDER3D
-	OGL_DrawShadowedPatch(237, 115, FontBSlash);
-#else
 	V_DrawShadowedPatch(237, 115, FontBSlash);
-#endif
 	IN_DrawNumber(totalsecret, 248, 115, 3);
 	if (intertime < 150)
 	{
@@ -806,11 +796,7 @@ static void IN_DrawCoopStats(void)
 	{
 		if (playeringame[i])
 		{
-#ifdef RENDER3D
-			OGL_DrawShadowedPatch(25, ypos, patchFaceOkayBase + i);
-#else
-			V_DrawShadowedPatch(25, ypos, (patch_t *)W_CacheLumpNum(patchFaceOkayBase + i, PU_CACHE));
-#endif
+			V_DrawShadowedPatch(25, ypos, (PATCH_REF)WR_CacheLumpNum(patchFaceOkayBase + i, PU_CACHE));
 			if (intertime < 40)
 			{
 				sounds = 0;

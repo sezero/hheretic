@@ -28,6 +28,17 @@
 #define SLOTTEXTLEN		16
 #define ASCII_CURSOR		'['
 
+#include "v_compat.h"
+
+#ifdef RENDER3D
+#define W_CacheLumpName(a,b)		W_GetNumForName((a))
+#define WR_CacheLumpNum(a,b)		(a)
+#define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
+#define V_DrawRawScreen(a)		OGL_DrawRawScreen((a))
+#else
+#define WR_CacheLumpNum(a,b)		W_CacheLumpNum((a),(b))
+#endif
+
 // TYPES -------------------------------------------------------------------
 
 typedef enum
@@ -1523,7 +1534,7 @@ boolean MN_Responder(event_t *event)
 					typeofask = 0;
 					askforquit = false;
 					paused = false;
-					I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
+					V_SetPaletteBase();
 					D_StartTitle(); // go to intro/demo mode.
 					break;
 				case 3:
@@ -2022,15 +2033,9 @@ void MN_DeactivateMenu(void)
 
 void MN_DrawInfo(void)
 {
-#ifdef RENDER3D
-	OGL_SetFilter(0);
-	OGL_DrawRawScreen(W_GetNumForName("TITLE")+InfoType);
-#else
-	I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
+	V_SetPaletteBase();
 //	V_DrawPatch(0, 0, (patch_t *)W_CacheLumpNum(W_GetNumForName("TITLE")+InfoType, PU_CACHE));
-	memcpy(screen, (byte *)W_CacheLumpNum(W_GetNumForName("TITLE") + InfoType,
-		PU_CACHE), SCREENWIDTH*SCREENHEIGHT);
-#endif
+	V_DrawRawScreen((BYTE_REF) WR_CacheLumpNum(W_GetNumForName("TITLE")+InfoType, PU_CACHE));
 }
 
 

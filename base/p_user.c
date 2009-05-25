@@ -12,7 +12,9 @@ void P_PlayerNextArtifact(player_t *player);
 
 // Macros
 
-#define MAXBOB 0x100000 // 16 pixels of bob
+#define MAXBOB		0x100000	/* 16 pixels of bob */
+
+#include "v_compat.h"	/* V_SetPaletteXXX() macros */
 
 // Data
 
@@ -372,7 +374,7 @@ void P_DeathThink(player_t *player)
 	{
 		if(player == &players[consoleplayer])
 		{
-			I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
+			V_SetPaletteBase();
 			inv_ptr = 0;
 			curpos = 0;
 			newtorch = 0;

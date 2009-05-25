@@ -8,18 +8,20 @@
 #include "soundst.h"
 #ifdef RENDER3D
 #include "ogl_def.h"
-#define WR_CacheLumpName(a,b)		W_GetNumForName((a))
-#define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
-#define V_DrawFuzzPatch(x,y,p)		OGL_DrawFuzzPatch((x),(y),(p))
-#define V_DrawAltFuzzPatch(x,y,p)	OGL_DrawAltFuzzPatch((x),(y),(p))
-#define V_DrawShadowedPatch(x,y,p)	OGL_DrawShadowedPatch((x),(y),(p))
-#define V_DrawRawScreen(a)		OGL_DrawRawScreen((a))
-#else
-#define WR_CacheLumpName(a,b)		W_CacheLumpName((a),(b))
 #endif
 
 #define TEXTSPEED	3
 #define TEXTWAIT	250
+
+#include "v_compat.h"
+
+#ifdef RENDER3D
+#define WR_CacheLumpName(a,b)		W_GetNumForName((a))
+#define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
+#define V_DrawRawScreen(a)		OGL_DrawRawScreen((a))
+#else
+#define WR_CacheLumpName(a,b)		W_CacheLumpName((a),(b))
+#endif
 
 extern boolean	viewactive;
 
@@ -249,7 +251,7 @@ static void F_DrawUnderwater(void)
 			I_SetPalette(W_CacheLumpName("E2PAL", PU_CACHE));
 			//memcpy(screen, W_CacheLumpName("E2END", PU_CACHE),
 			//			  SCREENWIDTH*SCREENHEIGHT);
-			V_DrawRawScreen(W_CacheLumpName("E2END", PU_CACHE));
+			V_DrawRawScreen((byte *)W_CacheLumpName("E2END", PU_CACHE));
 #endif
 		}
 		paused = false;
@@ -259,7 +261,7 @@ static void F_DrawUnderwater(void)
 		break;
 
 	case 2:
-		V_DrawRawScreen(WR_CacheLumpName("TITLE", PU_CACHE));
+		V_DrawRawScreen((BYTE_REF) WR_CacheLumpName("TITLE", PU_CACHE));
 	}
 }
 
@@ -274,13 +276,9 @@ void F_Drawer(void)
 		{
 		case 1:
 			if (shareware)
-			{
-				V_DrawRawScreen(WR_CacheLumpName("ORDER", PU_CACHE));
-			}
+			  V_DrawRawScreen((BYTE_REF) WR_CacheLumpName("ORDER", PU_CACHE));
 			else
-			{
-				V_DrawRawScreen(WR_CacheLumpName("CREDIT", PU_CACHE));
-			}
+			  V_DrawRawScreen((BYTE_REF) WR_CacheLumpName("CREDIT", PU_CACHE));
 			break;
 		case 2:
 			F_DrawUnderwater();
@@ -290,7 +288,7 @@ void F_Drawer(void)
 			break;
 		case 4: // Just show credits screen for extended episodes
 		case 5:
-			V_DrawRawScreen(WR_CacheLumpName("CREDIT", PU_CACHE));
+			V_DrawRawScreen((BYTE_REF) WR_CacheLumpName("CREDIT", PU_CACHE));
 			break;
 		}
 	}

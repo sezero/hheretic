@@ -9,21 +9,23 @@
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
+#ifdef RENDER3D
+#include "ogl_def.h"
+#endif
 
 // MACROS ------------------------------------------------------------------
 
+#define PLAYPAL_NUM		playpalette
+
+#include "v_compat.h"
+
 #ifdef RENDER3D
-#include "ogl_def.h"
-#define PATCH_REF			int
-#define INVALID_PATCH			0
 #define W_CacheLumpName(a,b)		W_GetNumForName((a))
 #define WR_CacheLumpNum(a,b)		(a)
 #define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
 #define V_DrawFuzzPatch(x,y,p)		OGL_DrawFuzzPatch((x),(y),(p))
 #define V_DrawAltFuzzPatch(x,y,p)	OGL_DrawAltFuzzPatch((x),(y),(p))
 #else
-#define PATCH_REF			patch_t*
-#define INVALID_PATCH			NULL
 #define WR_CacheLumpNum(a,b)		W_CacheLumpNum((a),(b))
 #endif
 
@@ -369,12 +371,11 @@ void SB_Init(void)
 	}
 	if (!netgame)
 	{ // single player game uses red life gem
-		PatchLIFEGEM = (PATCH_REF) W_CacheLumpName("LIFEGEM2", PU_STATIC);
+	  PatchLIFEGEM = (PATCH_REF) W_CacheLumpName("LIFEGEM2", PU_STATIC);
 	}
 	else
 	{
-		PatchLIFEGEM = (PATCH_REF) WR_CacheLumpNum(W_GetNumForName("LIFEGEM0")
-			+ consoleplayer, PU_STATIC);
+	  PatchLIFEGEM = (PATCH_REF) WR_CacheLumpNum(W_GetNumForName("LIFEGEM0") + consoleplayer, PU_STATIC);
 	}
 	PatchLTFCTOP   = (PATCH_REF) W_CacheLumpName("LTFCTOP", PU_STATIC);
 	PatchRTFCTOP   = (PATCH_REF) W_CacheLumpName("RTFCTOP", PU_STATIC);
@@ -875,9 +876,6 @@ void SB_PaletteFlash(void)
 {
 	static int sb_palette = 0;
 	int palette;
-#ifndef RENDER3D
-	byte *pal;
-#endif
 
 	CPlayer = &players[consoleplayer];
 
@@ -906,12 +904,7 @@ void SB_PaletteFlash(void)
 	if (palette != sb_palette)
 	{
 		sb_palette = palette;
-#ifdef RENDER3D
-		OGL_SetFilter(palette);
-#else
-		pal = (byte *)WR_CacheLumpNum(playpalette, PU_CACHE) + palette*768;
-		I_SetPalette(pal);
-#endif
+		V_SetPaletteShift(palette);
 	}
 }
 

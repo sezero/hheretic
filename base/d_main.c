@@ -16,19 +16,22 @@
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
+#ifdef RENDER3D
+#include "ogl_def.h"
+#endif
 
 // MACROS ------------------------------------------------------------------
 
-#ifdef RENDER3D
-#include "ogl_def.h"
-#define W_CacheLumpName(a,b)        W_GetNumForName(a)
-#define V_DrawPatch(x,y,p)          OGL_DrawPatch(x,y,p)
-#define V_DrawRawScreen(a)          OGL_DrawRawScreen(a)
-#endif
-
 #define MAXWADFILES		20
-
 #define SHAREWAREWADNAME	"heretic1.wad"
+
+#include "v_compat.h"
+
+#ifdef RENDER3D
+#define W_CacheLumpName(a,b)		W_GetNumForName((a))
+#define V_DrawPatch(x,y,p)		OGL_DrawPatch((x),(y),(p))
+#define V_DrawRawScreen(a)		OGL_DrawRawScreen((a))
+#endif
 
 // TYPES -------------------------------------------------------------------
 
@@ -334,11 +337,11 @@ void D_Display(void)
 	{
 		if (!netgame)
 		{
-			V_DrawPatch(160, viewwindowy + 5, W_CacheLumpName("PAUSED", PU_CACHE));
+			V_DrawPatch(160, viewwindowy + 5, (PATCH_REF)W_CacheLumpName("PAUSED", PU_CACHE));
 		}
 		else
 		{
-			V_DrawPatch(160, 70, W_CacheLumpName("PAUSED", PU_CACHE));
+			V_DrawPatch(160, 70, (PATCH_REF)W_CacheLumpName("PAUSED", PU_CACHE));
 		}
 	}
 
@@ -441,10 +444,10 @@ extern boolean MenuActive;
 
 void D_PageDrawer(void)
 {
-	V_DrawRawScreen(W_CacheLumpName(pagename, PU_CACHE));
+	V_DrawRawScreen((BYTE_REF)W_CacheLumpName(pagename, PU_CACHE));
 	if (demosequence == 1)
 	{
-		V_DrawPatch(4, 160, W_CacheLumpName("ADVISOR", PU_CACHE));
+		V_DrawPatch(4, 160, (PATCH_REF)W_CacheLumpName("ADVISOR", PU_CACHE));
 	}
 	UpdateState |= I_FULLSCRN;
 }

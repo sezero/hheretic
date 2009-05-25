@@ -861,9 +861,10 @@ boolean G_Responder(event_t *ev)
 			}
 			return true;
 		}
-		if (ev->data1 == KEY_PAUSE && !MenuActive)
+		if (ev->data1 == KEY_PAUSE)
 		{
-			sendpause = true;
+			if (!MenuActive && gamestate != GS_FINALE)
+				sendpause = true;
 			return true;
 		}
 		if (ev->data1 < MAXKEYS)

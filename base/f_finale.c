@@ -90,7 +90,7 @@ boolean F_Responder (event_t *event)
 		// Hmm... naughty Heretic again :/ - DDOI
 		//memset((byte *)0xa0000, 0, SCREENWIDTH*SCREENHEIGHT);
 		//memset(screen, 0, SCREENWIDTH*SCREENHEIGHT);
-		I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
+		I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 #endif
 		return true;
 	}
@@ -127,7 +127,7 @@ static void F_TextWrite (void)
 // erase the entire screen to a tiled background
 //
 #ifndef RENDER3D
-	src = W_CacheLumpName(finaleflat, PU_CACHE);
+	src = (byte *) W_CacheLumpName(finaleflat, PU_CACHE);
 	dest = screen;
 	for (y = 0; y < SCREENHEIGHT; y++)
 	{
@@ -241,7 +241,7 @@ static void F_DrawUnderwater(void)
 #else
 			// Naughty Heretic :/ - DDOI
 			//memset((byte *)0xa0000, 0, SCREENWIDTH*SCREENHEIGHT);
-			I_SetPalette(W_CacheLumpName("E2PAL", PU_CACHE));
+			I_SetPalette((byte *)W_CacheLumpName("E2PAL", PU_CACHE));
 			//memcpy(screen, W_CacheLumpName("E2END", PU_CACHE),
 			//			  SCREENWIDTH*SCREENHEIGHT);
 			V_DrawRawScreen((byte *)W_CacheLumpName("E2END", PU_CACHE));

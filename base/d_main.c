@@ -956,7 +956,7 @@ void D_DoomMain(void)
 #ifdef __WATCOMC__
 	I_StartupKeyboard();
 	I_StartupJoystick();
-	startup = W_CacheLumpName("LOADING", PU_CACHE);
+	startup = (char *) W_CacheLumpName("LOADING", PU_CACHE);
 	blitStartup();
 
 	//  Build status bar line!

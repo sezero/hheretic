@@ -51,8 +51,14 @@
 #define	DATA_ENVVAR		"HERETIC_DATA"
 #define	H_USERDIR		".hheretic"
 
-/* path to the user directory		*/
+/* path to the user directory with a trailing
+ * directory separator character. initialized
+ * to DUMMY_BASEPATH string, which is "./" or
+ * empty string "", so that it will have no
+ * effect when user directories are disabled.
+ */
 extern	const char		*basePath;
+#define	DUMMY_BASEPATH		""
 
 #define	SAVEGAMENAME		"hticsav"
 #define	CONFIG_FILE_NAME	"heretic.cfg"

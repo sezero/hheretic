@@ -406,11 +406,11 @@ static const char *stupidtable[] =
 
 static const char *GammaText[] =
 {
-	GAMMALVL0,
-	GAMMALVL1,
-	GAMMALVL2,
-	GAMMALVL3,
-	GAMMALVL4
+	TXT_GAMMA_LEVEL_OFF,
+	TXT_GAMMA_LEVEL_1,
+	TXT_GAMMA_LEVEL_2,
+	TXT_GAMMA_LEVEL_3,
+	TXT_GAMMA_LEVEL_4
 };
 
 // CODE --------------------------------------------------------------------

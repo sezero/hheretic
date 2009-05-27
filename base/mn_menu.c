@@ -325,7 +325,8 @@ static Menu_t Options2Menu =
 {
 	90, 20,
 	DrawOptions2Menu,
-	6, Options2Items,
+	6,
+	Options2Items,
 	0,
 	ITEM_HEIGHT,
 	MENU_OPTIONS
@@ -349,7 +350,7 @@ static MenuItem_t Options3Items[] =
 	{ ITT_SETKEY, "LOOK UP :", SCSetKey, 9, MENU_NONE },
 	{ ITT_SETKEY, "LOOK DOWN :", SCSetKey, 10, MENU_NONE },
 	{ ITT_SETKEY, "LOOK CENTER :", SCSetKey, 11, MENU_NONE },
-	{ ITT_SETKEY, "INVETORY LEFT :", SCSetKey, 12, MENU_NONE },
+	{ ITT_SETKEY, "INVENTORY LEFT :", SCSetKey, 12, MENU_NONE },
 	{ ITT_SETKEY, "INVENTORY RIGHT :", SCSetKey, 13, MENU_NONE },
 	{ ITT_SETKEY, "USE ARTIFACT :", SCSetKey, 14, MENU_NONE },
 	{ ITT_SETKEY, "FIRE :", SCSetKey, 15, MENU_NONE },
@@ -1033,8 +1034,6 @@ static void DrawOptionsMenu(void)
 		MN_DrTextB("OFF", 196, 50);
 	}
 
-	if (mouselook < 0 || mouselook > 2)
-		mouselook = 0;
 	MN_DrTextB(mlooktext[mouselook], 208, 110);
 
 	snprintf(num, sizeof(num), "%d", mouseSensitivity);

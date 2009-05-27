@@ -326,7 +326,7 @@ typedef struct
 	int	*location;
 	int	defaultvalue;
 	int	minvalue;
-	int	minvalue;
+	int	maxvalue;
 } default_t;
 
 typedef struct

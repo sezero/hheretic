@@ -380,8 +380,13 @@ typedef struct mobj_s
 	int			damage;		/* For missiles */
 	int			flags;
 	int			flags2;		/* Heretic flags */
-	int			special1;	/* Special info */
-	int			special2;	/* Special info */
+
+	/* be doubly careful with these two: they may be used to store
+	 * a state or the address of an mobj_t or player_t structure!!!
+	 */
+	intptr_t		special1;	/* Special info */
+	intptr_t		special2;	/* Special info */
+
 	int			health;
 	int			movedir;	/* 0-7 */
 	int			movecount;	/* when 0, select a new dir */

@@ -1221,7 +1221,7 @@ void A_FireMacePL2(player_t *player, pspdef_t *psp)
 		mo->momz = 2*FRACUNIT+((player->lookdir)<<(FRACBITS-5));
 		if(linetarget)
 		{
-			mo->special1 = (int)linetarget;
+			mo->special1 = (intptr_t)linetarget;
 		}
 	}
 	S_StartSound(player->mo, sfx_lobsht);
@@ -1270,7 +1270,7 @@ void A_DeathBallImpact(mobj_t *ball)
 				P_AimLineAttack(ball, angle, 10*64*FRACUNIT);
 				if(linetarget && ball->target != linetarget)
 				{
-					ball->special1 = (int)linetarget;
+					ball->special1 = (intptr_t)linetarget;
 					angle = R_PointToAngle2(ball->x, ball->y,
 						linetarget->x, linetarget->y);
 					newAngle = true;
@@ -1428,7 +1428,7 @@ void A_FireSkullRodPL2(player_t *player, pspdef_t *psp)
 	}
 	if(linetarget)
 	{
-		MissileMobj->special1 = (int)linetarget;
+		MissileMobj->special1 = (intptr_t)linetarget;
 	}
 	S_StartSound(MissileMobj, sfx_hrnpow);
 }

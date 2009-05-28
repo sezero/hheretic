@@ -1203,7 +1203,7 @@ void A_MummyAttack2(mobj_t *actor)
 	//mo = P_SpawnMissile(actor, actor->target, MT_EGGFX);
 	if(mo != NULL)
 	{
-		mo->special1 = (int)actor->target;
+		mo->special1 = (intptr_t)actor->target;
 	}
 }
 
@@ -1805,7 +1805,7 @@ void A_HeadAttack(mobj_t *actor)
 		if(mo != NULL)
 		{
 			mo->z -= 32*FRACUNIT;
-			mo->special1 = (int)target;
+			mo->special1 = (intptr_t)target;
 			mo->special2 = 50; // Timer for active sound
 			mo->health = 20*TICSPERSEC; // Duration
 			S_StartSound(actor, sfx_hedat3);			
@@ -2237,7 +2237,7 @@ void A_MakePod(mobj_t *actor)
 	P_ThrustMobj(mo, P_Random()<<24, (fixed_t)(4.5*FRACUNIT));
 	S_StartSound(mo, sfx_newpod);
 	actor->special1++; // Increment generated pod count
-	mo->special2 = (int)actor; // Link the generator to the pod
+	mo->special2 = (intptr_t)actor; // Link the generator to the pod
 	return;
 }
 

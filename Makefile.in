@@ -135,6 +135,7 @@ OBJ_BASE = \
 	base/r_things.o \
 	base/sb_bar.o \
 	base/sounds.o \
+	base/sv_save.o \
 	base/tables.o \
 	base/v_video.o \
 	base/w_wad.o \

@@ -1179,14 +1179,11 @@ static boolean SCMessages(int option)
 
 static boolean SCLoadGame(int option)
 {
-	char name[MAX_OSPATH];
-
 	if (!SlotStatus[option])
 	{ // slot's empty...don't try and load
 		return false;
 	}
-	snprintf(name, sizeof(name), "%s%s%d.hsg", basePath, SAVEGAMENAME, option);
-	G_LoadGame(name);
+	G_LoadGame(option);
 	MN_DeactivateMenu();
 	BorderNeedRefresh = true;
 	if (quickload == -1)

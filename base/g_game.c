@@ -10,9 +10,6 @@
 
 // Macros
 
-#define SVG_RAM			0
-#define SVG_FILE		1
-#define SAVE_GAME_TERMINATOR	0x1d
 #define AM_STARTKEY		9
 
 // Functions
@@ -62,9 +59,6 @@ static struct
 	{ -1, {-1, -1} } // Terminator
 };
 
-static FILE	*SaveGameFP;
-static int	SaveGameType;
-
 gameaction_t	gameaction;
 gamestate_t	gamestate;
 skill_t		gameskill;
@@ -110,9 +104,7 @@ static char	demoname[MAX_OSPATH];
 
 static short	consistancy[MAXPLAYERS][BACKUPTICS];
 
-static void	*savebuffer;
-byte		*save_p;
-static char	savename[MAX_OSPATH];
+static int	loadgameslot;
 static int	savegameslot;
 static char	savedescription[32];
 
@@ -1446,9 +1438,9 @@ static void G_DoWorldDone(void)
 //
 //---------------------------------------------------------------------------
 
-void G_LoadGame(const char *name)
+void G_LoadGame(int slot)
 {
-	strcpy(savename, name);
+	loadgameslot = slot;
 	gameaction = ga_loadgame;
 }
 
@@ -1460,53 +1452,10 @@ void G_LoadGame(const char *name)
 //
 //---------------------------------------------------------------------------
 
-#define VERSIONSIZE 16
-
 void G_DoLoadGame(void)
 {
-	int length;
-	int i;
-	int a, b, c;
-	char vcheck[VERSIONSIZE];
-
 	gameaction = ga_nothing;
-
-	length = M_ReadFile(savename, &savebuffer);
-	save_p = (byte *)savebuffer + SAVESTRINGSIZE;	// Skip the description field
-	memset(vcheck, 0, sizeof(vcheck));
-	sprintf(vcheck, "version %i", VERSION);
-	if (strcmp((char *)save_p, vcheck) != 0)
-	{ // Bad version
-		return;
-	}
-	save_p += VERSIONSIZE;
-	gameskill = *save_p++;
-	gameepisode = *save_p++;
-	gamemap = *save_p++;
-	for (i = 0; i < MAXPLAYERS; i++)
-	{
-		playeringame[i] = *save_p++;
-	}
-	// Load a base level
-	G_InitNew(gameskill, gameepisode, gamemap);
-
-	// Create leveltime
-	a = *save_p++;
-	b = *save_p++;
-	c = *save_p++;
-	leveltime = (a<<16) + (b<<8) + c;
-
-	// De-archive all the modifications
-	P_UnArchivePlayers();
-	P_UnArchiveWorld();
-	P_UnArchiveThinkers();
-	P_UnArchiveSpecials();
-
-	if (*save_p != SAVE_GAME_TERMINATOR)
-	{ // Missing savegame termination marker
-		I_Error("Bad savegame");
-	}
-	Z_Free(savebuffer);
+	SV_LoadGame(loadgameslot);
 }
 
 
@@ -1819,122 +1768,9 @@ void G_SaveGame(int slot, const char *description)
 
 static void G_DoSaveGame(void)
 {
-	int i;
-	char name[MAX_OSPATH];
-	char verString[VERSIONSIZE];
-	char *description;
-
-	snprintf(name, sizeof(name), "%s%s%d.hsg",
-		 basePath, SAVEGAMENAME, savegameslot);
-	description = savedescription;
-
-	SV_Open(name);
-	SV_Write(description, SAVESTRINGSIZE);
-	memset(verString, 0, sizeof(verString));
-	sprintf(verString, "version %i", VERSION);
-	SV_Write(verString, VERSIONSIZE);
-	SV_WriteByte(gameskill);
-	SV_WriteByte(gameepisode);
-	SV_WriteByte(gamemap);
-	for (i = 0; i < MAXPLAYERS; i++)
-	{
-		SV_WriteByte(playeringame[i]);
-	}
-	SV_WriteByte(leveltime>>16);
-	SV_WriteByte(leveltime>>8);
-	SV_WriteByte(leveltime);
-	P_ArchivePlayers();
-	P_ArchiveWorld();
-	P_ArchiveThinkers();
-	P_ArchiveSpecials();
-	SV_Close(name);
-
+	SV_SaveGame(savegameslot, savedescription);
 	gameaction = ga_nothing;
 	savedescription[0] = 0;
 	P_SetMessage(&players[consoleplayer], TXT_GAMESAVED, true);
-}
-
-//==========================================================================
-//
-// SV_Open
-//
-//==========================================================================
-
-void SV_Open(const char *fileName)
-{
-	MallocFailureOk = true;
-	savebuffer = Z_Malloc(SAVEGAMESIZE, PU_STATIC, NULL);
-	save_p = (byte *)savebuffer;
-	MallocFailureOk = false;
-	if (savebuffer == NULL)
-	{ // Not enough memory - use file save method
-		SaveGameType = SVG_FILE;
-		SaveGameFP = fopen(fileName, "wb");
-	}
-	else
-	{
-		SaveGameType = SVG_RAM;
-	}
-}
-
-//==========================================================================
-//
-// SV_Close
-//
-//==========================================================================
-
-void SV_Close(const char *fileName)
-{
-	int length;
-
-	SV_WriteByte(SAVE_GAME_TERMINATOR);
-	if (SaveGameType == SVG_RAM)
-	{
-		length = save_p - (byte *)savebuffer;
-		if (length > SAVEGAMESIZE)
-		{
-			I_Error("Savegame buffer overrun");
-		}
-		M_WriteFile(fileName, savebuffer, length);
-		Z_Free(savebuffer);
-	}
-	else
-	{ // SVG_FILE
-		fclose(SaveGameFP);
-	}
-}
-
-//==========================================================================
-//
-// SV_Write
-//
-//==========================================================================
-
-void SV_Write(const void *buffer, int size)
-{
-	if (SaveGameType == SVG_RAM)
-	{
-		memcpy(save_p, buffer, size);
-		save_p += size;
-	}
-	else
-	{ // SVG_FILE
-		fwrite(buffer, size, 1, SaveGameFP);
-	}
-}
-
-void SV_WriteByte(byte val)
-{
-	SV_Write(&val, sizeof(byte));
-}
-
-void SV_WriteWord(unsigned short val)
-{
-	SV_Write(&val, sizeof(unsigned short));
-}
-
-void SV_WriteLong(unsigned int val)
-{
-	SV_Write(&val, sizeof(int));
 }
 

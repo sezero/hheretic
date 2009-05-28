@@ -553,19 +553,14 @@ void D_StartTitle (void)
 void D_CheckRecordFrom (void)
 {
 	int p;
-	char file[MAX_OSPATH];
 
 	p = M_CheckParm ("-recordfrom");
 	if (!p || p >= myargc - 2)
 		return;
-
-	snprintf(file, sizeof(file), "%s%s%d.hsg",
-		 basePath, SAVEGAMENAME, myargv[p+1][0]);
-	G_LoadGame (file);
-	G_DoLoadGame ();    // load the gameskill etc info from savegame
-
-	G_RecordDemo (gameskill, 1, gameepisode, gamemap, myargv[p+2]);
-	D_DoomLoop ();  // never returns
+	G_LoadGame(atoi(myargv[p + 1]));
+	G_DoLoadGame(); // load the gameskill etc info from savegame
+	G_RecordDemo(gameskill, 1, gameepisode, gamemap, myargv[p + 2]);
+	D_DoomLoop(); // never returns
 }
 
 /*
@@ -1041,9 +1036,7 @@ void D_DoomMain(void)
 	p = M_CheckParm("-loadgame");
 	if (p && p < myargc-1)
 	{
-		snprintf(file, sizeof(file), "%s%s%c.hsg",
-			 basePath, SAVEGAMENAME, myargv[p+1][0]);
-		G_LoadGame(file);
+		G_LoadGame(atoi(myargv[p+1]));
 	}
 
 	// Check valid episode and map

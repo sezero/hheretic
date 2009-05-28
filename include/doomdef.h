@@ -795,10 +795,6 @@ extern	int		rndindex;
 extern	int		gametic, maketic;
 extern	int		nettics[MAXNETNODES];
 
-#define	SAVEGAMESIZE	0x30000
-#define	SAVESTRINGSIZE		24
-extern	byte		*save_p;
-
 extern	mapthing_t	*deathmatch_p;
 extern	mapthing_t	deathmatchstarts[10];
 extern	mapthing_t	playerstarts[MAXPLAYERS];
@@ -1175,7 +1171,7 @@ void G_DeferedInitNew (skill_t skill, int episode, int map);
 
 void G_DeferedPlayDemo (const char *demo);
 
-void G_LoadGame (const char *name);
+void G_LoadGame (int slot);
 /* can be called by the startup code or M_Responder
  * calls P_SetupLevel or W_EnterWorld
  */
@@ -1184,14 +1180,6 @@ void G_DoLoadGame (void);
 
 void G_SaveGame (int slot, const char *description);
 /* called by M_Responder */
-
-/* Support routines for saving games */
-void SV_Open(const char *fileName);
-void SV_Close(const char *fileName);
-void SV_Write(const void *buffer, int size);
-void SV_WriteByte(byte val);
-void SV_WriteWord(unsigned short val);
-void SV_WriteLong(unsigned int val);
 
 void G_RecordDemo (skill_t skill, int numplayers, int episode,
 		   int map, const char *name);
@@ -1211,6 +1199,15 @@ boolean G_Responder (event_t *ev);
 void G_ScreenShot (void);
 
 
+/* ------- SV_SAVE ------- */
+
+#define SAVEVERSIONSIZE		16
+#define SAVESTRINGSIZE		24
+
+void SV_SaveGame(int slot, const char *description);
+void SV_LoadGame(int slot);
+
+
 /* ----- PLAY ----- */
 
 void P_Ticker (void);
@@ -1224,16 +1221,6 @@ void P_SetupLevel (int episode, int map, int playermask, skill_t skill);
 
 void P_Init (void);
 /* called by startup code */
-
-void P_ArchivePlayers (void);
-void P_UnArchivePlayers (void);
-void P_ArchiveWorld (void);
-void P_UnArchiveWorld (void);
-void P_ArchiveThinkers (void);
-void P_UnArchiveThinkers (void);
-void P_ArchiveSpecials (void);
-void P_UnArchiveSpecials (void);
-/* load / save game routines */
 
 
 /* ------- REFRESH ------- */

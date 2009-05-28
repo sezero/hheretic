@@ -60,7 +60,7 @@ static void CloseStreamOut(const char *fileName);
 static void StreamOutBuffer(const void *buffer, int size);
 static void StreamOutByte(byte val);
 static void StreamOutWord(unsigned short val);
-static void StreamOutLong(unsigned int val);
+//static void StreamOutLong(unsigned int val);
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
@@ -689,8 +689,10 @@ static void StreamOutWord(unsigned short val)
 	StreamOutBuffer(&val, sizeof(unsigned short));
 }
 
+/*
 static void StreamOutLong(unsigned int val)
 {
 	StreamOutBuffer(&val, sizeof(int));
 }
+*/
 

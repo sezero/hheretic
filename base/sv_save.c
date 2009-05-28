@@ -187,7 +187,7 @@ static void ArchivePlayers(void)
 			if (dest.psprites[j].state)
 			{
 				dest.psprites[j].state =
-					(state_t *)(dest.psprites[j].state-states);
+					(state_t *)(dest.psprites[j].state - states);
 			}
 		}
 		StreamOutBuffer(&dest, sizeof(player_t));
@@ -208,15 +208,15 @@ static void UnarchivePlayers(void)
 	{
 		if (!playeringame[i])
 			continue;
-		memcpy(&players[i],SavePtr, sizeof(player_t));
+		memcpy(&players[i], SavePtr, sizeof(player_t));
 		SavePtr += sizeof(player_t);
-		players[i].mo = NULL;		// will be set when unarc thinker
+		players[i].mo = NULL; // will be set when unarc thinker
 		players[i].message = NULL;
 		players[i].attacker = NULL;
 		for (j = 0; j < NUMPSPRITES; j++)
 		{
 			if (players[i]. psprites[j].state)
-				players[i]. psprites[j].state = &states[(int)players[i].psprites[j].state];
+				players[i].psprites[j].state = &states[(int)players[i].psprites[j].state];
 		}
 	}
 }
@@ -243,7 +243,7 @@ static void ArchiveWorld(void)
 		StreamOutWord(sec->ceilingpic);
 		StreamOutWord(sec->lightlevel);
 		StreamOutWord(sec->special);	// needed?
-		StreamOutWord(sec->tag);		// needed?
+		StreamOutWord(sec->tag);	// needed?
 	}
 
 	// Lines
@@ -341,10 +341,10 @@ static void ArchiveThinkers(void)
 		{
 			StreamOutByte(tc_mobj);
 			memcpy(&mobj, th, sizeof(mobj_t));
-			mobj.state = (state_t *)(mobj.state-states);
+			mobj.state = (state_t *)(mobj.state - states);
 			if (mobj.player)
 			{
-				mobj.player = (player_t *)((mobj.player-players)+1);
+				mobj.player = (player_t *)((mobj.player - players) + 1);
 			}
 			StreamOutBuffer(&mobj, sizeof(mobj_t));
 			continue;
@@ -400,7 +400,7 @@ static void UnarchiveThinkers(void)
 			mobj->target = NULL;
 			if (mobj->player)
 			{
-				mobj->player = &players[(int)mobj->player-1];
+				mobj->player = &players[(int)mobj->player - 1];
 				mobj->player->mo = mobj;
 			}
 			P_SetThingPosition (mobj);
@@ -410,9 +410,9 @@ static void UnarchiveThinkers(void)
 			mobj->thinker.function = P_MobjThinker;
 			P_AddThinker (&mobj->thinker);
 			break;
-			
+
 		default:
-			I_Error ("Unknown tclass %i in savegame",tclass);
+			I_Error("Unknown tclass %i in savegame", tclass);
 		}
 	}
 }
@@ -449,7 +449,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_ceiling);
 			memcpy(&ceiling, th, sizeof(ceiling_t));
-			ceiling.sector = (sector_t *)(ceiling.sector-sectors);
+			ceiling.sector = (sector_t *)(ceiling.sector - sectors);
 			StreamOutBuffer(&ceiling, sizeof(ceiling_t));
 			continue;
 		}
@@ -457,7 +457,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_door);
 			memcpy(&door, th, sizeof(vldoor_t));
-			door.sector = (sector_t *)(door.sector-sectors);
+			door.sector = (sector_t *)(door.sector - sectors);
 			StreamOutBuffer(&door, sizeof(vldoor_t));
 			continue;
 		}
@@ -465,7 +465,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_floor);
 			memcpy(&floor, th, sizeof(floormove_t));
-			floor.sector = (sector_t *)(floor.sector-sectors);
+			floor.sector = (sector_t *)(floor.sector - sectors);
 			StreamOutBuffer(&floor, sizeof(floormove_t));
 			continue;
 		}
@@ -473,7 +473,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_plat);
 			memcpy(&plat, th, sizeof(plat_t));
-			plat.sector = (sector_t *)(plat.sector-sectors);
+			plat.sector = (sector_t *)(plat.sector - sectors);
 			StreamOutBuffer(&plat, sizeof(plat_t));
 			continue;
 		}
@@ -481,7 +481,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_flash);
 			memcpy(&flash, th, sizeof(lightflash_t));
-			flash.sector = (sector_t *)(flash.sector-sectors);
+			flash.sector = (sector_t *)(flash.sector - sectors);
 			StreamOutBuffer(&flash, sizeof(lightflash_t));
 			continue;
 		}
@@ -489,7 +489,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_strobe);
 			memcpy(&strobe, th, sizeof(strobe_t));
-			strobe.sector = (sector_t *)(strobe.sector-sectors);
+			strobe.sector = (sector_t *)(strobe.sector - sectors);
 			StreamOutBuffer(&strobe, sizeof(strobe_t));
 			continue;
 		}
@@ -497,7 +497,7 @@ T_PlatRaise, (plat_t: sector_t *), - active list
 		{
 			StreamOutByte(tc_glow);
 			memcpy(&glow, th, sizeof(glow_t));
-			glow.sector = (sector_t *)(glow.sector-sectors);
+			glow.sector = (sector_t *)(glow.sector - sectors);
 			StreamOutBuffer(&glow, sizeof(glow_t));
 			continue;
 		}
@@ -604,8 +604,8 @@ static void UnarchiveSpecials(void)
 			break;
 
 		default:
-			I_Error ("P_UnarchiveSpecials:Unknown tclass %i "
-						"in savegame",tclass);
+			I_Error("P_UnarchiveSpecials:Unknown tclass %i "
+						"in savegame", tclass);
 		}
 	}
 }

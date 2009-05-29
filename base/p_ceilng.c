@@ -35,7 +35,7 @@ void T_MoveCeiling (ceiling_t *ceiling)
 					ceiling->topheight,false,1,ceiling->direction);
 			if(!(leveltime&7))
 				S_StartSound((mobj_t *)(void *)&ceiling->sector->soundorg, sfx_dormov);
-			if (res == pastdest)
+			if (res == res_pastdest)
 				switch(ceiling->type)
 				{
 					case raiseToHighest:
@@ -54,7 +54,7 @@ void T_MoveCeiling (ceiling_t *ceiling)
 				ceiling->bottomheight,ceiling->crush,1,ceiling->direction);
 			if (!(leveltime&7))
 				S_StartSound((mobj_t *)(void *)&ceiling->sector->soundorg, sfx_dormov);
-			if (res == pastdest)
+			if (res == res_pastdest)
 				switch(ceiling->type)
 				{
 					case crushAndRaise:
@@ -70,7 +70,7 @@ void T_MoveCeiling (ceiling_t *ceiling)
 						break;
 				}
 			else
-			if (res == crushed)
+			if (res == res_crushed)
 				switch(ceiling->type)
 				{
 					case crushAndRaise:

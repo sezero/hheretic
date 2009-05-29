@@ -38,14 +38,14 @@ void	T_PlatRaise(plat_t	*plat)
 						sfx_stnmov);
 				}
 			}
-			if (res == crushed && (!plat->crush))
+			if (res == res_crushed && (!plat->crush))
 			{
 				plat->count = plat->wait;
 				plat->status = down;
 				S_StartSound((mobj_t *)(void *)&plat->sector->soundorg, sfx_pstart);
 			}
 			else
-			if (res == pastdest)
+			if (res == res_pastdest)
 			{
 				plat->count = plat->wait;
 				plat->status = waiting;
@@ -65,7 +65,7 @@ void	T_PlatRaise(plat_t	*plat)
 			break;
 		case	down:
 			res = T_MovePlane(plat->sector,plat->speed,plat->low,false,0,-1);
-			if (res == pastdest)
+			if (res == res_pastdest)
 			{
 				plat->count = plat->wait;
 				plat->status = waiting;

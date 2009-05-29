@@ -140,9 +140,9 @@ typedef struct
 
 typedef enum
 {
-	top,
-	middle,
-	bottom
+	swtch_top,
+	swtch_middle,
+	swtch_bottom
 } bwhere_e;
 
 typedef struct
@@ -319,9 +319,9 @@ typedef struct
 
 typedef enum
 {
-	ok,
-	crushed,
-	pastdest
+	res_ok,
+	res_crushed,
+	res_pastdest
 } result_e;
 
 result_e T_MovePlane(sector_t *sector, fixed_t speed,

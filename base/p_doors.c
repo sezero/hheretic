@@ -64,7 +64,7 @@ void T_VerticalDoor(vldoor_t *door)
 		case -1: // DOWN
 			res = T_MovePlane(door->sector, door->speed,
 				door->sector->floorheight, false, 1, door->direction);
-			if(res == pastdest)
+			if(res == res_pastdest)
 			{
 				switch(door->type)
 				{
@@ -83,7 +83,7 @@ void T_VerticalDoor(vldoor_t *door)
 						break;
 				}
 			}
-			else if(res == crushed)
+			else if(res == res_crushed)
 			{
 				switch(door->type)
 				{
@@ -100,7 +100,7 @@ void T_VerticalDoor(vldoor_t *door)
 		case 1: // UP
 			res = T_MovePlane(door->sector, door->speed,
 				door->topheight, false, 1, door->direction);
-			if(res == pastdest)
+			if(res == res_pastdest)
 			{
 				switch(door->type)
 				{

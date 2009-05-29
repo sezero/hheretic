@@ -85,7 +85,7 @@ static gametype_t gametype;
 
 static int cnt;
 
-static int time;
+static int thetime;
 static int hours;
 static int minutes;
 static int seconds;
@@ -227,12 +227,12 @@ static void IN_InitStats(void)
 	if (!netgame)
 	{
 		gametype = SINGLE;
-		time = leveltime/35;
-		hours = time/3600;
-		time -= hours*3600;
-		minutes = time/60;
-		time -= minutes*60;
-		seconds = time;
+		thetime = leveltime/35;
+		hours = thetime/3600;
+		thetime -= hours*3600;
+		minutes = thetime/60;
+		thetime -= minutes*60;
+		seconds = thetime;
 	}
 	else if (netgame && !deathmatch)
 	{
@@ -409,7 +409,7 @@ void IN_Ticker(void)
 		switch (interstate)
 		{
 		case 0:
-			oldintertime = intertime+300;
+			oldintertime = intertime + 300;
 			if (gameepisode > 3)
 			{
 				oldintertime = intertime + 1200;

@@ -3,6 +3,8 @@
 // $Revision$
 // $Date$
 
+// HEADER FILES ------------------------------------------------------------
+
 #include "h2stdinc.h"
 #include <math.h>
 #include "doomdef.h"
@@ -10,42 +12,63 @@
 #include "soundst.h"
 #ifdef RENDER3D
 #include "ogl_def.h"
-float AccurateDistance(fixed_t dx,fixed_t dy);
 #endif
 
-void	P_SpawnMapThing (mapthing_t *mthing);
+// MACROS ------------------------------------------------------------------
 
-int			numvertexes;
-vertex_t	*vertexes;
+// TYPES -------------------------------------------------------------------
 
-int			numsegs;
-seg_t		*segs;
+// EXTERNAL FUNCTION PROTOTYPES --------------------------------------------
 
-int			numsectors;
-sector_t	*sectors;
+void P_SpawnMapThing(mapthing_t *mthing);
 
-int			numsubsectors;
-subsector_t	*subsectors;
+// PUBLIC FUNCTION PROTOTYPES ----------------------------------------------
 
-int			numnodes;
-node_t		*nodes;
+// PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
-int			numlines;
-line_t		*lines;
+#ifdef RENDER3D
+static float AccurateDistance(fixed_t dx,fixed_t dy);
+#endif
 
-int			numsides;
-side_t		*sides;
+// EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
-short		*blockmaplump;			// offsets in blockmap are from here
-short		*blockmap;
-int			bmapwidth, bmapheight;	// in mapblocks
-fixed_t		bmaporgx, bmaporgy;		// origin of block map
-mobj_t		**blocklinks;			// for thing chains
-
-byte		*rejectmatrix;			// for fast sight rejection
+// PUBLIC DATA DEFINITIONS -------------------------------------------------
 
 mapthing_t	deathmatchstarts[10], *deathmatch_p;
 mapthing_t	playerstarts[MAXPLAYERS];
+
+int		numvertexes;
+vertex_t	*vertexes;
+
+int		numsegs;
+seg_t		*segs;
+
+int		numsectors;
+sector_t	*sectors;
+
+int		numsubsectors;
+subsector_t	*subsectors;
+
+int		numnodes;
+node_t		*nodes;
+
+int		numlines;
+line_t		*lines;
+
+int		numsides;
+side_t		*sides;
+
+short		*blockmaplump;		// offsets in blockmap are from here
+short		*blockmap;
+int		bmapwidth, bmapheight;	// in mapblocks
+fixed_t		bmaporgx, bmaporgy;	// origin of block map
+mobj_t		**blocklinks;		// for thing chains
+byte		*rejectmatrix;		// for fast sight rejection
+
+// PRIVATE DATA DEFINITIONS ------------------------------------------------
+
+// CODE --------------------------------------------------------------------
+
 
 /*
 =================
@@ -55,25 +78,25 @@ mapthing_t	playerstarts[MAXPLAYERS];
 =================
 */
 
-void P_LoadVertexes (int lump)
+static void P_LoadVertexes (int lump)
 {
 	void		*data;
 	int		i;
 	mapvertex_t	*ml;
 	vertex_t	*li;
-	
+
 	numvertexes = W_LumpLength (lump) / sizeof(mapvertex_t);
 	vertexes = (vertex_t *) Z_Malloc (numvertexes*sizeof(vertex_t), PU_LEVEL, NULL);
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+	data = W_CacheLumpNum (lump, PU_STATIC);
+
 	ml = (mapvertex_t *)data;
 	li = vertexes;
-	for (i=0 ; i<numvertexes ; i++, li++, ml++)
+	for (i = 0; i < numvertexes; i++, li++, ml++)
 	{
 		li->x = SHORT(ml->x)<<FRACBITS;
 		li->y = SHORT(ml->y)<<FRACBITS;
 	}
-	
+
 	Z_Free (data);
 }
 
@@ -86,7 +109,7 @@ void P_LoadVertexes (int lump)
 =================
 */
 
-void P_LoadSegs (int lump)
+static void P_LoadSegs (int lump)
 {
 	void		*data;
 	int		i;
@@ -94,19 +117,19 @@ void P_LoadSegs (int lump)
 	seg_t		*li;
 	line_t		*ldef;
 	int		_linedef, side;
-	
+
 	numsegs = W_LumpLength (lump) / sizeof(mapseg_t);
 	segs = (seg_t *) Z_Malloc (numsegs*sizeof(seg_t), PU_LEVEL, NULL);
 	memset (segs, 0, numsegs*sizeof(seg_t));
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+	data = W_CacheLumpNum (lump, PU_STATIC);
+
 	ml = (mapseg_t *)data;
 	li = segs;
-	for (i=0 ; i<numsegs ; i++, li++, ml++)
+	for (i = 0; i < numsegs; i++, li++, ml++)
 	{
 		li->v1 = &vertexes[SHORT(ml->v1)];
 		li->v2 = &vertexes[SHORT(ml->v2)];
-					
+
 		li->angle = (SHORT(ml->angle))<<16;
 		li->offset = (SHORT(ml->offset))<<16;
 		_linedef = SHORT(ml->linedef);
@@ -119,14 +142,14 @@ void P_LoadSegs (int lump)
 			li->backsector = sides[ldef->sidenum[side^1]].sector;
 		else
 			li->backsector = 0;
+
 #ifdef RENDER3D
-        // Calculate the length of the segment. We need this for
-        // the texture coordinates. -jk
-        li->len = AccurateDistance( li->v2->x - li->v1->x,
-                                    li->v2->y - li->v1->y );
+	// Calculate the length of the segment. We need this for
+	// the texture coordinates. -jk
+		li->len = AccurateDistance(li->v2->x - li->v1->x, li->v2->y - li->v1->y);
 #endif
 	}
-	
+
 	Z_Free (data);
 }
 
@@ -139,26 +162,26 @@ void P_LoadSegs (int lump)
 =================
 */
 
-void P_LoadSubsectors (int lump)
+static void P_LoadSubsectors (int lump)
 {
-	void		*data;
-	int		i;
-	mapsubsector_t	*ms;
-	subsector_t	*ss;
-	
+	void			*data;
+	int			i;
+	mapsubsector_t		*ms;
+	subsector_t		*ss;
+
 	numsubsectors = W_LumpLength (lump) / sizeof(mapsubsector_t);
 	subsectors = (subsector_t *) Z_Malloc (numsubsectors*sizeof(subsector_t), PU_LEVEL, NULL);
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+	data = W_CacheLumpNum (lump, PU_STATIC);
+
 	ms = (mapsubsector_t *)data;
-	memset (subsectors,0, numsubsectors*sizeof(subsector_t));
+	memset (subsectors, 0, numsubsectors*sizeof(subsector_t));
 	ss = subsectors;
-	for (i=0 ; i<numsubsectors ; i++, ss++, ms++)
+	for (i = 0; i < numsubsectors; i++, ss++, ms++)
 	{
 		ss->numlines = SHORT(ms->numsegs);
 		ss->firstline = SHORT(ms->firstseg);
 	}
-	
+
 	Z_Free (data);
 }
 
@@ -171,21 +194,22 @@ void P_LoadSubsectors (int lump)
 =================
 */
 
-void P_LoadSectors (int lump)
+static void P_LoadSectors (int lump)
 {
 	void			*data;
 	int			i;
 	mapsector_t		*ms;
 	sector_t		*ss;
-	
+
 	numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
 	sectors = (sector_t *) Z_Malloc (numsectors*sizeof(sector_t), PU_LEVEL, NULL);
 	memset (sectors, 0, numsectors*sizeof(sector_t));
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+	data = W_CacheLumpNum (lump, PU_STATIC);
+
 	ms = (mapsector_t *)data;
 	ss = sectors;
-	for (i=0 ; i<numsectors ; i++, ss++, ms++)
+
+	for (i = 0; i < numsectors; i++, ss++, ms++)
 	{
 		ss->floorheight = SHORT(ms->floorheight)<<FRACBITS;
 		ss->ceilingheight = SHORT(ms->ceilingheight)<<FRACBITS;
@@ -195,13 +219,13 @@ void P_LoadSectors (int lump)
 		ss->special = SHORT(ms->special);
 		ss->tag = SHORT(ms->tag);
 		ss->thinglist = NULL;
+
 #ifdef RENDER3D
-        ss->flatoffx = ss->flatoffy = 0;    // Flat scrolling.
-        ss->skyfix = 0;     // Set if needed.
+		ss->flatoffx = ss->flatoffy = 0;// Flat scrolling.
+		ss->skyfix = 0;			// Set if needed.
 #endif
 	}
-	
-	Z_Free (data);
+	Z_Free(data);
 }
 
 
@@ -213,36 +237,34 @@ void P_LoadSectors (int lump)
 =================
 */
 
-void P_LoadNodes (int lump)
+static void P_LoadNodes (int lump)
 {
 	void		*data;
 	int		i, j, k;
 	mapnode_t	*mn;
 	node_t		*no;
-	
+
 	numnodes = W_LumpLength (lump) / sizeof(mapnode_t);
 	nodes = (node_t *) Z_Malloc (numnodes*sizeof(node_t), PU_LEVEL, NULL);
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+	data = W_CacheLumpNum (lump, PU_STATIC);
+
 	mn = (mapnode_t *)data;
 	no = nodes;
-	for (i=0 ; i<numnodes ; i++, no++, mn++)
+	for (i = 0; i < numnodes; i++, no++, mn++)
 	{
 		no->x = SHORT(mn->x)<<FRACBITS;
 		no->y = SHORT(mn->y)<<FRACBITS;
 		no->dx = SHORT(mn->dx)<<FRACBITS;
 		no->dy = SHORT(mn->dy)<<FRACBITS;
-		for (j=0 ; j<2 ; j++)
+		for (j = 0; j < 2; j++)
 		{
 			no->children[j] = SHORT(mn->children[j]);
-			for (k=0 ; k<4 ; k++)
+			for (k = 0; k < 4; k++)
 				no->bbox[j][k] = SHORT(mn->bbox[j][k])<<FRACBITS;
 		}
 	}
-	
 	Z_Free (data);
 }
-
 
 
 /*
@@ -253,31 +275,28 @@ void P_LoadNodes (int lump)
 =================
 */
 
-void P_LoadThings (int lump)
+static void P_LoadThings(int lump)
 {
 	void		*data;
 	int		i;
 	mapthing_t	*mt;
 	int		numthings;
-	
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	numthings = W_LumpLength (lump) / sizeof(mapthing_t);
-	
+
+	data = W_CacheLumpNum(lump, PU_STATIC);
+	numthings = W_LumpLength(lump) / sizeof(mapthing_t);
+
 	mt = (mapthing_t *)data;
-	for (i=0 ; i<numthings ; i++, mt++)
+	for (i = 0; i < numthings; i++, mt++)
 	{
 		mt->x = SHORT(mt->x);
 		mt->y = SHORT(mt->y);
 		mt->angle = SHORT(mt->angle);
 		mt->type = SHORT(mt->type);
 		mt->options = SHORT(mt->options);
-		P_SpawnMapThing (mt);
+		P_SpawnMapThing(mt);
 	}
-	
-	Z_Free (data);
+	Z_Free(data);
 }
-
-
 
 /*
 =================
@@ -288,26 +307,28 @@ void P_LoadThings (int lump)
 =================
 */
 
-void P_LoadLineDefs (int lump)
+static void P_LoadLineDefs(int lump)
 {
 	void		*data;
 	int		i;
 	maplinedef_t	*mld;
 	line_t		*ld;
 	vertex_t	*v1, *v2;
-	
-	numlines = W_LumpLength (lump) / sizeof(maplinedef_t);
-	lines = (line_t *) Z_Malloc (numlines*sizeof(line_t), PU_LEVEL, NULL);
-	memset (lines, 0, numlines*sizeof(line_t));
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+
+	numlines = W_LumpLength(lump) / sizeof(maplinedef_t);
+	lines = (line_t *) Z_Malloc(numlines*sizeof(line_t), PU_LEVEL, NULL);
+	memset(lines, 0, numlines*sizeof(line_t));
+	data = W_CacheLumpNum(lump, PU_STATIC);
+
 	mld = (maplinedef_t *)data;
 	ld = lines;
-	for (i=0 ; i<numlines ; i++, mld++, ld++)
+	for (i = 0; i < numlines; i++, mld++, ld++)
 	{
 		ld->flags = SHORT(mld->flags);
+
 		ld->special = SHORT(mld->special);
 		ld->tag = SHORT(mld->tag);
+
 		v1 = ld->v1 = &vertexes[SHORT(mld->v1)];
 		v2 = ld->v2 = &vertexes[SHORT(mld->v2)];
 		ld->dx = v2->x - v1->x;
@@ -323,7 +344,7 @@ void P_LoadLineDefs (int lump)
 			else
 				ld->slopetype = ST_NEGATIVE;
 		}
-		
+
 		if (v1->x < v2->x)
 		{
 			ld->bbox[BOXLEFT] = v1->x;
@@ -355,7 +376,7 @@ void P_LoadLineDefs (int lump)
 		else
 			ld->backsector = 0;
 	}
-	
+
 	Z_Free (data);
 }
 
@@ -368,21 +389,21 @@ void P_LoadLineDefs (int lump)
 =================
 */
 
-void P_LoadSideDefs (int lump)
+static void P_LoadSideDefs (int lump)
 {
 	void		*data;
 	int		i;
 	mapsidedef_t	*msd;
 	side_t		*sd;
-	
+
 	numsides = W_LumpLength (lump) / sizeof(mapsidedef_t);
 	sides = (side_t *) Z_Malloc (numsides*sizeof(side_t), PU_LEVEL, NULL);
 	memset (sides, 0, numsides*sizeof(side_t));
-	data = W_CacheLumpNum (lump,PU_STATIC);
-	
+	data = W_CacheLumpNum (lump, PU_STATIC);
+
 	msd = (mapsidedef_t *)data;
 	sd = sides;
-	for (i=0 ; i<numsides ; i++, msd++, sd++)
+	for (i = 0; i < numsides; i++, msd++, sd++)
 	{
 		sd->textureoffset = SHORT(msd->textureoffset)<<FRACBITS;
 		sd->rowoffset = SHORT(msd->rowoffset)<<FRACBITS;
@@ -391,11 +412,8 @@ void P_LoadSideDefs (int lump)
 		sd->midtexture = R_TextureNumForName(msd->midtexture);
 		sd->sector = &sectors[SHORT(msd->sector)];
 	}
-	
-	Z_Free (data);
+	Z_Free(data);
 }
-
-
 
 /*
 =================
@@ -405,28 +423,26 @@ void P_LoadSideDefs (int lump)
 =================
 */
 
-void P_LoadBlockMap (int lump)
+static void P_LoadBlockMap (int lump)
 {
 	int		i, count;
-	
-	blockmaplump = (short *) W_CacheLumpNum (lump,PU_LEVEL);
+
+	blockmaplump = (short *) W_CacheLumpNum (lump, PU_LEVEL);
 	blockmap = blockmaplump + 4;
 	count = W_LumpLength (lump) / 2;
 	for (i = 0; i < count; i++)
 		blockmaplump[i] = SHORT(blockmaplump[i]);
-		
+
 	bmaporgx = blockmaplump[0]<<FRACBITS;
 	bmaporgy = blockmaplump[1]<<FRACBITS;
 	bmapwidth = blockmaplump[2];
 	bmapheight = blockmaplump[3];
-	
+
 // clear out mobj chains
-	count = sizeof(*blocklinks)* bmapwidth*bmapheight;
+	count = sizeof(*blocklinks) * bmapwidth * bmapheight;
 	blocklinks = (mobj_t **) Z_Malloc (count, PU_LEVEL, NULL);
 	memset (blocklinks, 0, count);
 }
-
-
 
 
 /*
@@ -439,20 +455,20 @@ void P_LoadBlockMap (int lump)
 =================
 */
 
-void P_GroupLines (void)
+static void P_GroupLines (void)
 {
 	line_t		**linebuffer;
-	int			i, j, total;
+	int		i, j, total;
 	line_t		*li;
 	sector_t	*sector;
 	subsector_t	*ss;
 	seg_t		*seg;
 	fixed_t		bbox[4];
-	int			block;
-	
+	int		block;
+
 // look up sector number for each subsector
 	ss = subsectors;
-	for (i=0 ; i<numsubsectors ; i++, ss++)
+	for (i = 0; i < numsubsectors; i++, ss++)
 	{
 		seg = &segs[ss->firstline];
 		ss->sector = seg->sidedef->sector;
@@ -461,7 +477,7 @@ void P_GroupLines (void)
 // count number of lines in each sector
 	li = lines;
 	total = 0;
-	for (i=0 ; i<numlines ; i++, li++)
+	for (i = 0; i < numlines; i++, li++)
 	{
 		total++;
 		li->frontsector->linecount++;
@@ -471,16 +487,16 @@ void P_GroupLines (void)
 			total++;
 		}
 	}
-	
-// build line tables for each sector	
+
+// build line tables for each sector
 	linebuffer = (line_t **) Z_Malloc (total * sizeof(line_t *), PU_LEVEL, NULL);
 	sector = sectors;
-	for (i=0 ; i<numsectors ; i++, sector++)
+	for (i = 0; i < numsectors; i++, sector++)
 	{
 		M_ClearBox (bbox);
 		sector->lines = linebuffer;
 		li = lines;
-		for (j=0 ; j<numlines ; j++, li++)
+		for (j = 0; j < numlines; j++, li++)
 		{
 			if (li->frontsector == sector || li->backsector == sector)
 			{
@@ -491,361 +507,340 @@ void P_GroupLines (void)
 		}
 		if (linebuffer - sector->lines != sector->linecount)
 			I_Error ("P_GroupLines: miscounted");
-			
+
 		// set the degenmobj_t to the middle of the bounding box
-		sector->soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
-		sector->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
-		
+		sector->soundorg.x = (bbox[BOXRIGHT] + bbox[BOXLEFT]) / 2;
+		sector->soundorg.y = (bbox[BOXTOP] + bbox[BOXBOTTOM]) / 2;
+
 		// adjust bounding box to map blocks
-		block = (bbox[BOXTOP]-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;
-		block = block >= bmapheight ? bmapheight-1 : block;
-		sector->blockbox[BOXTOP]=block;
+		block = (bbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+		block = block >= bmapheight ? bmapheight - 1 : block;
+		sector->blockbox[BOXTOP] = block;
 
-		block = (bbox[BOXBOTTOM]-bmaporgy-MAXRADIUS)>>MAPBLOCKSHIFT;
+		block = (bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
 		block = block < 0 ? 0 : block;
-		sector->blockbox[BOXBOTTOM]=block;
+		sector->blockbox[BOXBOTTOM] = block;
 
-		block = (bbox[BOXRIGHT]-bmaporgx+MAXRADIUS)>>MAPBLOCKSHIFT;
-		block = block >= bmapwidth ? bmapwidth-1 : block;
-		sector->blockbox[BOXRIGHT]=block;
+		block = (bbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+		block = block >= bmapwidth ? bmapwidth - 1 : block;
+		sector->blockbox[BOXRIGHT] = block;
 
-		block = (bbox[BOXLEFT]-bmaporgx-MAXRADIUS)>>MAPBLOCKSHIFT;
+		block = (bbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
 		block = block < 0 ? 0 : block;
-		sector->blockbox[BOXLEFT]=block;
+		sector->blockbox[BOXLEFT] = block;
 	}
-	
 }
-#ifdef RENDER3D
-float AccurateDistance(fixed_t dx,fixed_t dy)
+
+
+#if defined(RENDER3D)
+
+#define MAX_CC_SIDES	64
+
+static float AccurateDistance(fixed_t dx,fixed_t dy)
 {
-    float fx = FIX2FLT(dx), fy = FIX2FLT(dy);
-
-    return (float)sqrt(fx*fx + fy*fy);
+	float fx = FIX2FLT(dx), fy = FIX2FLT(dy);
+	return (float)sqrt(fx*fx + fy*fy);
 }
 
-
-#define MAX_CC_SIDES    64
-
-int detSideFloat(fvertex_t *pnt, fdivline_t *dline)
+static int detSideFloat(fvertex_t *pnt, fdivline_t *dline)
 {
-/*
-            (AY-CY)(BX-AX)-(AX-CX)(BY-AY)
-        s = -----------------------------
-                        L**2
+	/*
+	    (AY-CY)(BX-AX)-(AX-CX)(BY-AY)
+	s = -----------------------------
+			L**2
 
-    If s<0      C is left of AB (you can just check the numerator)
-    If s>0      C is right of AB
-    If s=0      C is on AB
-*/
-    // We'll return false if the point c is on the left side.
-/*  float ax = FIX2FLT(a->x), ay = FIX2FLT(a->y);
-    float bx = FIX2FLT(b->x), by = FIX2FLT(b->y);
-    float cx = FIX2FLT(c->x), cy = FIX2FLT(c->y);*/
-    //float ax = dline->x, ay = dline->y;
-    //float bx = ax + dline->dx, by = ay + dline->dy;
+	If s < 0  C is left of AB (you can just check the numerator)
+	If s > 0  C is right of AB
+	If s = 0  C is on AB
 
-    // REWRITE using dline->dx and dline->dy for (bx-ax) and (by-ay).
-
-    //float s = /*(*/(ay-pnt->y)*(bx-ax)-(ax-pnt->x)*(by-ay);//)/l2;
-    float s = (dline->y-pnt->y)*dline->dx-(dline->x-pnt->x)*dline->dy;
-
-    if(s<0) return 0;
-    return 1;
+	We'll return false if the point c is on the left side.
+	*/
+	float s = (dline->y - pnt->y) * dline->dx - (dline->x - pnt->x) * dline->dy;
+	if (s < 0)
+		return 0;
+	return 1;
 }
-
 
 // Lines start-end and fdiv must intersect.
-float findIntersectionVertex( fvertex_t *start, fvertex_t *end,
-                              fdivline_t *fdiv, fvertex_t *inter )
+static float findIntersectionVertex(fvertex_t *start, fvertex_t *end,
+				    fdivline_t *fdiv, fvertex_t *inter)
 {
-    float ax = start->x, ay = start->y, bx = end->x, by = end->y;
-    float cx = fdiv->x, cy = fdiv->y, dx = cx+fdiv->dx, dy = cy+fdiv->dy;
-
-    /*
-            (YA-YC)(XD-XC)-(XA-XC)(YD-YC)
-        r = -----------------------------  (eqn 1)
-            (XB-XA)(YD-YC)-(YB-YA)(XD-XC)
-    */
-
-    float r = ((ay-cy)*(dx-cx)-(ax-cx)*(dy-cy)) /
-              ((bx-ax)*(dy-cy)-(by-ay)*(dx-cx));
-    /*
-        XI=XA+r(XB-XA)
-        YI=YA+r(YB-YA)
-    */
-    inter->x = ax + r*(bx-ax);
-    inter->y = ay + r*(by-ay);
-    return r;
+	float ax = start->x, ay = start->y, bx = end->x, by = end->y;
+	float cx = fdiv->x, cy = fdiv->y, dx = cx + fdiv->dx, dy = cy + fdiv->dy;
+	/*
+	    (YA-YC)(XD-XC)-(XA-XC)(YD-YC)
+	r = -----------------------------  (eqn 1)
+	    (XB-XA)(YD-YC)-(YB-YA)(XD-XC)
+	*/
+	float r = ((ay - cy) * (dx-cx) - (ax-cx) * (dy-cy)) /
+		((bx - ax) * (dy - cy) - (by - ay) * (dx-cx));
+	/*
+	XI=XA+r(XB-XA)
+	YI=YA+r(YB-YA)
+	*/
+	inter->x = ax + r * (bx - ax);
+	inter->y = ay + r * (by - ay);
+	return r;
 }
 
-
-void P_ConvexCarver(subsector_t *ssec, int num, divline_t *list)
+static void P_ConvexCarver(subsector_t *ssec, int num, divline_t *list)
 {
-    int         numclippers = num+ssec->numlines;
-    fdivline_t  *clippers = (fdivline_t*) Z_Malloc(numclippers*sizeof(fdivline_t), PU_STATIC, NULL);
-    int         i, k, numedgepoints;
-    fvertex_t   *edgepoints;
-    unsigned char sidelist[MAX_CC_SIDES];
+	int		numclippers = num + ssec->numlines;
+	fdivline_t	*clippers = (fdivline_t *) malloc(numclippers*sizeof(fdivline_t));
+	int		i, k, numedgepoints;
+	fvertex_t	*edgepoints;
+	unsigned char	sidelist[MAX_CC_SIDES];
 
-    // Convert the divlines to float, in reverse order.
-    for(i=0; i<numclippers; i++)
-    {
-        if(i<num)
-        {
-            clippers[i].x = FIX2FLT(list[num-i-1].x);
-            clippers[i].y = FIX2FLT(list[num-i-1].y);
-            clippers[i].dx = FIX2FLT(list[num-i-1].dx);
-            clippers[i].dy = FIX2FLT(list[num-i-1].dy);
-        }
-        else
-        {
-            seg_t *seg = segs+(ssec->firstline+i-num);
-            clippers[i].x = FIX2FLT(seg->v1->x);
-            clippers[i].y = FIX2FLT(seg->v1->y);
-            clippers[i].dx = FIX2FLT(seg->v2->x - seg->v1->x);
-            clippers[i].dy = FIX2FLT(seg->v2->y - seg->v1->y);
-        }
-    }
+// Convert the divlines to float, in reverse order.
+	for (i = 0; i < numclippers; i++)
+	{
+		if (i < num)
+		{
+			clippers[i].x = FIX2FLT(list[num - i - 1].x);
+			clippers[i].y = FIX2FLT(list[num - i - 1].y);
+			clippers[i].dx = FIX2FLT(list[num - i - 1].dx);
+			clippers[i].dy = FIX2FLT(list[num - i - 1].dy);
+		}
+		else
+		{
+			seg_t *seg = segs + (ssec->firstline + i - num);
+			clippers[i].x = FIX2FLT(seg->v1->x);
+			clippers[i].y = FIX2FLT(seg->v1->y);
+			clippers[i].dx = FIX2FLT(seg->v2->x - seg->v1->x);
+			clippers[i].dy = FIX2FLT(seg->v2->y - seg->v1->y);
+		}
+	}
 
-    // Setup the 'worldwide' polygon.
-    numedgepoints = 4;
-    edgepoints = (fvertex_t*)malloc(numedgepoints*sizeof(fvertex_t));
+// Setup the 'worldwide' polygon.
+	numedgepoints = 4;
+	edgepoints = (fvertex_t *) malloc(numedgepoints*sizeof(fvertex_t));
 
-    edgepoints[0].x = -32768;
-    edgepoints[0].y = 32768;
+	edgepoints[0].x = -32768;
+	edgepoints[0].y = 32768;
 
-    edgepoints[1].x = 32768;
-    edgepoints[1].y = 32768;
+	edgepoints[1].x = 32768;
+	edgepoints[1].y = 32768;
 
-    edgepoints[2].x = 32768;
-    edgepoints[2].y = -32768;
+	edgepoints[2].x = 32768;
+	edgepoints[2].y = -32768;
 
-    edgepoints[3].x = -32768;
-    edgepoints[3].y = -32768;
+	edgepoints[3].x = -32768;
+	edgepoints[3].y = -32768;
 
+// We'll now clip the polygon with each of the divlines. The left side of
+// each divline is discarded.
+	for (i = 0; i < numclippers; i++)
+	{
+		fdivline_t *curclip = clippers + i;
 
-    // We'll now clip the polygon with each of the divlines. The left side of
-    // each divline is discarded.
-    for(i=0; i<numclippers; i++)
-    {
-        fdivline_t *curclip = clippers+i;
+		// First we'll determine the side of each vertex.
+		// Points are allowed to be on the line.
+		for (k = 0; k < numedgepoints; k++)
+		{
+			sidelist[k] = detSideFloat(edgepoints + k, curclip);
+		}
 
-        // First we'll determine the side of each vertex. Points are allowed
-        // to be on the line.
-        for(k=0; k<numedgepoints; k++)
-        {
-            sidelist[k] = detSideFloat(edgepoints+k, curclip);
-        }
+		for (k = 0; k < numedgepoints; k++)
+		{
+			int startIdx = k, endIdx = k + 1;
 
-        for(k=0; k<numedgepoints; k++)
-        {
-            int startIdx = k, endIdx = k+1;
+			// Check the end index.
+			if (endIdx == numedgepoints)
+				endIdx = 0;	// Wrap-around.
 
-            // Check the end index.
-            if(endIdx == numedgepoints) endIdx = 0; // Wrap-around.
+			// Clipping will happen when the ends are on different sides.
+			if (sidelist[startIdx] != sidelist[endIdx])
+			{
+				fvertex_t newvert;
+			// Find the intersection point of intersecting lines.
+				findIntersectionVertex(edgepoints + startIdx, edgepoints + endIdx, curclip, &newvert);
 
-            // Clipping will happen when the ends are on different sides.
-            if(sidelist[startIdx] != sidelist[endIdx])
-            {
-                fvertex_t newvert;
-                // Find the intersection point of intersecting lines.
-                findIntersectionVertex(edgepoints+startIdx, edgepoints+endIdx,
-                    curclip, &newvert);
+			// Add the new vertex. Also modify the sidelist.
+				edgepoints = (fvertex_t *) realloc(edgepoints, (++numedgepoints)*sizeof(fvertex_t));
+				if (numedgepoints >= MAX_CC_SIDES)
+					I_Error("Too many points in carver.\n");
 
-                // Add the new vertex. Also modify the sidelist.
-                edgepoints =
-(fvertex_t*)realloc(edgepoints,(++numedgepoints)*sizeof(fvertex_t));
-                if(numedgepoints >= MAX_CC_SIDES) I_Error("Too many points in carver.\n");
+			// Make room for the new vertex.
+				memmove(edgepoints + endIdx + 1, edgepoints + endIdx,
+					(numedgepoints - endIdx - 1)*sizeof(fvertex_t));
+				memcpy (edgepoints + endIdx, &newvert, sizeof(newvert));
 
-                // Make room for the new vertex.
-                memmove(edgepoints+endIdx+1, edgepoints+endIdx,
-                    (numedgepoints-endIdx-1)*sizeof(fvertex_t));
-                memcpy(edgepoints+endIdx, &newvert, sizeof(newvert));
+				memmove(sidelist + endIdx + 1, sidelist + endIdx, numedgepoints - endIdx - 1);
+				sidelist[endIdx] = 1;
 
-                memmove(sidelist+endIdx+1, sidelist+endIdx,
-numedgepoints-endIdx-1);
-                sidelist[endIdx] = 1;
+			// Skip over the new vertex.
+				k++;
+			}
+		}
 
-                // Skip over the new vertex.
-                k++;
-            }
-        }
+	// Now we must discard the points that are on the wrong side.
+		for (k = 0; k < numedgepoints; k++)
+		{
+			if (!sidelist[k])
+			{
+				memmove(edgepoints + k, edgepoints + k + 1, (numedgepoints-k-1)*sizeof(fvertex_t));
+				memmove(sidelist + k, sidelist + k + 1, numedgepoints - k - 1);
+				numedgepoints--;
+				k--;
+			}
+		} 
+	}
 
-        // Now we must discard the points that are on the wrong side.
-        for(k=0; k<numedgepoints; k++)
-            if(!sidelist[k])
-            {
-                memmove(edgepoints+k, edgepoints+k+1,
-(numedgepoints-k-1)*sizeof(fvertex_t));
-                memmove(sidelist+k, sidelist+k+1, numedgepoints-k-1);
-                numedgepoints--;
-                k--;
-            }
-    }
+	if (!numedgepoints)
+	{
+	//	I_Error("All carved away!\n");
+		printf( "All carved away: subsector %p\n", ssec);
+		ssec->numedgeverts = 0;
+		ssec->edgeverts = 0;
+		ssec->origedgeverts = 0;
+	}
+	else
+	{
+		// Screen out consecutive identical points.
+		for (i = 0; i < numedgepoints; i++)
+		{
+			int previdx = i - 1;
+			if (previdx < 0)
+				previdx = numedgepoints - 1;
+			if (edgepoints[i].x == edgepoints[previdx].x &&
+			    edgepoints[i].y == edgepoints[previdx].y)
+			{
+			// This point (i) must be removed.
+				memmove(edgepoints + i, edgepoints + i + 1,
+					sizeof(fvertex_t)*(numedgepoints - i - 1));
+				numedgepoints--;
+				i--;
+			}
+		}
+		// We need these with dynamic lights.
+		ssec->origedgeverts = (fvertex_t *) Z_Malloc(sizeof(fvertex_t)*numedgepoints, PU_LEVEL, NULL);
+		memcpy(ssec->origedgeverts, edgepoints, sizeof(fvertex_t)*numedgepoints);
 
-    if(!numedgepoints)
-    {
-        //I_Error("All carved away!\n");
-        printf( "All carved away: subsector %p\n", ssec);
-        ssec->numedgeverts = 0;
-        ssec->edgeverts = 0;
-        ssec->origedgeverts = 0;
-    }
-    else
-    {
-        // Screen out consecutive identical points.
-        for(i=0; i<numedgepoints; i++)
-        {
-            int previdx = i-1;
-            if(previdx < 0) previdx = numedgepoints-1;
-            if(edgepoints[i].x == edgepoints[previdx].x
-                && edgepoints[i].y == edgepoints[previdx].y)
-            {
-                // This point (i) must be removed.
-                memmove(edgepoints+i, edgepoints+i+1,
-sizeof(fvertex_t)*(numedgepoints-i-1));
-                numedgepoints--;
-                i--;
-            }
-        }
-        // We need these with dynamic lights.
-        ssec->origedgeverts =
-(fvertex_t*)Z_Malloc(sizeof(fvertex_t)*numedgepoints, PU_LEVEL, NULL);
-        memcpy(ssec->origedgeverts, edgepoints, sizeof(fvertex_t)*numedgepoints);
+		// Find the center point. Do this by first finding the bounding box.
+		ssec->bbox[0].x = ssec->bbox[1].x = edgepoints[0].x;
+		ssec->bbox[0].y = ssec->bbox[1].y = edgepoints[0].y;
+		for (i = 1; i < numedgepoints; i++)
+		{
+			if (edgepoints[i].x < ssec->bbox[0].x)
+				ssec->bbox[0].x = edgepoints[i].x;
+			if (edgepoints[i].y < ssec->bbox[0].y)
+				ssec->bbox[0].y = edgepoints[i].y;
+			if (edgepoints[i].x > ssec->bbox[1].x)
+				ssec->bbox[1].x = edgepoints[i].x;
+			if (edgepoints[i].y > ssec->bbox[1].y)
+				ssec->bbox[1].y = edgepoints[i].y;
+		}
+		ssec->midpoint.x = (ssec->bbox[1].x + ssec->bbox[0].x) / 2;
+		ssec->midpoint.y = (ssec->bbox[1].y + ssec->bbox[0].y) / 2;
 
-        // Find the center point. Do this by first finding the bounding box.
-        ssec->bbox[0].x = ssec->bbox[1].x = edgepoints[0].x;
-        ssec->bbox[0].y = ssec->bbox[1].y = edgepoints[0].y;
-        for(i=1; i<numedgepoints; i++)
-        {
-            if(edgepoints[i].x < ssec->bbox[0].x) ssec->bbox[0].x =
-edgepoints[i].x;
-            if(edgepoints[i].y < ssec->bbox[0].y) ssec->bbox[0].y =
-edgepoints[i].y;
-            if(edgepoints[i].x > ssec->bbox[1].x) ssec->bbox[1].x =
-edgepoints[i].x;
-            if(edgepoints[i].y > ssec->bbox[1].y) ssec->bbox[1].y =
-edgepoints[i].y;
-        }
-        ssec->midpoint.x = (ssec->bbox[1].x+ssec->bbox[0].x)/2;
-        ssec->midpoint.y = (ssec->bbox[1].y+ssec->bbox[0].y)/2;
+		// Make slight adjustments to patch up those ugly, small gaps.
+		for (i = 0; i < numedgepoints; i++)
+		{
+			float dx = edgepoints[i].x - ssec->midpoint.x,
+			      dy = edgepoints[i].y - ssec->midpoint.y;
+			float dlen = (float) sqrt(dx*dx + dy*dy) * 3;
+			if (dlen)
+			{
+				edgepoints[i].x += dx / dlen;
+				edgepoints[i].y += dy / dlen;
+			}
+		}
 
-        // Make slight adjustments to patch up those ugly, small gaps.
-        for(i=0; i<numedgepoints; i++)
-        {
-            float dx = edgepoints[i].x - ssec->midpoint.x,
-                dy = edgepoints[i].y - ssec->midpoint.y;
-            float dlen = (float) sqrt(dx*dx + dy*dy) * 3;
-            if(dlen)
-            {
-                edgepoints[i].x += dx/dlen;
-                edgepoints[i].y += dy/dlen;
-            }
-        }
+		ssec->numedgeverts = numedgepoints;
+		ssec->edgeverts = (fvertex_t *) Z_Malloc(sizeof(fvertex_t)*numedgepoints, PU_LEVEL, NULL);
+		memcpy(ssec->edgeverts, edgepoints, sizeof(fvertex_t)*numedgepoints);
+	}
 
-        ssec->numedgeverts = numedgepoints;
-        ssec->edgeverts =
-(fvertex_t*)Z_Malloc(sizeof(fvertex_t)*numedgepoints,PU_LEVEL,NULL);
-        memcpy(ssec->edgeverts, edgepoints, sizeof(fvertex_t)*numedgepoints);
-    }
-
-    // We're done, free the edgepoints memory.
-    free(edgepoints);
-    Z_Free(clippers);
+	// We're done, free the edgepoints memory.
+	free(clippers);
+	free(edgepoints);
 }
 
-
-void P_CreateFloorsAndCeilings( int bspnode, int numdivlines,
-                                divline_t* divlines )
+static void P_CreateFloorsAndCeilings(int bspnode, int numdivlines, divline_t* divlines)
 {
-    node_t      *nod;
-    divline_t   *childlist, *dl;
-    int         childlistsize = numdivlines+1;
+	node_t		*nod;
+	divline_t	*childlist, *dl;
+	int		childlistsize = numdivlines + 1;
 
-    // If this is a subsector we are dealing with, begin carving with the
-    // given list.
-    if(bspnode & NF_SUBSECTOR)
-    {
+	// If this is a subsector we are dealing with, begin carving with the
+	// given list.
+	if (bspnode & NF_SUBSECTOR)
+	{
+	// We have arrived at a subsector. The divline list contains all
+	// the partition lines that carve out the subsector.
+		int ssidx = bspnode & (~NF_SUBSECTOR);
+		OGL_DEBUG("subsector %d: %d divlines\n", ssidx, numdivlines);
+	//	if (ssidx < 10)
+		P_ConvexCarver(subsectors+ssidx, numdivlines, divlines);
 
-        // We have arrived at a subsector. The divline list contains all
-        // the partition lines that carve out the subsector.
+		OGL_DEBUG("subsector %d: %d edgeverts\n", ssidx, subsectors[ssidx].numedgeverts);
+		return;	// This leaf is done.
+	}
 
-        //printf( "subsector %d: %d
-        //divlines\n",bspnode&(~NF_SUBSECTOR),numdivlines);
+	// Get a pointer to the node.
+	nod = nodes + bspnode;
 
-        int ssidx = bspnode & (~NF_SUBSECTOR);
-        //if(ssidx < 10)
-        P_ConvexCarver(subsectors+ssidx, numdivlines, divlines);
+	// Allocate a new list for each child.
+	childlist = (divline_t *) malloc(childlistsize*sizeof(divline_t));
 
-        //printf( "subsector %d: %d edgeverts\n", ssidx,
-        //subsectors[ssidx].numedgeverts);
-        // This leaf is done.
-        return;
-    }
+	// Copy the previous lines.
+	if (divlines)
+		memcpy(childlist, divlines, numdivlines*sizeof(divline_t));
 
-    // Get a pointer to the node.
-    nod = nodes + bspnode;
+	dl = childlist + numdivlines;
+	dl->x = nod->x;
+	dl->y = nod->y;
+	// The right child gets the original line (LEFT side clipped).
+	dl->dx = nod->dx;
+	dl->dy = nod->dy;
+	P_CreateFloorsAndCeilings(nod->children[0], childlistsize, childlist);
 
-    // Allocate a new list for each child.
-    childlist = (divline_t*)malloc(childlistsize*sizeof(divline_t));
+	// The left side. We must reverse the line, otherwise the wrong
+	// side would get clipped.
+	dl->dx = -nod->dx;
+	dl->dy = -nod->dy;
+	P_CreateFloorsAndCeilings(nod->children[1], childlistsize, childlist);
 
-    // Copy the previous lines.
-    if(divlines) memcpy(childlist,divlines,numdivlines*sizeof(divline_t));
-
-    dl = childlist + numdivlines;
-    dl->x = nod->x;
-    dl->y = nod->y;
-    // The right child gets the original line (LEFT side clipped).
-    dl->dx = nod->dx;
-    dl->dy = nod->dy;
-    P_CreateFloorsAndCeilings(nod->children[0],childlistsize,childlist);
-
-    // The left side. We must reverse the line, otherwise the wrong
-    // side would get clipped.
-    dl->dx = -nod->dx;
-    dl->dy = -nod->dy;
-    P_CreateFloorsAndCeilings(nod->children[1],childlistsize,childlist);
-
-    // We are finishing with this node, free the allocated list.
-    free(childlist);
+	// We are finishing with this node, free the allocated list.
+	free(childlist);
 }
 
-
-void P_SkyFix()
+static void P_SkyFix(void)
 {
-    int         i;
+	int		i;
 
-    // We need to check all the linedefs.
-    for(i=0; i<numlines; i++)
-    {
-        line_t *line = lines + i;
-        sector_t *front = line->frontsector, *back = line->backsector;
-        int fix = 0;
-        // The conditions!
-        if(!front || !back) continue;
-        // Both the front and back sectors must have the sky ceiling.
-        if(front->ceilingpic != skyflatnum || back->ceilingpic != skyflatnum)
-            continue;
-        // Operate on the lower sector.
-        /*ST_Message("Line %d (f:%d, b:%d).\n", i, front->ceilingheight >>
-         * FRACBITS,
-            back->ceilingheight >> FRACBITS);*/
-        if(front->ceilingheight < back->ceilingheight)
-        {
-            fix = (back->ceilingheight-front->ceilingheight) >> FRACBITS;
-            if(fix > front->skyfix) front->skyfix = fix;
-        }
-        else if(front->ceilingheight > back->ceilingheight)
-        {
-            fix = (front->ceilingheight-back->ceilingheight) >> FRACBITS;
-            if(fix > back->skyfix) back->skyfix = fix;
-        }
-    }
+	// We need to check all the linedefs.
+	for (i = 0; i < numlines; i++)
+	{
+		line_t *line = lines + i;
+		sector_t *front = line->frontsector, *back = line->backsector;
+		int fix = 0;
+		// The conditions!
+		if (!front || !back)
+			continue;
+		// Both the front and back sectors must have the sky ceiling.
+		if (front->ceilingpic != skyflatnum || back->ceilingpic != skyflatnum)
+			continue;
+		// Operate on the lower sector.
+		OGL_DEBUG("Line %d (f:%d, b:%d).\n", i, front->ceilingheight >> FRACBITS,
+							 back->ceilingheight >> FRACBITS);
+		if (front->ceilingheight < back->ceilingheight)
+		{
+			fix = (back->ceilingheight - front->ceilingheight) >> FRACBITS;
+			if (fix > front->skyfix)
+				front->skyfix = fix;
+		}
+		else if (front->ceilingheight > back->ceilingheight)
+		{
+			fix = (front->ceilingheight - back->ceilingheight) >> FRACBITS;
+			if (fix > back->skyfix)
+				back->skyfix = fix;
+		}
+	}
 }
-#endif
+#endif	/* RENDER3D */
 
 //=============================================================================
-
 
 /*
 =================
@@ -855,32 +850,31 @@ void P_SkyFix()
 =================
 */
 
-void P_SetupLevel (int episode, int map, int playermask, skill_t skill)
+void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
 {
-	int i;
-	int parm;
-	char	lumpname[9];
+	int		i;
+	int		parm;
+	char		lumpname[9];
 	int		lumpnum;
-	mobj_t	*mobj;
-	
+	mobj_t		*mobj;
+
 	totalkills = totalitems = totalsecret = 0;
-	for (i=0 ; i<MAXPLAYERS ; i++)
+	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		players[i].killcount = players[i].secretcount 
-		= players[i].itemcount = 0;
+		players[i].killcount = players[i].secretcount = players[i].itemcount = 0;
 	}
-	players[consoleplayer].viewz = 1; // will be set by player think
-	
-	S_Start ();			// make sure all sounds are stopped before Z_FreeTags
-	
-	Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
+	players[consoleplayer].viewz = 1;	// will be set by player think
+
+	S_Start ();	// make sure all sounds are stopped before Z_FreeTags
+
+	Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
 
 #ifdef RENDER3D
-    OGL_ResetData();
+	OGL_ResetData();
 #endif
-	
-	P_InitThinkers ();
-	
+
+	P_InitThinkers();
+
 //
 // look for a regular (development) map first
 //
@@ -890,67 +884,64 @@ void P_SetupLevel (int episode, int map, int playermask, skill_t skill)
 	lumpname[3] = '0' + map;
 	lumpname[4] = 0;
 	leveltime = 0;
-	
-	lumpnum = W_GetNumForName (lumpname);
-	
-// note: most of this ordering is important	
-	P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
-	P_LoadVertexes (lumpnum+ML_VERTEXES);
-	P_LoadSectors (lumpnum+ML_SECTORS);
-	P_LoadSideDefs (lumpnum+ML_SIDEDEFS);
 
-	P_LoadLineDefs (lumpnum+ML_LINEDEFS);
-	P_LoadSubsectors (lumpnum+ML_SSECTORS);
-	P_LoadNodes (lumpnum+ML_NODES);
-	P_LoadSegs (lumpnum+ML_SEGS);
+	lumpnum = W_GetNumForName (lumpname);
+
+	// Note: most of this ordering is important
+	P_LoadBlockMap(lumpnum + ML_BLOCKMAP);
+	P_LoadVertexes(lumpnum + ML_VERTEXES);
+	P_LoadSectors(lumpnum + ML_SECTORS);
+	P_LoadSideDefs(lumpnum + ML_SIDEDEFS);
+	P_LoadLineDefs(lumpnum + ML_LINEDEFS);
+	P_LoadSubsectors(lumpnum + ML_SSECTORS);
+	P_LoadNodes(lumpnum + ML_NODES);
+	P_LoadSegs(lumpnum + ML_SEGS);
 
 #ifdef RENDER3D
-    // We need to carve out the floor/ceiling polygons of each subsector.
-    // Walk the tree to do this.
-    //ST_Message( "Floor/ceiling creation: begin at %d, ", ticcount);
-    P_CreateFloorsAndCeilings(numnodes-1, 0, 0);
-    // Also check if the sky needs a fix.
-    P_SkyFix();
+	// We need to carve out the floor/ceiling polygons of each subsector.
+	// Walk the tree to do this.
+	//OGL_DEBUG("Floor/ceiling creation: begin at %d, ", ticcount);
+	P_CreateFloorsAndCeilings(numnodes - 1, 0, 0);
+	// Also check if the sky needs a fix.
+	P_SkyFix();
 #endif
-	
-	rejectmatrix = (byte *) W_CacheLumpNum(lumpnum + ML_REJECT, PU_LEVEL);
-	P_GroupLines ();
 
+	rejectmatrix = (byte *) W_CacheLumpNum(lumpnum + ML_REJECT, PU_LEVEL);
+	P_GroupLines();
 	bodyqueslot = 0;
 	deathmatch_p = deathmatchstarts;
 	P_InitAmbientSound();
 	P_InitMonsters();
 	P_OpenWeapons();
-	P_LoadThings(lumpnum+ML_THINGS);
+	P_LoadThings(lumpnum + ML_THINGS);
 	P_CloseWeapons();
 
-//
-// if deathmatch, randomly spawn the active players
-//
+	// If deathmatch, randomly spawn the active players
 	TimerGame = 0;
-	if(deathmatch)
+	if (deathmatch)
 	{
-		for (i=0 ; i<MAXPLAYERS ; i++)
+		for (i = 0; i < MAXPLAYERS; i++)
 		{
 			if (playeringame[i])
-			{	// must give a player spot before deathmatchspawn
+			{   // must give a player spot before deathmatchspawn
 				mobj = P_SpawnMobj (playerstarts[i].x<<16,
-				playerstarts[i].y<<16,0, MT_PLAYER);
+						    playerstarts[i].y<<16,
+						    0, MT_PLAYER);
 				players[i].mo = mobj;
 				G_DeathMatchSpawnPlayer (i);
 				P_RemoveMobj (mobj);
 			}
 		}
 		parm = M_CheckParm("-timer");
-		if(parm && parm < myargc-1)
+		if (parm && parm < myargc - 1)
 		{
-			TimerGame = atoi(myargv[parm+1])*35*60;
+			TimerGame = atoi(myargv[parm + 1]) * 35 * 60;
 		}
 	}
 
 // set up world state
 	P_SpawnSpecials ();
-	
+
 // build subsector connect matrix
 //	P_ConnectSubsectors ();
 
@@ -958,8 +949,7 @@ void P_SetupLevel (int episode, int map, int playermask, skill_t skill)
 	if (precache)
 		R_PrecacheLevel ();
 
-//printf ("free memory: 0x%x\n", Z_FreeMemory());
-
+//	printf ("free memory: 0x%x\n", Z_FreeMemory());
 }
 
 
@@ -971,11 +961,12 @@ void P_SetupLevel (int episode, int map, int playermask, skill_t skill)
 =================
 */
 
-void P_Init (void)
-{	
+void P_Init(void)
+{
 	P_InitSwitchList();
 	P_InitPicAnims();
 	P_InitTerrainTypes();
 	P_InitLava();
 	R_InitSprites(sprnames);
 }
+

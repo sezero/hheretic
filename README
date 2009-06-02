@@ -1,23 +1,173 @@
-HHeretic v0.1 README
 
-Configuring
------------
-./configure for software.
-./configure --enable-gl for 3D accel.
+				HHeretic v0.2.0
 
-!!!IMPORTANT!!!
-You *MUST* do a 'make clean' between software and GL builds.
+--------------------------------------------------------------------------------
 
-HHeretic currently expects a heretic.wad in the dir it runs from.
+				    About
 
-Send bugs to theoddone@quakefiles.com
+This is a new release of Dan Olson's excellent Hacked Heretic by the authors
+of Hammer of Thyrion (Hexen II).  We're applying fixes, adding a few features,
+and ensuring it runs on most *nix operating systems.
 
-Known Bugs
-----------
-OpenGL:
- - Some tall rooms can be seen through skies (ie. skies not clipped properly).
+Major changes in HHeretic-0.2 since Dan Olson's original 0.1:
 
-Thanks
-------
-Jeff Mrochuk
-All who helped me test
+  * Support for 64 bit machines.
+  * Support for big endian machines.
+  * FreeBSD support.
+  * Fixed structure packing enabling support for ARM, etc.
+  * Support for newest gcc versions.
+  * Updated build system with new configuration options.
+  * SDL and SDL_mixer sound drivers in addition to OSS.
+  * External ogg/mp3 music playback with the sdlmixer driver.
+  * User directories fully implemented ( $HOME/.hheretic )
+  * Screenshots, both opengl and software mode. Bound to F12.
+  * Transparent automap feature.
+  * Key configuration menu.
+  * Finale screens of the episodes 2 and 3 implemented in opengl.
+  * An additional svgalib video driver option.
+  * ANSI endtext working properly on wide consoles.
+  * Lots of bug fixes.
+
+--------------------------------------------------------------------------------
+
+				   Prereqs
+
+You need a Heretic wad file. Both the retail and the shareware version work
+just fine.  It is recommended, but not required, that you patch your wad file
+to the latest version, 1.2 for the shareware, 1.2 or 1.3 for the retail.  See,
+at the end, for the md5sums and file sizes of different heretic wad files.
+
+--------------------------------------------------------------------------------
+
+				  Compiling
+
+You'll need SDL and SDL-devel packages installed.
+
+To compile the OpenGL version (hheretic-gl):
+	./configure
+	make
+
+To compile the software version (hheretic-sdl):
+	./configure --disable-gl
+	make
+
+To compile the software version (hheretic-svga, for the old-fashioned :))
+	./configure --enable-svga
+	make
+
+The configure script accepts a new --with-audio=<driver> option.  Valid
+values are oss, sdl, and sdlmixer.  sdl is the default option.  sdlmixer
+adds the ability of midi music playback.
+
+It's essential that you run make clean between different types of builds
+or different types of targets.
+
+--------------------------------------------------------------------------------
+
+				Playing the Game
+
+Put the file heretic.wad (registered) or heretic1.wad (shareware) in the same
+directory where the hheretic binary is and simply run the binary, for example:
+
+	./hheretic-gl
+
+With the -h or --help option, you can see the basic command line switches.
+
+The -file option can also be used to play any extra heretic wads that you may
+have. The option takes as many wad filename arguments as you give to it, at
+least one name, of course. Remember, though, that the -file option makes the
+engine to load extra wads: you always need heretic.wad as the base wad.
+
+--------------------------------------------------------------------------------
+
+			     Custom Music playback
+
+Playback of external ogg, mp3 and midi files is available when hheretic is
+configured with the "--with-audio=sdlmixer" option. This is done by placing
+custom music files in $HOME/.hheretic/music .
+
+A high quality OGG version of the original Heretic soundtrack is available for
+download from Sycraft.org :  http://sycraft.org/content/audio/heretic.shtml
+To install, download the normal quality archive (or high quality if preferred),
+and unzip it (probably twice).  Create the music directory:
+	mkdir -p $HOME/.hheretic/music
+ or:
+	mkdir -p <hheretic_dir>/music
+
+(replace <hheretic_dir> with the directory where hheretic is installed, such as
+/usr/local/games/hheretic )
+
+Place the ogg files in that new "music" directory you just created. Now, when
+the game is run, the new sound files should automatically be used.
+
+--------------------------------------------------------------------------------
+
+				     Hints
+
+You can switch between windowed and fullscreen modes by the ALT-Enter key
+combination.
+
+Double-clicking with Mouse2 or Mouse3 acts as the 'activate' (or 'use') key.
+
+There is still no way to assign mouse buttons to actions in the control-setup
+menu; it needs some work.  Currently, the mouse buttons can only be
+assigned to a few actions:
+
+  mouseb_fire    (fire)
+  mouseb_strafe  (strafe)
+  mouseb_forward (move forward)
+
+which is done by editing $HOME/.hheretic/heretic.cfg and changing these values.
+Button values are:
+
+  left   mouse button = 0
+  middle mouse button = 1
+  right  mouse button = 2
+  unused              =-1
+
+So, to make the right button fire, change the mouseb_fire line in heretic.cfg,
+like so:
+
+  mouseb_fire 2
+
+--------------------------------------------------------------------------------
+
+				  Known Bugs:
+
+- Clipping issues on some maps with OpenGL. Some tall rooms can be seen through
+  skies, ie. skies not clipped properly.
+
+--------------------------------------------------------------------------------
+
+				Notes / Issues:
+
+- Saved game files are not interoperable between 32 and 64 bit and/or big endian
+  and little endian machines: saves are byte order and word size dependant.
+
+--------------------------------------------------------------------------------
+
+				WAD file info:
+
+Shareware 1.0:
+  023b52175d2f260c3bdc5528df5d0a8c  heretic1.wad (5,120,300 bytes)
+
+Shareware 1.2:
+  ae779722390ec32fa37b0d361f7d82f8  heretic1.wad (5,120,920 bytes)
+
+Registered 1.0 (3 episodes):
+  3117e399cdb4298eaa3941625f4b2923  heretic.wad (11,096,488 bytes)
+
+Registered 1.2 (3 episodes):
+  1e4cb4ef075ad344dd63971637307e04  heretic.wad (11,095,516 bytes)
+
+Retail 1.3 (Shadow of the Serpent Riders, extended, 5 episodes):
+  66d686b1ed6d35ff103f15dbd30e0341  heretic.wad (14,189,976 bytes)
+
+--------------------------------------------------------------------------------
+
+				    Contact
+
+http://sourceforge.net/projects/hhexen
+sezero_at_users.sourceforge.net
+stevenaaus_at_yahoo_com
+

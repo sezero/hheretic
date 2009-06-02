@@ -1,0 +1,35 @@
+HHeretic ChangeLog
+
+v0.2.0
+ - Support for 64 bit machines.
+ - Support for big endian machines.
+ - FreeBSD support.
+ - Fixed structure packing enabling support for ARM, etc.
+ - Support for newest gcc versions.
+ - Updated build system with new configuration options.
+ - Added SDL and SDL_mixer sound drivers in addition to OSS. SDL is
+   the default. Can be changed by configure.
+ - External ogg/mp3 music playback with the sdlmixer driver.
+ - User directories fully implemented: $HOME/.hheretic
+ - Added a shared data path system for the game's data files such as
+   the wad files, external music files, etc. The shared data path is
+   decided in the following order:
+   * -waddir <DIR>  command line option,
+   * HERETIC_DATA  environment variable,
+   * --with-datapath=<DIR>  configure (compile time) option,
+   * current working directory which has always been used as
+     the last resort.
+ - Screenshots, both opengl and software mode, work. Bound to F12.
+ - Added Barry Mead's transparent automap feature.
+ - Added key configuration menu from HHexen.
+ - OpenGL: Implemented finale screens of the episodes 2 and 3.
+ - OpenGL: Life chain's left and right ends darkened properly.
+ - Fixed the ANSI endtext to work properly on wide consoles.
+ - Added svgalib video driver from HHexen.
+ - A lot of bug fixes. All fixes went into hhexen up to hhexen-1.6.0,
+   also went into hheretic.
+ - Synchronized the source code with hhexen wherever possible.
+
+v0.1
+ - Initial release by Dan Olson
+

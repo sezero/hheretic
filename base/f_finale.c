@@ -193,7 +193,7 @@ static void F_TextWrite (void)
 
 static void F_DemonScroll(void)
 {
-#ifndef RENDER3D	/* FIXME: need an opengl version! */
+#ifndef RENDER3D
 	byte *p1, *p2;
 	static int yval = 0;
 	static int nextscroll = 0;
@@ -220,6 +220,38 @@ static void F_DemonScroll(void)
 	else
 	{ //else, we'll just sit here and wait, for now
 		memcpy(screen, p2, SCREENWIDTH*SCREENHEIGHT);
+	}
+
+#else
+	/* OpenGL version: */
+	int p1, p2;
+	static int yval = 200;
+	static int nextscroll = 0;
+
+	if (finalecount < nextscroll)
+	{
+		return;
+	}
+	p1 = W_GetNumForName("FINAL1");
+	p2 = W_GetNumForName("FINAL2");
+	if (finalecount < 70)
+	{
+		yval = 200;
+		OGL_DrawRawScreen(p1);
+		nextscroll = finalecount;
+		return;
+	}
+	if (yval > 0)
+		--yval;
+	if (yval > 0)
+	{
+		OGL_DrawRawScreenOfs(p2, 0, -yval);
+		OGL_DrawRawScreenOfs(p1, 0, 200 - yval);
+		nextscroll = finalecount + 2;	// + 3;
+	}
+	else
+	{ //else, we'll just sit here and wait, for now
+		OGL_DrawRawScreen(p2);
 	}
 #endif	/* ! RENDER3D */
 }

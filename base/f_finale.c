@@ -17,11 +17,16 @@
 #endif
 
 extern boolean	viewactive;
+extern boolean	MenuActive;
+extern boolean	askforquit;
 
-static int	finalestage;		// 0 = text, 1 = art screen
+static int	finalestage;		/* 0 = text, 1 = art screen */
 static int	finalecount;
+static int	finaletextcount;
 
 static boolean	underwater_init;
+static int	nextscroll;
+static int	scroll_yval;
 
 static int	FontABaseLump;
 
@@ -32,6 +37,13 @@ static const char *e4text = E4TEXT;
 static const char *e5text = E5TEXT;
 static const char *finaletext;
 static const char *finaleflat;
+
+static void F_TextWrite (void);
+static void F_DrawBackground(void);
+static void F_DemonScroll(void);
+static void F_DrawUnderwater(void);
+static void F_InitUnderWater(void);
+static void F_KillUnderWater(void);
 
 
 void F_StartFinale (void)
@@ -69,6 +81,14 @@ void F_StartFinale (void)
 
 	finalestage = 0;
 	finalecount = 0;
+	finaletextcount = strlen(finaletext)*TEXTSPEED + TEXTWAIT;
+#ifndef RENDER3D
+	scroll_yval = 0;
+#else
+	scroll_yval = 200;
+#endif
+	nextscroll = 0;
+	underwater_init = false;
 	FontABaseLump = W_GetNumForName("FONTA_S") + 1;
 
 	S_StartSong(mus_cptd, true);
@@ -81,17 +101,12 @@ boolean F_Responder (event_t *event)
 		return false;
 	}
 	if (finalestage == 1 && gameepisode == 2)
-	{ // we're showing the water pic, make any key kick to demo mode
+	{
+	/* we're showing the water pic,
+	 * make any key kick to demo mode
+	 */
 		finalestage++;
-		underwater_init = false;
-#ifdef RENDER3D
-		OGL_SetPaletteLump("PLAYPAL");
-#else
-		// Hmm... naughty Heretic again :/ - DDOI
-		//memset((byte *)0xa0000, 0, SCREENWIDTH*SCREENHEIGHT);
-		//memset(screen, 0, SCREENWIDTH*SCREENHEIGHT);
-		I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
-#endif
+		F_KillUnderWater();
 		return true;
 	}
 	return false;
@@ -100,22 +115,15 @@ boolean F_Responder (event_t *event)
 void F_Ticker (void)
 {
 	finalecount++;
-	if (!finalestage && finalecount>strlen (finaletext)*TEXTSPEED + TEXTWAIT)
+	if (!finalestage && finalecount > finaletextcount)
 	{
 		finalecount = 0;
-		if (!finalestage)
-		{
-			finalestage = 1;
-		}
+		finalestage = 1;
 	}
 }
 
 static void F_TextWrite (void)
 {
-#ifndef RENDER3D
-	byte	*src, *dest;
-	int		x, y;
-#endif
 	int		count;
 	const char	*ch;
 	int		c;
@@ -123,35 +131,8 @@ static void F_TextWrite (void)
 	patch_t		*w;
 	int		width;
 
-//
-// erase the entire screen to a tiled background
-//
-#ifndef RENDER3D
-	src = (byte *) W_CacheLumpName(finaleflat, PU_CACHE);
-	dest = screen;
-	for (y = 0; y < SCREENHEIGHT; y++)
-	{
-		for (x = 0; x < SCREENWIDTH/64; x++)
-		{
-			memcpy (dest, src + ((y & 63)<<6), 64);
-			dest += 64;
-		}
-		if (SCREENWIDTH & 63)
-		{
-			memcpy (dest, src + ((y & 63)<<6), SCREENWIDTH & 63);
-			dest += (SCREENWIDTH & 63);
-		}
-	}
-#else
-	OGL_SetFlat (R_FlatNumForName(finaleflat));
-	OGL_DrawRectTiled(0, 0, SCREENWIDTH, SCREENHEIGHT, 64, 64);
-#endif
+	F_DrawBackground();
 
-//	V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
-
-//
-// draw some of the text onto the screen
-//
 	cx = 20;
 	cy = 5;
 	ch = finaletext;
@@ -191,12 +172,86 @@ static void F_TextWrite (void)
 	}
 }
 
+#if defined(RENDER3D)
+static void F_DrawBackground(void)
+{
+/* erase the entire screen to a tiled background.
+ */
+	OGL_SetFlat (R_FlatNumForName(finaleflat));
+	OGL_DrawRectTiled(0, 0, SCREENWIDTH, SCREENHEIGHT, 64, 64);
+}
+
 static void F_DemonScroll(void)
 {
-#ifndef RENDER3D
+	int p1, p2;
+
+	if (finalecount < nextscroll)
+	{
+		return;
+	}
+	p1 = W_GetNumForName("FINAL1");
+	p2 = W_GetNumForName("FINAL2");
+	if (finalecount < 70)
+	{
+		OGL_DrawRawScreen(p1);
+		nextscroll = finalecount;
+		return;
+	}
+	if (scroll_yval > 0)
+		--scroll_yval;
+	if (scroll_yval > 0)
+	{
+		OGL_DrawRawScreenOfs(p2, 0, -scroll_yval);
+		OGL_DrawRawScreenOfs(p1, 0, 200 - scroll_yval);
+		nextscroll = finalecount + 2;	// + 3;
+	}
+	else
+	{
+		OGL_DrawRawScreen(p2);
+	}
+}
+
+static void F_InitUnderWater(void)
+{
+	underwater_init = true;
+	OGL_SetPaletteLump("E2PAL");
+	OGL_DrawRawScreen(W_GetNumForName("E2END"));
+}
+
+static void F_KillUnderWater(void)
+{
+	OGL_SetPaletteLump("PLAYPAL");
+}
+
+#else	/* RENDER3D */
+
+static void F_DrawBackground(void)
+{
+/* erase the entire screen to a tiled background.
+ */
+	int		x, y;
+	byte	*src, *dest;
+
+	src = (byte *) W_CacheLumpName(finaleflat, PU_CACHE);
+	dest = screen;
+	for (y = 0; y < SCREENHEIGHT; y++)
+	{
+		for (x = 0; x < SCREENWIDTH/64; x++)
+		{
+			memcpy (dest, src + ((y & 63)<<6), 64);
+			dest += 64;
+		}
+		if (SCREENWIDTH & 63)
+		{
+			memcpy (dest, src + ((y & 63)<<6), SCREENWIDTH & 63);
+			dest += (SCREENWIDTH & 63);
+		}
+	}
+}
+
+static void F_DemonScroll(void)
+{
 	byte *p1, *p2;
-	static int yval = 0;
-	static int nextscroll = 0;
 
 	if (finalecount < nextscroll)
 	{
@@ -210,79 +265,56 @@ static void F_DemonScroll(void)
 		nextscroll = finalecount;
 		return;
 	}
-	if (yval < 64000)
+	if (scroll_yval < 64000)
 	{
-		memcpy(screen, p2 + SCREENHEIGHT*SCREENWIDTH - yval, yval);
-		memcpy(screen + yval, p1, SCREENHEIGHT*SCREENWIDTH - yval);
-		yval += SCREENWIDTH;
+		memcpy(screen, p2 + SCREENHEIGHT*SCREENWIDTH - scroll_yval, scroll_yval);
+		memcpy(screen + scroll_yval, p1, SCREENHEIGHT*SCREENWIDTH - scroll_yval);
+		scroll_yval += SCREENWIDTH;
 		nextscroll = finalecount + 3;
 	}
 	else
-	{ //else, we'll just sit here and wait, for now
+	{
 		memcpy(screen, p2, SCREENWIDTH*SCREENHEIGHT);
 	}
-
-#else
-	/* OpenGL version: */
-	int p1, p2;
-	static int yval = 200;
-	static int nextscroll = 0;
-
-	if (finalecount < nextscroll)
-	{
-		return;
-	}
-	p1 = W_GetNumForName("FINAL1");
-	p2 = W_GetNumForName("FINAL2");
-	if (finalecount < 70)
-	{
-		yval = 200;
-		OGL_DrawRawScreen(p1);
-		nextscroll = finalecount;
-		return;
-	}
-	if (yval > 0)
-		--yval;
-	if (yval > 0)
-	{
-		OGL_DrawRawScreenOfs(p2, 0, -yval);
-		OGL_DrawRawScreenOfs(p1, 0, 200 - yval);
-		nextscroll = finalecount + 2;	// + 3;
-	}
-	else
-	{ //else, we'll just sit here and wait, for now
-		OGL_DrawRawScreen(p2);
-	}
-#endif	/* ! RENDER3D */
 }
+
+static void F_InitUnderWater(void)
+{
+	underwater_init = true;
+
+# ifdef _WATCOMC_
+	memset((byte *)0xa0000, 0, SCREENWIDTH * SCREENHEIGHT);	/* pcscreen */
+# endif /* DOS */
+	I_SetPalette((byte *)W_CacheLumpName("E2PAL", PU_CACHE));
+	V_DrawRawScreen((byte *)W_CacheLumpName("E2END", PU_CACHE));
+}
+
+static void F_KillUnderWater(void)
+{
+# ifdef _WATCOMC_
+	memset((byte *)0xa0000, 0, SCREENWIDTH * SCREENHEIGHT);	/* pcscreen */
+	memset(screen, 0, SCREENWIDTH * SCREENHEIGHT);
+# endif /* DOS */
+	I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
+}
+#endif	/* ! RENDER3D */
 
 static void F_DrawUnderwater(void)
 {
-	extern boolean MenuActive;
-	extern boolean askforquit;
-
 	switch (finalestage)
 	{
 	case 1:
-		if (!underwater_init)
-		{
-			underwater_init = true;
-#ifdef RENDER3D
-			OGL_SetPaletteLump("E2PAL");
-			OGL_DrawRawScreen(W_GetNumForName("E2END"));
-#else
-			// Naughty Heretic :/ - DDOI
-			//memset((byte *)0xa0000, 0, SCREENWIDTH*SCREENHEIGHT);
-			I_SetPalette((byte *)W_CacheLumpName("E2PAL", PU_CACHE));
-			//memcpy(screen, W_CacheLumpName("E2END", PU_CACHE),
-			//			  SCREENWIDTH*SCREENHEIGHT);
-			V_DrawRawScreen((byte *)W_CacheLumpName("E2END", PU_CACHE));
-#endif
-		}
 		paused = false;
 		MenuActive = false;
 		askforquit = false;
 
+	/* draw the underwater picture only
+	 * once during finalestage == 1, no
+	 * need to update it thereafter.
+	 */
+		if (underwater_init)
+			break;
+		F_InitUnderWater();
 		break;
 
 	case 2:
@@ -311,7 +343,7 @@ void F_Drawer(void)
 		case 3:
 			F_DemonScroll();
 			break;
-		case 4: // Just show credits screen for extended episodes
+		case 4: /* Just show credits screen for extended episodes */
 		case 5:
 			V_DrawRawScreen((BYTE_REF) WR_CacheLumpName("CREDIT", PU_CACHE));
 			break;

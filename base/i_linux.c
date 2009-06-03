@@ -34,14 +34,6 @@ extern void I_ShutdownGraphics(void);
 ===============================================================================
 */
 
-//static channel_t channel[MAX_CHANNELS];
-
-//static int rs; //the current registered song.
-//int mus_song = -1;
-//int mus_lumpnum;
-//void *mus_sndptr;
-//byte *soundCurve;
-
 extern sfxinfo_t S_sfx[];
 extern musicinfo_t S_music[];
 
@@ -67,6 +59,7 @@ extern int startmap;
 int AmbChan;
 
 boolean S_StopSoundID(int sound_id, int priority);
+
 
 //==========================================================================
 //
@@ -139,30 +132,31 @@ void S_StartSong(int song, boolean loop)
 
 void S_StartSound(mobj_t *origin, int sound_id)
 {
-	int dist, vol;
-	int i;
-	int priority;
-	int sep;
-	int angle;
-	int absx;
-	int absy;
-
 	static int sndcount = 0;
-	int chan;
+
+	int i;
+	int dist, vol, chan;
+	int priority;
+	int angle, sep;
+	int absx, absy;
 
 	if (sound_id == 0 || snd_MaxVolume == 0)
 		return;
-	if(origin == NULL)
+#if 0
+	if (origin == NULL)
 	{
-	//	origin = players[consoleplayer].mo;
+		origin = players[consoleplayer].mo;
+	// this can be uninitialized when we are newly
+	// started before the demos start playing !...
 	}
+#endif
 
-// calculate the distance before other stuff so that we can throw out
-// sounds that are beyond the hearing range.
+	// calculate the distance before other stuff so that we can throw out
+	// sounds that are beyond the hearing range.
 	if (origin)
 	{
-		absx = abs(origin->x-players[consoleplayer].mo->x);
-		absy = abs(origin->y-players[consoleplayer].mo->y);
+		absx = abs(origin->x - players[consoleplayer].mo->x);
+		absy = abs(origin->y - players[consoleplayer].mo->y);
 	}
 	else
 	{
@@ -280,7 +274,8 @@ void S_StartSound(mobj_t *origin, int sound_id)
 					S_sfx[sound_id].lumpnum, name);
 			return;
 		}
-		S_sfx[sound_id].snd_ptr = W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
+		S_sfx[sound_id].snd_ptr =
+			W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
 	}
 
 	// calculate the volume based upon the distance from the sound origin.
@@ -294,10 +289,9 @@ void S_StartSound(mobj_t *origin, int sound_id)
 	else
 	{
 		angle = R_PointToAngle2(players[consoleplayer].mo->x,
-			//	players[consoleplayer].mo->y, Channel[i].mo->x, Channel[i].mo->y);
-				players[displayplayer].mo->y, origin->x, origin->y);
-
-		angle = (angle-viewangle)>>24;
+					players[consoleplayer].mo->y,
+					origin->x, origin->y);
+		angle = (angle - viewangle)>>24;
 		sep = angle*2 - 128;
 		if (sep < 64)
 			sep = -sep;
@@ -306,7 +300,8 @@ void S_StartSound(mobj_t *origin, int sound_id)
 	}
 
 	Channel[i].pitch = (byte)(127 + (M_Random() & 7) - (M_Random() & 7));
-	Channel[i].handle = I_StartSound(sound_id, S_sfx[sound_id].snd_ptr, vol, sep, Channel[i].pitch, 0);
+	Channel[i].handle = I_StartSound(sound_id, S_sfx[sound_id].snd_ptr, vol,
+					 sep, Channel[i].pitch, 0);
 	Channel[i].mo = origin;
 	Channel[i].sound_id = sound_id;
 	Channel[i].priority = priority;
@@ -344,7 +339,7 @@ void S_StartSoundAtVolume(mobj_t *origin, int sound_id, int volume)
 	{
 		return;
 	}
-	volume = (volume*(snd_MaxVolume+1)*8)>>7;
+	volume = (volume * (snd_MaxVolume + 1) * 8)>>7;
 
 // no priority checking, as ambient sounds would be the LOWEST.
 	for (i = 0; i < snd_Channels; i++)
@@ -374,10 +369,12 @@ void S_StartSoundAtVolume(mobj_t *origin, int sound_id, int volume)
 					S_sfx[sound_id].lumpnum, name);
 			return;
 		}
-		S_sfx[sound_id].snd_ptr = W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
+		S_sfx[sound_id].snd_ptr =
+			W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
 	}
 	Channel[i].pitch = (byte)(127 - (M_Random() & 3) + (M_Random() & 3));
-	Channel[i].handle = I_StartSound(sound_id, S_sfx[sound_id].snd_ptr, volume, 128, Channel[i].pitch, 0);
+	Channel[i].handle = I_StartSound(sound_id, S_sfx[sound_id].snd_ptr,
+					 volume, 128, Channel[i].pitch, 0);
 	Channel[i].mo = origin;
 	Channel[i].sound_id = sound_id;
 	Channel[i].priority = 1; // super low priority.
@@ -521,11 +518,9 @@ void S_ResumeSound(void)
 void S_UpdateSounds(mobj_t *listener)
 {
 	int i, dist, vol;
-	int angle;
-	int sep;
+	int angle, sep;
 	int priority;
-	int absx;
-	int absy;
+	int absx, absy;
 
 	listener = players[consoleplayer].mo;
 	if (snd_MaxVolume == 0)
@@ -541,8 +536,8 @@ void S_UpdateSounds(mobj_t *listener)
 			{
 				if (lumpcache[S_sfx[i].lumpnum])
 				{
-					if (((memblock_t *)((byte*) (lumpcache[S_sfx[i].lumpnum])-
-							sizeof(memblock_t)))->id == ZONEID)
+					if (((memblock_t *) ((byte*)(lumpcache[S_sfx[i].lumpnum]) -
+								sizeof(memblock_t)))->id == ZONEID)
 					{ // taken directly from the Z_ChangeTag macro
 						Z_ChangeTag2(lumpcache[S_sfx[i].lumpnum], PU_CACHE);
 					}
@@ -581,8 +576,8 @@ void S_UpdateSounds(mobj_t *listener)
 		}
 		else
 		{
-			absx = abs(Channel[i].mo->x-listener->x);
-			absy = abs(Channel[i].mo->y-listener->y);
+			absx = abs(Channel[i].mo->x - listener->x);
+			absy = abs(Channel[i].mo->y - listener->y);
 			dist = absx+absy-(absx > absy ? absy>>1 : absx>>1);
 			dist >>= FRACBITS;
 
@@ -597,8 +592,8 @@ void S_UpdateSounds(mobj_t *listener)
 			}
 			vol = SoundCurve[dist];
 			angle = R_PointToAngle2(listener->x, listener->y,
-					Channel[i].mo->x, Channel[i].mo->y);
-			angle = (angle-viewangle)>>24;
+						Channel[i].mo->x, Channel[i].mo->y);
+			angle = (angle - viewangle)>>24;
 			sep = angle*2-128;
 			if(sep < 64)
 				sep = -sep;
@@ -606,7 +601,7 @@ void S_UpdateSounds(mobj_t *listener)
 				sep = 512-sep;
 			I_UpdateSoundParams(Channel[i].handle, vol, sep, Channel[i].pitch);
 			priority = S_sfx[Channel[i].sound_id].priority;
-			priority *= PRIORITY_MAX_ADJUST- (dist / DIST_ADJUST);
+			priority *= PRIORITY_MAX_ADJUST - (dist / DIST_ADJUST);
 			Channel[i].priority = priority;
 		}
 	}
@@ -659,16 +654,16 @@ void S_GetChannelInfo(SoundInfo_t *s)
 void S_SetMaxVolume(boolean fullprocess)
 {
 	int i;
-
+	byte *SC = (byte *)W_CacheLumpName("SNDCURVE", PU_CACHE);
 	if (!fullprocess)
 	{
-		SoundCurve[0] = (*((byte *)W_CacheLumpName("SNDCURVE", PU_CACHE))*(snd_MaxVolume*8))>>7;
+		SoundCurve[0] = ( *(SC) * (snd_MaxVolume * 8))>>7;
 	}
 	else
 	{
 		for (i = 0; i < MAX_SND_DIST; i++)
 		{
-			SoundCurve[i] = (*((byte *)W_CacheLumpName("SNDCURVE", PU_CACHE)+i)*(snd_MaxVolume*8))>>7;
+			SoundCurve[i] = ( *(SC + i) * (snd_MaxVolume * 8))>>7;
 		}
 	}
 }
@@ -742,10 +737,11 @@ int I_GetTime (void)
 {
 	struct timeval tv;
 	gettimeofday (&tv, NULL);
-//	printf( "GT: %lx %lx\n", tv.tv_sec, tv.tv_usec );
+
+//	printf ("GT: %lx %lx\n", tv.tv_sec, tv.tv_usec);
 //	ticcount = ((tv.tv_sec * 1000000) + tv.tv_usec) / 28571;
 	ticcount = ((tv.tv_sec - _startSec) * 35) + (tv.tv_usec / 28571);
-	return( ticcount );
+	return ticcount;
 }
 
 
@@ -817,7 +813,7 @@ void I_Init (void)
 {
 	I_StartupMouse();
 	I_StartupJoystick();
-	printf("S_Init... ");
+	printf("  S_Init... ");
 	S_Init();
 	S_Start();
 
@@ -956,6 +952,9 @@ byte *I_ZoneBase (int *size)
 	ptr = (byte *) malloc (heap);
 	if (ptr == NULL)
 		I_Error ("I_ZoneBase: Insufficient memory!");
+
+	printf ("0x%x allocated for zone, ", heap);
+	printf ("ZoneBase: %p\n", ptr);
 
 	*size = heap;
 	return ptr;

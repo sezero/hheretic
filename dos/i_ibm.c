@@ -158,7 +158,6 @@ boolean I_ReadJoystick (void);          // returns false if not connected
 #define MOUSEB3 4
 
 boolean mousepresent;
-//static  int tsm_ID = -1; // tsm init flag
 
 //===============================
 

@@ -27,21 +27,11 @@
  *	SOUND HEADER & DATA
  */
 
-int tsm_ID = -1;
-
 int snd_Channels;
-int snd_DesiredMusicDevice, snd_DesiredSfxDevice;
-int snd_MusicDevice,		/* current music card # (index to dmxCodes) */
-	snd_SfxDevice,		/* current sfx card # (index to dmxCodes) */
-	snd_MaxVolume,		/* maximum volume for sound */
+int snd_MaxVolume,		/* maximum volume for sound */
 	snd_MusicVolume;	/* maximum volume for music */
-int dmxCodes[NUM_SCARDS];	/* the dmx code for a given card */
-
-int snd_SBport, snd_SBirq, snd_SBdma;	/* sound blaster variables */
-int snd_Mport;				/* midi variables */
-
 boolean snd_MusicAvail,		/* whether music is available */
-	snd_SfxAvail;		/* whether sfx are available */
+	snd_SfxAvail;		/* whether sfx are available. */
 
 /*
  *	SOUND FX API
@@ -323,8 +313,6 @@ void I_StartupSound (void)
 {
 	int ok;
 
-	snd_MusicDevice = snd_SfxDevice = 0;
-
 	snd_SfxAvail = false;
 
 	if (M_CheckParm("--nosound") || M_CheckParm("-s") || M_CheckParm("-nosound"))
@@ -332,9 +320,6 @@ void I_StartupSound (void)
 		printf("I_StartupSound: Sound Disabled.\n");
 		return;
 	}
-
-	if (debugmode)
-		printf("I_StartupSound: Hope you hear a pop.\n");
 
 	/* Using get_oplugin_info() from oss.c.  In the future this could
 	   load from a real shared library plugin. */

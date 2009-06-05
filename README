@@ -9,7 +9,7 @@ This is a new release of Dan Olson's excellent Hacked Heretic by the authors
 of Hammer of Thyrion (Hexen II).  We're applying fixes, adding a few features,
 and ensuring it runs on most *nix operating systems.
 
-Major changes in HHeretic-0.2 since Dan Olson's original 0.1:
+Major changes in HHeretic-0.2 since Dan Olson's original HHeretic-0.1:
 
   * Support for 64 bit machines.
   * Support for big endian machines.
@@ -88,14 +88,13 @@ custom music files in $HOME/.hheretic/music .
 
 A high quality OGG version of the original Heretic soundtrack is available for
 download from Sycraft.org :  http://sycraft.org/content/audio/heretic.shtml
-To install, download the normal quality archive (or high quality if preferred),
-and unzip it (probably twice).  Create the music directory:
-	mkdir -p $HOME/.hheretic/music
+To install, download the normal or high quality archive and unzip it.  Create
+the music directory:
+	mkdir -p $HOME/.hheretic/music		(for most end users)
  or:
-	mkdir -p <hheretic_dir>/music
-
-(replace <hheretic_dir> with the directory where hheretic is installed, such as
-/usr/local/games/hheretic )
+	mkdir -p <install_dir>/music		(if you prefer that way..)
+ or:
+	mkdir -p <shared_datapath>/music	(mostly for packagers)
 
 Place the ogg files in that new "music" directory you just created. Now, when
 the game is run, the new sound files should automatically be used.

@@ -81,7 +81,7 @@ static int demosequence;
 static int pagetic;
 static const char *pagename;
 
-static const char *wadfiles[MAXWADFILES] =
+static const char *wadfiles[MAXWADFILES + 1] =
 {
 	"heretic.wad",
 	"texture1.lmp",
@@ -584,7 +584,7 @@ void D_AddFile(const char *file)
 	newwad = (char *) malloc(strlen(file) + 1);
 	strcpy(newwad, file);
 	wadfiles[i] = newwad;
-	if (++i < MAXWADFILES)
+	if (++i <= MAXWADFILES)
 		wadfiles[i] = NULL;
 }
 

@@ -70,6 +70,13 @@ fi
 AC_SUBST(GLHEXEN)
 AC_SUBST(SVGAHEXEN)
 
+AC_ARG_ENABLE(rangecheck,
+AC_HELP_STRING([--enable-rangecheck], [Enable parameter validation debugging code [[default=no]]]),
+						[], [enable_rangecheck=no])
+if test x$enable_rangecheck = xno; then
+	AC_DEFINE(NORANGECHECKING, 1, [Define to not compile most parameter validation debugging code])
+fi
+
 AC_ARG_WITH(datapath,
 [  --with-datapath=<DIR>   Use DIR for shared game data. Not defined by default.],
 datapath="$withval", datapath="")
@@ -309,14 +316,6 @@ AC_SUBST(SVGALIBS)
 
 
 dnl ==================================================================
-dnl Miscellaneous things
-dnl ==================================================================
-
-dnl === do not compile most parameter validation debugging code ======
-AC_DEFINE(NORANGECHECKING, 1, [Define to not compile most parameter validation debugging code])
-
-
-dnl ==================================================================
 dnl Generate output files
 dnl ==================================================================
 
@@ -341,6 +340,13 @@ fi
 echo "Enabled target       : $report"
 
 echo "Audio driver         : $SND_MODULE"
+
+if test x$enable_rangecheck = xno; then
+    report="disabled"
+else
+    report="enabled"
+fi
+echo "Range checks (debug) : $report"
 
 if test x$datapath = x; then
     report="(not set)"

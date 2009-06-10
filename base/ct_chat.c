@@ -131,7 +131,7 @@ void CT_Stop(void)
 boolean CT_Responder(event_t *ev)
 {
 	const char *macro;
-	int sendto;
+	int sendtarget;
 
 	if (!netgame)
 	{
@@ -153,33 +153,33 @@ boolean CT_Responder(event_t *ev)
 	}
 	if (!chatmodeon)
 	{
-		sendto = 0;
+		sendtarget = 0;
 		if (ev->data1 == CT_KEY_ALL)
 		{
-			sendto = CT_PLR_ALL;
+			sendtarget = CT_PLR_ALL;
 		}
 		else if (ev->data1 == CT_KEY_GREEN)
 		{
-			sendto = CT_PLR_GREEN;
+			sendtarget = CT_PLR_GREEN;
 		}
 		else if (ev->data1 == CT_KEY_YELLOW)
 		{
-			sendto = CT_PLR_YELLOW;
+			sendtarget = CT_PLR_YELLOW;
 		}
 		else if (ev->data1 == CT_KEY_RED)
 		{
-			sendto = CT_PLR_RED;
+			sendtarget = CT_PLR_RED;
 		}
 		else if (ev->data1 == CT_KEY_BLUE)
 		{
-			sendto = CT_PLR_BLUE;
+			sendtarget = CT_PLR_BLUE;
 		}
-		if (sendto == 0 || (sendto != CT_PLR_ALL && !playeringame[sendto - 1])
-			|| sendto == consoleplayer + 1)
+		if (sendtarget == 0 || (sendtarget != CT_PLR_ALL && !playeringame[sendtarget - 1])
+			|| sendtarget == consoleplayer + 1)
 		{
 			return false;
 		}
-		CT_queueChatChar(sendto);
+		CT_queueChatChar(sendtarget);
 		chatmodeon = true;
 		return true;
 	}

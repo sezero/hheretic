@@ -267,7 +267,7 @@ void CT_Ticker(void)
 		}
 		if ((c = players[i].cmd.chatchar) != 0)
 		{
-			if (c <= 5)
+			if (c <= CT_PLR_ALL)
 			{
 				chat_dest[i] = c;
 				continue;

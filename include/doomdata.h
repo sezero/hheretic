@@ -48,7 +48,7 @@ typedef struct
 	short		flags;
 	short		special, tag;
 	short		sidenum[2];	/* sidenum[1] will be -1 if one sided */
-} maplinedef_t;
+} __attribute__((packed)) maplinedef_t;
 COMPILE_TIME_ASSERT(maplinedef_t, sizeof(maplinedef_t) == 14);
 
 #define	ML_BLOCKING			1
@@ -119,7 +119,7 @@ typedef struct
 	short		angle;
 	short		type;
 	short		options;
-} mapthing_t;
+} __attribute__((packed)) mapthing_t;
 COMPILE_TIME_ASSERT(mapthing_t, sizeof(mapthing_t) == 10);
 
 #define	MTF_EASY		1

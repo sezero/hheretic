@@ -1,5 +1,15 @@
 HHeretic ChangeLog
 
+v0.2.1
+ - added packed attribute to some disk data structures which were
+   accidentally missed in hheretic-0.2.0.
+ - fixed player movement for environments where the char type is
+   unsigned by default.
+ - made detSideFloat() and findIntersectionVertex() to compile
+   without optimizations, at least for gcc >= 4.4, providing some
+   partial solution to opengl clipping problems.
+ - added -nomidi as a new command line option.
+
 v0.2.0
  - Support for 64 bit machines.
  - Support for big endian machines.

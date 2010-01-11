@@ -905,15 +905,15 @@ fixed_t	FixedDiv2 (fixed_t a, fixed_t b);
 #define Q_FIX2FLT(x)	((float)((x)>>FRACBITS))
 
 
-int16_t ShortSwap(int16_t) __attribute__((const));
-int32_t LongSwap (int32_t) __attribute__((const));
+int16_t ShortSwap(int16_t) __attribute__((__const__));
+int32_t LongSwap (int32_t) __attribute__((__const__));
 
 #if defined(__GNUC__)
-static inline __attribute__((const)) int16_t _H2_SWAP16(int16_t x)
+static inline __attribute__((__const__)) int16_t _H2_SWAP16(int16_t x)
 {
 	return (int16_t) (((uint16_t)x << 8) | ((uint16_t)x >> 8));
 }
-static inline __attribute__((const)) int32_t _H2_SWAP32(int32_t x)
+static inline __attribute__((__const__)) int32_t _H2_SWAP32(int32_t x)
 {
 	return (int32_t) (((uint32_t)x << 24) | ((uint32_t)x >> 24) |
 			  (((uint32_t)x & (uint32_t)0x0000ff00UL) << 8) |
@@ -1097,12 +1097,12 @@ void I_InitGraphics (void);
 void I_InitNetwork (void);
 void I_NetCmd (void);
 
-void I_Error (const char *error, ...) __attribute__((format(printf,1,2), noreturn));
+void I_Error (const char *error, ...) __attribute__((__format__(__printf__,1,2), __noreturn__));
 /* called by anything that can generate a terminal error
  * bad exit with diagnostic message
  */
 
-void I_Quit (void) __attribute__((noreturn));
+void I_Quit (void) __attribute__((__noreturn__));
 /* called by M_Responder when quit is selected
  * clean exit, displays sell blurb
  */

@@ -39,7 +39,7 @@ typedef struct
 	short		rowoffset;
 	char		toptexture[8], bottomtexture[8], midtexture[8];
 	short		sector;		/* on viewer's side */
-} __attribute__((packed)) mapsidedef_t;
+} __attribute__((__packed__)) mapsidedef_t;
 COMPILE_TIME_ASSERT(mapsidedef_t, sizeof(mapsidedef_t) == 30);
 
 typedef struct
@@ -48,7 +48,7 @@ typedef struct
 	short		flags;
 	short		special, tag;
 	short		sidenum[2];	/* sidenum[1] will be -1 if one sided */
-} __attribute__((packed)) maplinedef_t;
+} __attribute__((__packed__)) maplinedef_t;
 COMPILE_TIME_ASSERT(maplinedef_t, sizeof(maplinedef_t) == 14);
 
 #define	ML_BLOCKING			1
@@ -76,7 +76,7 @@ typedef	struct
 	char		floorpic[8], ceilingpic[8];
 	short		lightlevel;
 	short		special, tag;
-} __attribute__((packed)) mapsector_t;
+} __attribute__((__packed__)) mapsector_t;
 COMPILE_TIME_ASSERT(mapsector_t, sizeof(mapsector_t) == 26);
 
 typedef struct
@@ -119,7 +119,7 @@ typedef struct
 	short		angle;
 	short		type;
 	short		options;
-} __attribute__((packed)) mapthing_t;
+} __attribute__((__packed__)) mapthing_t;
 COMPILE_TIME_ASSERT(mapthing_t, sizeof(mapthing_t) == 10);
 
 #define	MTF_EASY		1
@@ -136,7 +136,7 @@ typedef struct
 	short		patch;
 	short		stepdir;
 	short		colormap;
-} __attribute__((packed)) mappatch_t;
+} __attribute__((__packed__)) mappatch_t;
 COMPILE_TIME_ASSERT(mappatch_t, sizeof(mappatch_t) == 10);
 
 typedef struct
@@ -148,7 +148,7 @@ typedef struct
 	int32_t		columndirectory;	/* OBSOLETE */
 	short		patchcount;
 	mappatch_t	patches[1];
-} __attribute__((packed)) maptexture_t;
+} __attribute__((__packed__)) maptexture_t;
 COMPILE_TIME_ASSERT(maptexture_t, sizeof(maptexture_t) == 32);
 
 
@@ -160,7 +160,7 @@ typedef struct
 	byte		topdelta;	/* -1 is the last post in a column */
 	byte		length;
 	/* length data bytes follows */
-} __attribute__((packed)) post_t;
+} __attribute__((__packed__)) post_t;
 COMPILE_TIME_ASSERT(post_t, sizeof(post_t) == 2);
 
 /* column_t is a list of 0 or more post_t, (byte)-1 terminated */

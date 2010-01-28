@@ -1,0 +1,47 @@
+
+- HHeretic saved game files are not interoperable between 32 and 64 bit
+  and/or big endian and little endian machines: saves are byte order and
+  word size dependant.
+
+- As it is, HHeretic can not read game saves from DOS Heretic, because
+  Raven seems to have liked the "zp1" switch of Watcom which alinged
+  structures on bytes.  In order to be able to load the save files from
+  DOS_Heretic, the mobj_t and player_t structures in doomdef.h and the
+  floormove_t structure in p_spec.h must be added the 'packed' attribute
+  of gcc:  you can use the patch written below in order to do it.  When
+  that is done though, HHeretic won't be able to read its own saves from
+  versions not modified this way.
+
+========================================================================
+
+--- p_spec.h.orig
++++ p_spec.h
+@@ -313,7 +313,7 @@
+ 	short		texture;
+ 	fixed_t		floordestheight;
+ 	fixed_t		speed;
+-} floormove_t;
++} __attribute__((packed)) floormove_t;
+ 
+ #define FLOORSPEED	FRACUNIT
+ 
+--- doomdef.h.orig
++++ doomdef.h
+@@ -401,7 +401,7 @@
+ 	int			lastlook;	/* player number last looked for */
+ 
+ 	mapthing_t		spawnpoint;	/* for nightmare respawn */
+-} mobj_t;
++} __attribute__((packed)) mobj_t;
+ 
+ /* each sector has a degenmobj_t in it's center for sound origin purposes */
+ typedef struct
+@@ -674,7 +674,7 @@
+ 	int		chickenPeck;		/* chicken peck countdown */
+ 	mobj_t		*rain1;			/* active rain maker 1 */
+ 	mobj_t		*rain2;			/* active rain maker 2 */
+-} player_t;
++} __attribute__((packed)) player_t;
+ 
+ #define CF_NOCLIP		1
+ #define	CF_GODMODE		2

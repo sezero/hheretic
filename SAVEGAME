@@ -6,8 +6,8 @@
 - As it is, HHeretic can not read game saves from DOS Heretic, because
   Raven seems to have liked the "zp1" switch of Watcom which alinged
   structures on bytes.  In order to be able to load the save files from
-  DOS_Heretic, the mobj_t and player_t structures in doomdef.h and the
-  floormove_t structure in p_spec.h must be added the 'packed' attribute
+  DOS-Heretic, the mobj_t and player_t structures in doomdef.h and the
+  floormove_t structure in p_spec.h must be added the "packed" attribute
   of gcc:  you can use the patch written below in order to do it.  When
   that is done though, HHeretic won't be able to read its own saves from
   versions not modified this way.
@@ -21,7 +21,7 @@
  	fixed_t		floordestheight;
  	fixed_t		speed;
 -} floormove_t;
-+} __attribute__((packed)) floormove_t;
++} __attribute__((__packed__)) floormove_t;
  
  #define FLOORSPEED	FRACUNIT
  
@@ -32,7 +32,7 @@
  
  	mapthing_t		spawnpoint;	/* for nightmare respawn */
 -} mobj_t;
-+} __attribute__((packed)) mobj_t;
++} __attribute__((__packed__)) mobj_t;
  
  /* each sector has a degenmobj_t in it's center for sound origin purposes */
  typedef struct
@@ -41,7 +41,7 @@
  	mobj_t		*rain1;			/* active rain maker 1 */
  	mobj_t		*rain2;			/* active rain maker 2 */
 -} player_t;
-+} __attribute__((packed)) player_t;
++} __attribute__((__packed__)) player_t;
  
  #define CF_NOCLIP		1
  #define	CF_GODMODE		2

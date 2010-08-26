@@ -1,5 +1,8 @@
 HHeretic ChangeLog
 
+v0.2.2-svn
+ - fixed ENDTEXT printing.
+
 v0.2.1
  - added packed attribute to some disk data structures which were
    accidentally missed in hheretic-0.2.0.

@@ -215,26 +215,25 @@ static void put_dos2ansi (byte attrib)
 
 static void I_ENDTEXT (void)
 {
-	int i, c, nl;
-	byte *scr = (byte *)W_CacheLumpName("ENDTEXT", PU_CACHE);
+	int i, nl;
+	char *scr = (char *) W_CacheLumpName("ENDTEXT", PU_CACHE);
 	char *col = getenv("COLUMNS");
 
 	if (col == NULL)
-	{
 		nl = 1;
-		c = 80;
-	}
 	else
 	{
-		c = atoi(col);
-		if (c > 80)
+		if (atoi(col) > 80)
 			nl = 1;
 		else	nl = 0;
 	}
 	for (i = 1; i <= 80*25; scr += 2, i++)
 	{
-		put_dos2ansi (scr[1]);
-		putchar (scr[0]);
+		put_dos2ansi ((byte) scr[1]);
+		if (scr[0] < 32)
+			putchar('.');
+		else
+			putchar(scr[0]);
 		if (nl && !(i % 80))
 			puts("\033[0m");
 	}

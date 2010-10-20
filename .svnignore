@@ -1,7 +1,10 @@
 Makefile
+aclocal.m4
 config.cache
 config.log
 config.status
 heretic.cfg
 hheretic-gl
+hheretic-sdl
+hheretic-svga
 include/config.h

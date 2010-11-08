@@ -1,6 +1,9 @@
 HHeretic ChangeLog
 
-v0.2.2-svn
+v0.2.2
+ - fixed e2 and e3 finale screens for opengl where they weren't drawn
+   every frame and resulted in broken display.
+ - configury updates.
  - fixed ENDTEXT printing.
 
 v0.2.1

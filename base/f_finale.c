@@ -183,44 +183,58 @@ static void F_DrawBackground(void)
 
 static void F_DemonScroll(void)
 {
-	int p1, p2;
-
-	if (finalecount < nextscroll)
-	{
-		return;
-	}
-	p1 = W_GetNumForName("FINAL1");
-	p2 = W_GetNumForName("FINAL2");
 	if (finalecount < 70)
 	{
-		OGL_DrawRawScreen(p1);
+		OGL_DrawRawScreen(W_GetNumForName("FINAL1"));
 		nextscroll = finalecount;
 		return;
 	}
-	if (scroll_yval > 0)
+	if (finalecount >= nextscroll && scroll_yval > 0)
 		--scroll_yval;
 	if (scroll_yval > 0)
 	{
-		OGL_DrawRawScreenOfs(p2, 0, -scroll_yval);
-		OGL_DrawRawScreenOfs(p1, 0, 200 - scroll_yval);
-		nextscroll = finalecount + 2;	// + 3;
+		OGL_DrawRawScreenOfs(W_GetNumForName("FINAL2"), 0, -scroll_yval);
+		OGL_DrawRawScreenOfs(W_GetNumForName("FINAL1"), 0, 200 - scroll_yval);
+		if (finalecount >= nextscroll)
+			nextscroll = finalecount + 2;	// + 3;
 	}
 	else
 	{
-		OGL_DrawRawScreen(p2);
+		OGL_DrawRawScreen(W_GetNumForName("FINAL2"));
 	}
 }
 
 static void F_InitUnderWater(void)
 {
-	underwater_init = true;
 	OGL_SetPaletteLump("E2PAL");
-	OGL_DrawRawScreen(W_GetNumForName("E2END"));
 }
 
 static void F_KillUnderWater(void)
 {
 	OGL_SetPaletteLump("PLAYPAL");
+}
+
+static void F_DrawUnderwater(void)
+{
+	switch (finalestage)
+	{
+	case 1:
+		paused = false;
+		MenuActive = false;
+		askforquit = false;
+
+		if (!underwater_init)
+		{
+			underwater_init = true;
+			F_InitUnderWater();
+		}
+		OGL_DrawRawScreen(W_GetNumForName("E2END"));
+		break;
+
+	case 2:
+		OGL_DrawRawScreen(W_GetNumForName("TITLE"));
+		break;
+	}
 }
 
 #else	/* RENDER3D */
@@ -280,13 +294,10 @@ static void F_DemonScroll(void)
 
 static void F_InitUnderWater(void)
 {
-	underwater_init = true;
-
 # ifdef _WATCOMC_
 	memset((byte *)0xa0000, 0, SCREENWIDTH * SCREENHEIGHT);	/* pcscreen */
 # endif /* DOS */
 	I_SetPalette((byte *)W_CacheLumpName("E2PAL", PU_CACHE));
-	V_DrawRawScreen((byte *)W_CacheLumpName("E2END", PU_CACHE));
 }
 
 static void F_KillUnderWater(void)
@@ -297,7 +308,6 @@ static void F_KillUnderWater(void)
 # endif /* DOS */
 	I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
-#endif	/* ! RENDER3D */
 
 static void F_DrawUnderwater(void)
 {
@@ -308,19 +318,22 @@ static void F_DrawUnderwater(void)
 		MenuActive = false;
 		askforquit = false;
 
-	/* draw the underwater picture only
-	 * once during finalestage == 1, no
-	 * need to update it thereafter.
-	 */
-		if (underwater_init)
-			break;
-		F_InitUnderWater();
+		if (!underwater_init)
+		{
+			underwater_init = true;
+			F_InitUnderWater();
+			/* draw underwater picture only once during finalestage 1,
+			 * no need to update it thereafter. */
+			V_DrawRawScreen((byte *)W_CacheLumpName("E2END", PU_CACHE));
+		}
 		break;
 
 	case 2:
-		V_DrawRawScreen((BYTE_REF) WR_CacheLumpName("TITLE", PU_CACHE));
+		V_DrawRawScreen((byte *) W_CacheLumpName("TITLE", PU_CACHE));
+		break;
 	}
 }
+#endif	/* ! RENDER3D */
 
 void F_Drawer(void)
 {

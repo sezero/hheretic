@@ -191,7 +191,6 @@ int EV_DoDoor(line_t *line, vldoor_e type, fixed_t speed)
 void EV_VerticalDoor(line_t *line, mobj_t *thing)
 {
 	player_t	*player;
-	int		secnum;
 	sector_t	*sec;
 	vldoor_t	*door;
 	int		side;
@@ -246,7 +245,6 @@ void EV_VerticalDoor(line_t *line, mobj_t *thing)
 
 	// if the sector has an active thinker, use it
 	sec = sides[line->sidenum[side^1]].sector;
-	secnum = sec-sectors;
 	if (sec->specialdata)
 	{
 		door = sec->specialdata;

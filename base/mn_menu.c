@@ -965,7 +965,6 @@ static void DrawSaveMenu(void)
 static void MN_LoadSlotText(void)
 {
 	FILE *fp;
-	int count;
 	int i;
 	char name[MAX_OSPATH];
 
@@ -979,7 +978,7 @@ static void MN_LoadSlotText(void)
 			SlotStatus[i] = 0;
 			continue;
 		}
-		count = fread(&SlotText[i], SLOTTEXTLEN, 1, fp);
+		fread(&SlotText[i], SLOTTEXTLEN, 1, fp);
 		fclose(fp);
 		SlotStatus[i] = 1;
 	}

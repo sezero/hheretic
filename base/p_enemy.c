@@ -503,7 +503,6 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
 	int c;
 	int stop;
 	player_t *player;
-	sector_t *sector;
 	angle_t an;
 	fixed_t dist;
 
@@ -511,7 +510,6 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
 	{ // Single player game and player is dead, look for monsters
 		return(P_LookForMonsters(actor));
 	}
-	sector = actor->subsector->sector;
 	c = 0;
 	stop = (actor->lastlook - 1) & (MAXPLAYERS - 1);
 	for ( ; ; actor->lastlook = (actor->lastlook + 1) & (MAXPLAYERS - 1))
@@ -2241,7 +2239,6 @@ void A_MakePod(mobj_t *actor)
 	mobj_t *mo;
 	fixed_t x;
 	fixed_t y;
-	fixed_t z;
 
 	if (actor->special1 == MAX_GEN_PODS)
 	{ // Too many generated pods
@@ -2249,7 +2246,6 @@ void A_MakePod(mobj_t *actor)
 	}
 	x = actor->x;
 	y = actor->y;
-	z = actor->z;
 	mo = P_SpawnMobj(x, y, ONFLOORZ, MT_POD);
 	if (P_CheckPosition(mo, x, y) == false)
 	{ // Didn't fit

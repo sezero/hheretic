@@ -453,7 +453,7 @@ void R_ProjectSprite (mobj_t *thing)
 {
 	fixed_t		xtr, ytr;
 	fixed_t		gxt, gyt;
-	fixed_t		tx,tz;
+	fixed_t		tz;
 	fixed_t		xscale;
 	int		x1 = 0, x2 = 0;
 	spritedef_t	*sprdef;
@@ -462,6 +462,7 @@ void R_ProjectSprite (mobj_t *thing)
 	unsigned int	rot;
 	boolean		flip;
 #ifndef RENDER3D
+	fixed_t		tx;
 	int		idx;
 #endif
 	vissprite_t	*vis;
@@ -498,11 +499,11 @@ void R_ProjectSprite (mobj_t *thing)
 #endif
 	xscale = FixedDiv(projection, tz);
 
+#ifndef RENDER3D
 	gxt = -FixedMul(xtr,viewsin);
 	gyt = FixedMul(ytr,viewcos);
 	tx = -(gyt + gxt);
 
-#ifndef RENDER3D
 	if (abs(tx) > (tz<<2))
 		return;		// too far off the side
 #endif

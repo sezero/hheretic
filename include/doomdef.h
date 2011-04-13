@@ -1155,11 +1155,6 @@ typedef struct
 } externdata_t;
 
 void I_Tactile (int on, int off, int total);
-
-#else
-
-#define I_Tactile(a,b,c)	do {} while (0)
-
 #endif	/* externdriver, DOS */
 
 

@@ -1,6 +1,7 @@
 HHeretic ChangeLog
 
 v0.2.3
+ - verified successful compilation using clang-3.0.
  - verified successful compilation using gcc-4.6.
 
 v0.2.2

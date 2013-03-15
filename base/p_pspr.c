@@ -1336,7 +1336,7 @@ void A_SpawnRippers(mobj_t *actor)
 	for (i = 0; i < 8; i++)
 	{
 		ripper = P_SpawnMobj(actor->x, actor->y, actor->z, MT_RIPPER);
-		angle = i*ANG45;
+		angle = (i&3)*ANG45;
 		ripper->target = actor->target;
 		ripper->angle = angle;
 		angle >>= ANGLETOFINESHIFT;

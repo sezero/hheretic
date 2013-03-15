@@ -1878,7 +1878,7 @@ void A_HeadIceImpact(mobj_t *ice)
 	for (i = 0; i < 8; i++)
 	{
 		shard = P_SpawnMobj(ice->x, ice->y, ice->z, MT_HEADFX2);
-		angle = i*ANG45;
+		angle = (i&3)*ANG45;
 		shard->target = ice->target;
 		shard->angle = angle;
 		angle >>= ANGLETOFINESHIFT;
@@ -2506,7 +2506,7 @@ void A_VolcBallImpact(mobj_t *ball)
 	{
 		tiny = P_SpawnMobj(ball->x, ball->y, ball->z, MT_VOLCANOTBLAST);
 		tiny->target = ball;
-		angle = i*ANG90;
+		angle = (i&1)*ANG90;
 		tiny->angle = angle;
 		angle >>= ANGLETOFINESHIFT;
 		tiny->momx = FixedMul(FRACUNIT*.7, finecosine[angle]);

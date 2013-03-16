@@ -1871,14 +1871,14 @@ void A_WhirlwindSeek(mobj_t *actor)
 
 void A_HeadIceImpact(mobj_t *ice)
 {
-	int i;
+	unsigned int i;
 	angle_t angle;
 	mobj_t *shard;
 
 	for (i = 0; i < 8; i++)
 	{
 		shard = P_SpawnMobj(ice->x, ice->y, ice->z, MT_HEADFX2);
-		angle = (i&3)*ANG45;
+		angle = i*ANG45;
 		shard->target = ice->target;
 		shard->angle = angle;
 		angle >>= ANGLETOFINESHIFT;
@@ -2490,7 +2490,7 @@ void A_VolcanoBlast(mobj_t *volcano)
 
 void A_VolcBallImpact(mobj_t *ball)
 {
-	int i;
+	unsigned int i;
 	mobj_t *tiny;
 	angle_t angle;
 
@@ -2506,7 +2506,7 @@ void A_VolcBallImpact(mobj_t *ball)
 	{
 		tiny = P_SpawnMobj(ball->x, ball->y, ball->z, MT_VOLCANOTBLAST);
 		tiny->target = ball;
-		angle = (i&1)*ANG90;
+		angle = i*ANG90;
 		tiny->angle = angle;
 		angle >>= ANGLETOFINESHIFT;
 		tiny->momx = FixedMul(FRACUNIT*.7, finecosine[angle]);

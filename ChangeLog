@@ -1,8 +1,8 @@
 HHeretic ChangeLog
 
 v0.2.3
- - verified successful compilation using clang-3.0/3.1.
- - verified successful compilation using gcc-4.6/4.7.
+ - verified successful compilation using gcc-4.6 to 4.8 and clang-3.x.
+   fixed some undefined behaviors in the C code.
 
 v0.2.2
  - fixed e2 and e3 finale screens for opengl where they weren't drawn

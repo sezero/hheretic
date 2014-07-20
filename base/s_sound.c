@@ -350,6 +350,7 @@ void S_Start(void)
 
 void S_StartSong(int song, boolean loop)
 {
+	int length;
 	if (song == Mus_Song)
 	{ // don't replay an old song
 		return;
@@ -379,11 +380,12 @@ void S_StartSong(int song, boolean loop)
 		return;
 	}
 	Mus_LumpNum = W_GetNumForName(S_music[song].name);
+	length = W_LumpLength(Mus_LumpNum);
 	Mus_SndPtr = W_CacheLumpNum(Mus_LumpNum, PU_MUSIC);
 #ifdef __WATCOMC__
 	_dpmi_lockregion(Mus_SndPtr, lumpinfo[Mus_LumpNum].size);
 #endif
-	RegisteredSong = I_RegisterSong(Mus_SndPtr);
+	RegisteredSong = I_RegisterSong(Mus_SndPtr, length);
 	I_PlaySong(RegisteredSong, loop); // 'true' denotes endless looping.
 	Mus_Song = song;
 }

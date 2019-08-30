@@ -18,6 +18,14 @@
 #include "ogl_def.h"
 #endif
 
+#ifndef O_BINARY
+# if defined(_O_BINARY)
+#  define O_BINARY	_O_BINARY
+# else
+#  define O_BINARY		0
+# endif
+#endif
+
 int		myargc;
 const char	**myargv;
 

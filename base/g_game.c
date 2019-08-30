@@ -158,7 +158,7 @@ static int	inventoryTics;
 
 boolean		usearti = true;
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 extern externdata_t *i_ExternData;
 #endif
 
@@ -191,7 +191,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	int	forward, side;
 	int	look, arti;
 	int	flyheight;
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	int angleDelta;
 	static int oldAngle;
 	extern int newViewAngleOff;
@@ -208,7 +208,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 //printf ("cons: %i\n",cmd->consistancy);
 	strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] || joybuttons[joybstrafe];
 	speed = gamekeydown[key_speed] || joybuttons[joybspeed] || joybuttons[joybspeed];
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	if (useexterndriver)
 	{
 		speed |= (i_ExternData->buttons & EBT_SPEED);
@@ -297,7 +297,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	{
 		look = -lspeed;
 	}
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	if (gamekeydown[key_lookcenter] && !useexterndriver)
 	{
 		look = TOCENTER;
@@ -309,7 +309,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	}
 #endif
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	if (useexterndriver && look != TOCENTER && (gamestate == GS_LEVEL ||
 						gamestate == GS_INTERMISSION))
 	{
@@ -498,7 +498,7 @@ void G_BuildTiccmd (ticcmd_t *cmd)
 	if (gamekeydown[key_flycenter])
 	{
 		flyheight = TOCENTER;
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 		if (!useexterndriver)
 		{
 			look = TOCENTER;

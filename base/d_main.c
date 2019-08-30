@@ -8,7 +8,7 @@
 #include "h2stdinc.h"
 #include <sys/stat.h>
 #include <ctype.h>
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 #include <dos.h>
 #include <graph.h>
 #include <direct.h>
@@ -593,7 +593,7 @@ void D_AddFile(const char *file)
 //  Startup Thermo code
 //  FIXME : MOVE OR REMOVE THIS...
 //==========================================================
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 
 #define MSG_Y		9
 /*
@@ -776,7 +776,7 @@ void tprintf(const char *msg, int initflag)
 
 void CheckAbortStartup(void)
 {
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	extern int lastpress;
 	if (lastpress == 1)
 	{ // Abort if escape pressed
@@ -948,7 +948,7 @@ void D_DoomMain(void)
 		ExtendedWAD = true;
 	}
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	I_StartupKeyboard();
 	I_StartupJoystick();
 	startup = (char *) W_CacheLumpName("LOADING", PU_CACHE);
@@ -997,7 +997,7 @@ void D_DoomMain(void)
 	D_CheckNetGame();
 	IncThermo();
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	I_CheckExternDriver(); // Check for an external device driver
 #endif
 
@@ -1062,7 +1062,7 @@ void D_DoomMain(void)
 			D_StartTitle();
 		}
 	}
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	_settextcursor(0x0607); // bring the cursor back
 #endif
 	D_DoomLoop(); // Never returns

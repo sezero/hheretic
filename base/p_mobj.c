@@ -544,7 +544,7 @@ static void P_ZMovement(mobj_t *mo)
 			{
 				mo->player->deltaviewheight = mo->momz>>3;
 				S_StartSound(mo, sfx_plroof);
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 				if (!useexterndriver)
 				{
 					mo->player->centering = true;

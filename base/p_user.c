@@ -663,7 +663,7 @@ void P_PlayerThink(player_t *player)
 	{
 		if (!--player->powers[pw_flight])
 		{
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 			if (player->mo->z != player->mo->floorz && !useexterndriver)
 			{
 				player->centering = true;

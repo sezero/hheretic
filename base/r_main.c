@@ -12,7 +12,7 @@
 
 int			viewangleoffset;
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 int			newViewAngleOff;
 #endif
 
@@ -724,7 +724,7 @@ void R_SetupFrame(player_t *player)
 	int tempCentery;
 
 	viewplayer = player;
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	viewangleoffset = newViewAngleOff<<ANGLETOFINESHIFT;
 #endif
 	viewangle = player->mo->angle + viewangleoffset;
@@ -792,7 +792,7 @@ void R_SetupFrame(player_t *player)
 		UpdateState |= I_MESSAGES;
 	}
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__) && defined(_DOS)
 	destview = destscreen + (viewwindowx>>2) + viewwindowy*80;
 #endif
 #if 0

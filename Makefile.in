@@ -1,5 +1,4 @@
 # HHeretic Makefile
-# $Revision$
 #
 # svga			build Software (SVGALib) version
 # sdl			build Software (SDL) version
@@ -25,9 +24,8 @@ mandir = $(prefix)/man/man1
 includedir = $(prefix)/include
 
 CC = @CC@
-DEFS = @DEFS@
 CFLAGS = @CFLAGS@
-CPPFLAGS = @CPPFLAGS@
+CPPFLAGS = @DEFS@ @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 BASELIBS = @LIBS@
@@ -40,11 +38,9 @@ SDL_LIBS = @SDL_LIBS@
 SDL_CFLAGS = @SDL_CFLAGS@
 GLHEXEN = @GLHEXEN@
 SVGAHEXEN = @SVGAHEXEN@
-SHARED_DATAPATH = @SHARED_DATAPATH@
 SND_MODULE= @SND_MODULE@
 
 # Directories
-
 TOPSRCDIR = @top_srcdir@
 TOPOBJDIR = .
 SRCDIR    = @srcdir@
@@ -64,7 +60,6 @@ GL_LIBS := -L$(X11_LIB) $(GL_LIBS)
 endif
 
 # Objects to build
-
 OBJ_SYS  = unix/i_linux.o
 OBJ_SVGA = svgalib/i_svgalib.o
 OBJ_SWSDL = sdl/i_sdl.o
@@ -160,4 +155,3 @@ endif
 
 clean:
 	$(RM) base/*.o opengl/*.o dos/*.o unix/*.o sdl/*.o svgalib/*.o
-

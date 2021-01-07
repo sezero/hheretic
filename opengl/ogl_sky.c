@@ -1,10 +1,6 @@
-
 //**************************************************************************
 //**
 //** OGL_SKY.C
-//**
-//** $Revision$
-//** $Date$
 //**
 //**************************************************************************
 
@@ -255,7 +251,7 @@ void R_RenderSkyHemispheres(int hemis)
 }
 
 
-// THESE COPIED OVER FROM R_PLANES.C ---------------------------------------
+/* THESE COPIED OVER FROM R_PLANES.C ---------------------------------*/
 
 // R_InitSkyMap - Called whenever the view size changes.
 void R_InitSkyMap (void)

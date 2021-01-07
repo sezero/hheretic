@@ -1,10 +1,6 @@
-
 //**************************************************************************
 //**
 //** r_main.c
-//**
-//** $Revision$
-//** $Date$
 //**
 //** (ogl_main.c is r_main.c with necessary clean-ups for ogl)
 //**

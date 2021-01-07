@@ -1,6 +1,4 @@
 // R_bsp.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 

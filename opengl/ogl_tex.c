@@ -1,10 +1,6 @@
-
 //**************************************************************************
 //**
 //** OGL_TEX.C
-//**
-//** $Revision$
-//** $Date$
 //**
 //**************************************************************************
 
@@ -925,4 +921,3 @@ void OGL_UpdateRawScreenParams(int smoothing)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _glmode);
 	}
 }
-

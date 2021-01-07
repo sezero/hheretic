@@ -1,6 +1,4 @@
 // R_draw.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 

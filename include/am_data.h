@@ -1,6 +1,4 @@
 // AM_data.h : The vector graphics for the automap
-// $Revision$
-// $Date$
 
 #ifndef __AMDATA_H__
 #define __AMDATA_H__

@@ -1,7 +1,4 @@
-
 // P_spec.h
-// $Revision$
-// $Date$
 
 #ifndef __P_SPEC__
 #define __P_SPEC__

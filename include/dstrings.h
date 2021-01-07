@@ -1,7 +1,4 @@
-
 // DStrings.h
-// $Revision$
-// $Date$
 
 #ifndef __DSTRINGS_H
 #define __DSTRINGS_H
@@ -231,4 +228,3 @@
 			"wide, you go to meet your fate."
 
 #endif	/* __DSTRINGS_H */
-

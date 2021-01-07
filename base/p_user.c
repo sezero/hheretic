@@ -1,7 +1,4 @@
-
 // P_user.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

@@ -1,6 +1,4 @@
 // info.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"
@@ -5679,4 +5677,3 @@ MF_NOBLOCKMAP|MF_NOSECTOR,		// flags
 0		// flags2
  }
 };
-

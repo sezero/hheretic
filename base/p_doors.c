@@ -1,7 +1,4 @@
-
 // P_doors.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"
@@ -365,4 +362,3 @@ void P_SpawnDoorRaiseIn5Mins(sector_t *sec, int secnum)
 	door->topwait = VDOORWAIT;
 	door->topcountdown = 5*60*35;
 }
-

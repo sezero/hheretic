@@ -1,7 +1,4 @@
 // ct_chat.c
-// $Revision$
-// $Date$
-
 //
 // Chat mode
 //

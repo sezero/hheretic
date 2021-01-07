@@ -1,14 +1,8 @@
-
 // P_maputl.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"
 #include "p_local.h"
-
-
-//===========================================================================
 
 
 /*

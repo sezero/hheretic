@@ -1,18 +1,10 @@
-//**************************************************************************
-//**
-//** i_linux.c
-//**
-//** $Revision$
-//** $Date$
-//**
-//**************************************************************************
-
 #include "h2stdinc.h"
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include "doomdef.h"
 #include "soundst.h"
+
 
 extern void I_StartupMouse(void);
 extern void I_ShutdownGraphics(void);

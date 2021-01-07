@@ -1,7 +1,4 @@
-
 // AM_map.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 #include "doomdef.h"

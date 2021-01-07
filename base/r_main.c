@@ -1,6 +1,4 @@
 // R_main.c
-// $Revision$
-// $Date$
 
 #include "h2stdinc.h"
 #include <math.h>

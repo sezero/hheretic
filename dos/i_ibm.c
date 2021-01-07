@@ -1,7 +1,4 @@
-
 // I_IBM.C
-// $Revision$
-// $Date$
 
 #include <dos.h>
 #include <conio.h>

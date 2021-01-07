@@ -1,6 +1,4 @@
 // info.h
-// $Revision$
-// $Date$
 
 #ifndef __INFO_H
 #define __INFO_H
@@ -1557,4 +1555,3 @@ typedef struct {
 extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
 
 #endif	/* __INFO_H */
-

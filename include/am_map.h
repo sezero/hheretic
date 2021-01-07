@@ -1,6 +1,4 @@
 // am_map.h
-// $Revision$
-// $Date$
 
 #ifndef __AMMAP_H__
 #define __AMMAP_H__
@@ -113,4 +111,3 @@ typedef struct
 } islope_t;
 
 #endif	/* __AMMAP_H__ */
-

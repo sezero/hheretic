@@ -1,6 +1,4 @@
 // DoomData.h
-// $Revision$
-// $Date$
 
 /* all external data is defined here
  * most of the data is loaded into different structures at run time
@@ -126,6 +124,7 @@ COMPILE_TIME_ASSERT(mapthing_t, sizeof(mapthing_t) == 10);
 #define	MTF_NORMAL		2
 #define	MTF_HARD		4
 #define	MTF_AMBUSH		8
+
 
 /* ---- Texture definition ---- */
 

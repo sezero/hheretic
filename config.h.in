@@ -66,11 +66,17 @@
 /* Define if building with OpenGL support */
 #undef RENDER3D
 
+/* Define if HHeretic depends on SDL */
+#undef SDLHERETIC
+
 /* Define this to the shared game directory root */
 #undef SHARED_DATAPATH
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Define if HHeretic depends on SVGALib */
+#undef SVGAHERETIC
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

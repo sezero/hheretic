@@ -4,7 +4,9 @@
 #include <errno.h>
 #include "doomdef.h"
 #include "soundst.h"
-
+#ifdef SDLHERETIC
+#include "SDL.h"
+#endif
 
 extern void I_StartupMouse(void);
 extern void I_ShutdownGraphics(void);
@@ -20,7 +22,6 @@ extern int startmap;
 
 ============================================================================
 */
-
 
 int		ticcount;
 static long	_startSec;
@@ -118,6 +119,10 @@ void I_StartFrame (void)
 
 void I_Init (void)
 {
+#ifdef SDLHERETIC
+	if (SDL_Init(0) < 0)
+		I_Error("SDL failed to initialize.");
+#endif
 	I_StartupMouse();
 	I_StartupJoystick();
 	printf("  S_Init... ");
@@ -515,4 +520,3 @@ int main (int argc, char **argv)
 
 	return 0;
 }
-

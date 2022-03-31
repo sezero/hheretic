@@ -462,7 +462,7 @@ void R_RenderPlayerView (player_t *player)
 
 	// Draw psprites.
 	if (viewangleoffset <=  1024<<ANGLETOFINESHIFT ||
-	    viewangleoffset >= -1024<<ANGLETOFINESHIFT)
+	    viewangleoffset >= -(1024<<ANGLETOFINESHIFT))
 	{  // don't draw on side views
 		R_DrawPlayerSprites();
 	}

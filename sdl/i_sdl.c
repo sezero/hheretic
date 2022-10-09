@@ -30,6 +30,8 @@ static SDL_Surface* surface = NULL;
 static SDL_Surface* screen_surface = NULL;
 static SDL_Texture* render_texture = NULL;
 
+static int screenWidth = SCREENWIDTH*2;
+static int screenHeight = SCREENHEIGHT*2;
 static Uint32 sdl_pixel_format;
 static boolean vid_initialized = false;
 static int grabMouse;
@@ -228,7 +230,7 @@ void I_Update (void)
 void I_InitGraphics(void)
 {
 	char text[20];
-	int bpp;
+	int p, bpp;
 	Uint32 flags = DEFAULT_FLAGS;
 	Uint32 rmask, gmask, bmask, amask;
 
@@ -250,9 +252,21 @@ void I_InitGraphics(void)
 	if (M_CheckParm("-w") || M_CheckParm("--windowed"))
 		flags &= ~SDL_WINDOW_FULLSCREEN_DESKTOP;
 
-	// Needs some work to get screenHeight and screenWidth working - S.A.
+	p = M_CheckParm ("-height");
+	if (p && p < myargc -1)
+	{
+		screenHeight = atoi (myargv[p+1]);
+	}
+
+	p = M_CheckParm ("-width");
+	if (p && p < myargc -1)
+	{
+		screenWidth = atoi (myargv[p+1]);
+	}
+	printf("Screen size: %dx%d\n",screenWidth, screenHeight);
+
 	sdl_window = SDL_CreateWindow(text, SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED, SCREENWIDTH, SCREENHEIGHT, flags);
+		SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, flags);
 		
 	if ( sdl_window == NULL )
 	{

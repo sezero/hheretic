@@ -270,7 +270,6 @@ void I_InitGraphics(void)
 		
 	if ( sdl_window == NULL )
 	{
-		SDL_Quit ();
 		I_Error ("Couldn't initialize SDL2: %s\n", SDL_GetError());
 	}
 	
@@ -280,7 +279,6 @@ void I_InitGraphics(void)
 	if ( sdl_renderer == NULL )
 	{
 		SDL_DestroyWindow (sdl_window);
-		SDL_Quit ();
 		I_Error ("Couldn't create SDL2 renderer: %s\n", SDL_GetError());
 	}
 
@@ -345,7 +343,6 @@ void I_ShutdownGraphics(void)
 		SDL_DestroyWindow (sdl_window);
 
 	vid_initialized = false;
-	SDL_Quit ();
 }
 
 //===========================================================================
@@ -409,6 +406,7 @@ static int xlatekey (SDL_Keysym *key)
 		return KEY_RCTRL;
 
 	case SDLK_LALT:
+		return KEY_LALT;
 	case SDLK_RALT:
 		return KEY_RALT;
 

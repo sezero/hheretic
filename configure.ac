@@ -13,12 +13,6 @@ CFLAGS_DBG="-g"
 CFLAGS_OPT="-O2 -ffast-math -fomit-frame-pointer"
 
 GLHEXEN="true"
-SVGAHEXEN="false"
-no_svga="yes"
-
-THREAD_LIBS=""
-GLLIBS=""
-SVGALIBS=""
 
 dnl == Optimization
 AC_ARG_ENABLE(debug,
@@ -52,29 +46,16 @@ if test x$enable_asm != xyes; then
 	AC_DEFINE(_DISABLE_ASM, 1, [Define if not want to use assembly language])
 fi
 
-AC_ARG_ENABLE(svga,
-[AS_HELP_STRING([--enable-svga], [Enable SVGALib version [default=no]])],
-  [], [enable_svga=no])
-if test x$enable_svga = xyes; then
-	AC_DEFINE(SVGAHERETIC, 1, [Define if HHeretic depends on SVGALib])
-	no_svga="no"
-	SVGAHEXEN="true"
-fi
-
 AC_ARG_ENABLE(gl,
 [AS_HELP_STRING([--disable-gl], [Disable OpenGL version [default=no]])],
-  [], [enable_gl=$no_svga])
+  [], [enable_gl=yes])
 if test x$enable_gl = xyes; then
-	if test x$no_svga = xno; then
-	    AC_MSG_ERROR([*** --enable-gl and --enable-svga can not be used together])
-	fi
 	AC_DEFINE(RENDER3D, 1, [Define if building with OpenGL support])
 else
 	GLHEXEN="false"
 fi
 
 AC_SUBST(GLHEXEN)
-AC_SUBST(SVGAHEXEN)
 
 AC_ARG_ENABLE(rangecheck,
 [AS_HELP_STRING([--enable-rangecheck], [Enable parameter validation debugging code [default=no]])],
@@ -89,33 +70,22 @@ AC_ARG_WITH(datapath,
 AC_DEFINE_UNQUOTED(SHARED_DATAPATH, "$datapath", [Define this to the shared game directory root])
 SHARED_DATAPATH="$datapath"
 
-if test "$SVGAHEXEN" = "true"; then
-  default_audio="oss"
-else
-  default_audio="sdl"
-fi
+default_audio="sdl"
 
 AC_ARG_WITH([audio],
 [AS_HELP_STRING([--with-audio=<driver>], [If set, will change the audio driver.
-Valid values are oss, sdl and sdlmixer.  sdl is the default.
+Valid values are sdl and sdlmixer.  sdl is the default.
 sdlmixer adds the ability of midi music playback.])],
   [audio_drv="$withval"], [audio_drv="$default_audio"])
 
-if test "$SVGAHEXEN" = "true"; then
-	if test "$audio_drv" != "$default_audio";then
-		AC_MSG_WARN([Ignoring --with-audio option for svgahexen])
-	fi
-	SND_MODULE="$default_audio"
-else
-  case "$audio_drv" in
-	oss|sdl|sdlmixer)
+case "$audio_drv" in
+	sdl|sdlmixer)
 		SND_MODULE="$audio_drv"
 		;;
 	*)
 		AC_MSG_ERROR([*** invalid value for --with-audio])
 		;;
-  esac
-fi
+esac
 
 AC_SUBST(SND_MODULE)
 
@@ -161,43 +131,14 @@ X11_LIB="$ac_x_libraries"
 
 AC_CHECK_LIB(m, pow,, AC_MSG_ERROR([*** math library (-lm) appears broken]))
 
-AH_VERBATIM([_REENTRANT],
-[/* For pthread support in OSS audio code. */
-#ifndef _REENTRANT
-# undef _REENTRANT
-#endif])
-
-AH_VERBATIM([_THREAD_SAFE],
-[/* For pthread support in OSS audio code. */
-#ifndef _THREAD_SAFE
-# undef _THREAD_SAFE
-#endif])
-
-dnl == pthreads check: This is linux-centric (see the configure.in of SDL
-dnl == for other systems' pthreads support), but we need this for linux only
-AC_CHECK_LIB(pthread, pthread_join,
-	[HAVE_PTHREADS="yes";THREAD_LIBS="-lpthread";], [HAVE_PTHREADS="no";])
-if test "$SND_MODULE" = "oss";then
-	if test "$HAVE_PTHREADS" = "no"; then
-	   AC_MSG_ERROR([*** libpthread not found! (required by sound code.)])
-	fi
-	AC_DEFINE(_REENTRANT)
-	AC_DEFINE(_THREAD_SAFE)
-fi
-
-AC_SUBST(THREAD_LIBS)
-AC_SUBST(X11_INC)
-AC_SUBST(X11_LIB)
-
 dnl == Check for SDL
 SDL_VERSION="2.0.2"
 AM_PATH_SDL2($SDL_VERSION,[HAVESDL="yes"],[HAVESDL="no"])
-if test "$SVGAHEXEN" = "false";then
-    AC_DEFINE(SDLHERETIC, 1, [Define if HHeretic depends on SDL])
-    if test "$HAVESDL" = "no"; then
+AC_DEFINE(SDLHERETIC, 1, [Define if HHeretic depends on SDL])
+if test "$HAVESDL" = "no"; then
 	AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
-    fi
 fi
+
 
 saved_libs="$LIBS"
 AC_CHECK_LIB(SDL2_mixer, Mix_LoadMUS, [HAVE_SDLMIXER="yes"], [HAVE_SDLMIXER="no"], [$SDL_LIBS])
@@ -248,15 +189,6 @@ if test "$GLHEXEN" = "true"; then
 fi
 AC_SUBST(GL_LIBS)
 
-dnl == Check for SVGALib
-AC_CHECK_LIB(vga, vga_setmode, [SVGALIBS="-lvga"; HAVESVGA="yes"], [HAVESVGA="no"])
-if test "$SVGAHEXEN" = "true";then
-  if test "$HAVESVGA" = "no"; then
-	AC_MSG_ERROR([*** SVGALib not found!])
-  fi
-fi
-AC_SUBST(SVGALIBS)
-
 dnl == Generate output files
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -265,15 +197,12 @@ dnl == Make a short report
 echo
 echo "HHeretic configuration finished."
 
-if test "$SVGAHEXEN" = "true"; then
-    report="Software (SVGALib)"
-else
-  if test "$GLHEXEN" = "true"; then
+if test "$GLHEXEN" = "true"; then
     report="OpenGL (SDL)"
   else
     report="Software (SDL)"
-  fi
 fi
+
 echo "Enabled target       : $report"
 
 echo "Audio driver         : $SND_MODULE"
@@ -292,15 +221,12 @@ else
 fi
 echo "Shared game data path: $report"
 
-if test "$SVGAHEXEN" = "true"; then
-    report="N/A"
-else
-  if test x$enable_fullscreen = xyes; then
+if test x$enable_fullscreen = xyes; then
     report="fullscreen"
-  else
+else
     report="windowed"
-  fi
 fi
+
 echo "Default window mode  : $report"
 echo
 

@@ -177,6 +177,13 @@ int P_Random (void)
 	return rndtable[prndindex];
 }
 
+int P_SubRandom (void)
+{
+	int rand1 = P_Random();
+	int rand2 = P_Random();
+	return rand1 - rand2;
+}
+
 int M_Random (void)
 {
 	rndindex = (rndindex + 1) & 0xff;

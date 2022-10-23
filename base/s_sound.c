@@ -35,14 +35,6 @@ extern int	snd_MaxVolume;
 extern int	snd_MusicVolume;
 extern int	snd_Channels;
 
-#if defined(__WATCOMC__) && defined(_DOS)
-extern int	snd_SfxDevice;
-extern int	snd_MusicDevice;
-extern int	snd_DesiredSfxDevice;
-extern int	snd_DesiredMusicDevice;
-extern int	tsm_ID;
-#endif
-
 extern void	**lumpcache;
 
 extern int	startepisode;
@@ -304,10 +296,6 @@ void S_Init(void)
 
 void S_ShutDown(void)
 {
-#if defined(__WATCOMC__) && defined(_DOS)
-	if (tsm_ID == -1)
-		return;
-#endif
 	if (RegisteredSong)
 	{
 		I_StopSong(RegisteredSong);
@@ -359,9 +347,6 @@ void S_StartSong(int song, boolean loop)
 		if (!isExternalSong)
 		{
 			Z_ChangeTag(lumpcache[Mus_LumpNum], PU_CACHE);
-#if defined(__WATCOMC__) && defined(_DOS)
-			_dpmi_unlockregion(Mus_SndPtr, lumpinfo[Mus_LumpNum].size);
-#endif
 		}
 	}
 	if (song < mus_e1m1 || song >= NUMMUSIC)
@@ -379,9 +364,6 @@ void S_StartSong(int song, boolean loop)
 	Mus_LumpNum = W_GetNumForName(S_music[song].name);
 	length = W_LumpLength(Mus_LumpNum);
 	Mus_SndPtr = W_CacheLumpNum(Mus_LumpNum, PU_MUSIC);
-#if defined(__WATCOMC__) && defined(_DOS)
-	_dpmi_lockregion(Mus_SndPtr, lumpinfo[Mus_LumpNum].size);
-#endif
 	RegisteredSong = I_RegisterSong(Mus_SndPtr, length);
 	I_PlaySong(RegisteredSong, loop); // 'true' denotes endless looping.
 	Mus_Song = song;
@@ -539,10 +521,6 @@ void S_StartSound(mobj_t *origin, int sound_id)
 		}
 		S_sfx[sound_id].snd_ptr =
 			W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
-#if defined(__WATCOMC__) && defined(_DOS)
-		_dpmi_lockregion(S_sfx[sound_id].snd_ptr,
-				 lumpinfo[S_sfx[sound_id].lumpnum].size);
-#endif
 	}
 
 	// calculate the volume based upon the distance from the sound origin.
@@ -638,10 +616,6 @@ void S_StartSoundAtVolume(mobj_t *origin, int sound_id, int volume)
 		}
 		S_sfx[sound_id].snd_ptr =
 			W_CacheLumpNum(S_sfx[sound_id].lumpnum, PU_SOUND);
-#if defined(__WATCOMC__) && defined(_DOS)
-		_dpmi_lockregion(S_sfx[sound_id].snd_ptr,
-				 lumpinfo[S_sfx[sound_id].lumpnum].size);
-#endif
 	}
 	Channel[i].pitch = (byte)(127 - (M_Random() & 3) + (M_Random() & 3));
 	Channel[i].handle = I_StartSound(sound_id, S_sfx[sound_id].snd_ptr,
@@ -811,10 +785,6 @@ void S_UpdateSounds(mobj_t *listener)
 								sizeof(memblock_t)))->id == ZONEID)
 					{ // taken directly from the Z_ChangeTag macro
 						Z_ChangeTag2(lumpcache[S_sfx[i].lumpnum], PU_CACHE);
-#if defined(__WATCOMC__) && defined(_DOS)
-						_dpmi_unlockregion(S_sfx[i].snd_ptr,
-								   lumpinfo[S_sfx[i].lumpnum].size);
-#endif
 					}
 				}
 				S_sfx[i].usefulness = -1;

@@ -660,17 +660,10 @@ void P_PlayerThink(player_t *player)
 	{
 		if (!--player->powers[pw_flight])
 		{
-#if defined(__WATCOMC__) && defined(_DOS)
-			if (player->mo->z != player->mo->floorz && !useexterndriver)
-			{
-				player->centering = true;
-			}
-#else
 			if (player->mo->z != player->mo->floorz)
 			{
 				player->centering = true;
 			}
-#endif
 
 			player->mo->flags2 &= ~MF2_FLY;
 			player->mo->flags &= ~MF_NOGRAVITY;

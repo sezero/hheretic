@@ -10,10 +10,6 @@
 
 int			viewangleoffset;
 
-#if defined(__WATCOMC__) && defined(_DOS)
-int			newViewAngleOff;
-#endif
-
 int			validcount = 1;		// increment every time a check is made
 
 lighttable_t		*fixedcolormap;
@@ -722,9 +718,7 @@ void R_SetupFrame(player_t *player)
 	int tempCentery;
 
 	viewplayer = player;
-#if defined(__WATCOMC__) && defined(_DOS)
-	viewangleoffset = newViewAngleOff<<ANGLETOFINESHIFT;
-#endif
+
 	viewangle = player->mo->angle + viewangleoffset;
 	tableAngle = viewangle>>ANGLETOFINESHIFT;
 	if (player->chickenTics && player->chickenPeck)
@@ -789,17 +783,6 @@ void R_SetupFrame(player_t *player)
 		BorderTopRefresh = false;
 		UpdateState |= I_MESSAGES;
 	}
-
-#if defined(__WATCOMC__) && defined(_DOS)
-	destview = destscreen + (viewwindowx>>2) + viewwindowy*80;
-#endif
-#if 0
-	{
-		static int frame;
-		memset (screen, frame, SCREENWIDTH*SCREENHEIGHT);
-		frame++;
-	}
-#endif
 }
 
 /*

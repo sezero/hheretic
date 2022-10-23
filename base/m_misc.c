@@ -8,9 +8,6 @@
 #include "doomdef.h"
 #include "p_local.h"
 #include "soundst.h"
-#if defined(__WATCOMC__) && defined(_DOS)
-#include "i_sound.h"
-#endif
 #ifdef RENDER3D
 #include "ogl_def.h"
 #endif
@@ -411,14 +408,6 @@ extern int viewwidth, viewheight;
 extern int screenblocks;
 
 extern int snd_Channels;
-#if defined(__WATCOMC__) && defined(_DOS)
-extern int snd_DesiredMusicDevice, snd_DesiredSfxDevice;
-extern int snd_MusicDevice,	// current music card # (index to dmxCodes)
-	   snd_SfxDevice;	// current sfx card # (index to dmxCodes)
-
-extern int snd_SBport, snd_SBirq, snd_SBdma;	// sound blaster variables
-extern int snd_Mport;				// midi variables
-#endif	/* DOS vars */
 
 default_t defaults[] =
 {
@@ -467,16 +456,6 @@ default_t defaults[] =
 	{ "alwaysrun",		&alwaysrun,		0,	0, 1 },
 
 	{ "snd_channels",	&snd_Channels,		3,	3, MAX_CHANNELS },
-#if defined(__WATCOMC__) && defined(_DOS)
-	/* the min/max values I added here are pretty much meaningless.
-	  the values used to be set by the DOS version's setup program. */
-	{ "snd_musicdevice",	&snd_DesiredMusicDevice,0,	0, NUM_SCARDS-1 },
-	{ "snd_sfxdevice",	&snd_DesiredSfxDevice,	0,	0, NUM_SCARDS-1 },
-	{ "snd_sbport",		&snd_SBport,		544,	0, 544 },
-	{ "snd_sbirq",		&snd_SBirq,		-1,	-1, 7 },
-	{ "snd_sbdma",		&snd_SBdma,		-1,	-1, 7 },
-	{ "snd_mport",		&snd_Mport,		-1,	-1, 360 }
-#endif	/* DOS vars */
 };
 
 default_str_t default_strings[] =
@@ -746,17 +725,10 @@ void M_ScreenShot (void)
 	char	lbmname[MAX_OSPATH], *p;
 	byte	*pal;
 
-#if defined(__WATCOMC__) && defined(_DOS)
-	extern  byte *pcscreen;
-#endif
 //
 // munge planar buffer to linear
 // 
-#if defined(__WATCOMC__) && defined(_DOS)
-	linear = pcscreen;
-#else
 	linear = screen;
-#endif
 //
 // find a file name to save it to
 //
@@ -778,23 +750,11 @@ void M_ScreenShot (void)
 //
 // save the pcx file
 //
-#if defined(__WATCOMC__) && defined(_DOS)
-	pal = (byte *)Z_Malloc(768, PU_STATIC, NULL);
-	outp(0x3c7, 0);
-	for(i = 0; i < 768; i++)
-	{
-		*(pal+i) = inp(0x3c9)<<2;
-	}
-#else
 	pal = (byte *)W_CacheLumpName("PLAYPAL", PU_CACHE);
-#endif
 
 	WritePCXfile (lbmname, linear, SCREENWIDTH, SCREENHEIGHT, pal);
 
 	P_SetMessage(&players[consoleplayer], "SCREEN SHOT", false);
-#if defined(__WATCOMC__) && defined(_DOS)
-	Z_Free(pal);
-#endif
 }
 #endif
 

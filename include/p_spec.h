@@ -24,13 +24,13 @@ typedef struct
 	int		speed;
 } animdef_t;
 
-#define MAXANIMS		32
+#define MAXANIMS		128 /* old was 32 */
 
 extern	anim_t		anims[MAXANIMS], *lastanim;
 extern	int		*TerrainTypes;
 
 /* Animating line specials */
-#define MAXLINEANIMS		64
+#define MAXLINEANIMS		16384 /* old was 64 */
 
 extern	short		numlinespecials;
 extern	line_t		*linespeciallist[MAXLINEANIMS];
@@ -197,7 +197,7 @@ typedef struct
 
 #define PLATWAIT	3
 #define PLATSPEED	FRACUNIT
-#define MAXPLATS	30
+#define MAXPLATS	7680 /* old was 30 */
 
 extern	plat_t		*activeplats[MAXPLATS];
 

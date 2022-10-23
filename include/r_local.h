@@ -166,8 +166,8 @@ typedef struct
 
 typedef byte	lighttable_t;		/* this could be wider for >8 bit display */
 
-#define MAXVISPLANES		128
-#define MAXOPENINGS		(SCREENWIDTH * 64)
+#define MAXVISPLANES		1024 /* old was 128 */
+#define MAXOPENINGS		(SCREENWIDTH * SCREENHEIGHT) /* old was SCREENWIDTH*64 */
 
 typedef struct
 {
@@ -203,7 +203,7 @@ typedef struct drawseg_s
 #define SIL_TOP		2
 #define SIL_BOTH	3
 
-#define MAXDRAWSEGS	256
+#define MAXDRAWSEGS	4096 /* old was 256 */
 
 /* A vissprite_t is a thing that will be drawn during a refresh */
 typedef struct vissprite_s
@@ -418,7 +418,7 @@ void R_PrecacheLevel (void);
 
 /* ---- R_things.c ---- */
 
-#define MAXVISSPRITES		128
+#define MAXVISSPRITES		4096 /* old was 128 */
 
 extern	vissprite_t	vissprites[MAXVISSPRITES], *vissprite_p;
 extern	vissprite_t	vsprsortedhead;

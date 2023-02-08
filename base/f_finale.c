@@ -292,18 +292,11 @@ static void F_DemonScroll(void)
 
 static void F_InitUnderWater(void)
 {
-# if defined(__WATCOMC__) && defined(_DOS)
-	memset((byte *)0xa0000, 0, SCREENWIDTH * SCREENHEIGHT);	/* pcscreen */
-# endif /* DOS */
 	I_SetPalette((byte *)W_CacheLumpName("E2PAL", PU_CACHE));
 }
 
 static void F_KillUnderWater(void)
 {
-# if defined(__WATCOMC__) && defined(_DOS)
-	memset((byte *)0xa0000, 0, SCREENWIDTH * SCREENHEIGHT);	/* pcscreen */
-	memset(screen, 0, SCREENWIDTH * SCREENHEIGHT);
-# endif /* DOS */
 	I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
 

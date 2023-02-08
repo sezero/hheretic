@@ -9,9 +9,9 @@
 #include "r_local.h"
 #include "ogl_def.h"
 
-#define BASE_WINDOW_FLAGS	(SDL_OPENGL)
+#define BASE_WINDOW_FLAGS	(SDL_WINDOW_OPENGL)
 #ifdef FULLSCREEN_DEFAULT
-#define DEFAULT_FLAGS		(BASE_WINDOW_FLAGS|SDL_FULLSCREEN)
+#define DEFAULT_FLAGS		(BASE_WINDOW_FLAGS|SDL_WINDOW_FULLSCREEN_DESKTOP)
 #else
 #define DEFAULT_FLAGS		(BASE_WINDOW_FLAGS)
 #endif
@@ -34,9 +34,12 @@ boolean mousepresent;
 extern int usemouse, usejoystick;
 
 // Private Data
-
+static boolean fullscreen_mode = false;
 static boolean vid_initialized = false;
 static int grabMouse;
+
+static SDL_Window* sdl_window = NULL;
+static SDL_GLContext sdl_gl_context = NULL;
 
 
 //--------------------------------------------------------------------------
@@ -95,7 +98,7 @@ void I_Update (void)
 	if (UpdateState == I_NOUPDATE)
 		return;
 
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(sdl_window);
 	UpdateState = I_NOUPDATE;
 }
 
@@ -105,13 +108,54 @@ void I_Update (void)
 //
 //--------------------------------------------------------------------------
 
-static char mesa_env[32];
+/*
+ * At the moment there's no simple solution
+ * to resize the OpenGL window, so we should 
+ * perform a full graphics system restart.
+*/
+
+static void I_UpdateVideoMode(void)
+{
+	I_ShutdownGraphics();
+
+	Uint32 flags = DEFAULT_FLAGS;
+	char text[20];
+
+	snprintf (text, sizeof(text), "HHeretic v%d.%d.%d",
+		  VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
+		  
+	if (fullscreen_mode)
+		  flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+	else
+		  flags &= ~SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+	sdl_window = SDL_CreateWindow (text, SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, flags);
+		  
+	if (sdl_window == NULL) {
+		I_Error ("Couldn't create SDL2 window: %s\n", SDL_GetError());
+	}
+
+	SDL_GL_GetDrawableSize(sdl_window, &screenWidth, &screenHeight);
+
+	sdl_gl_context = SDL_GL_CreateContext (sdl_window);
+
+	if (sdl_gl_context == NULL)
+	{
+		SDL_DestroyWindow (sdl_window);
+		I_Error ("Couldn't create OpenGL context: %s\n", SDL_GetError());
+	}
+
+	vid_initialized = true;
+
+	OGL_InitRenderer ();
+
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
 void I_InitGraphics(void)
 {
 	int p;
-	char text[20];
-	Uint32 flags = DEFAULT_FLAGS;
 
 	if (M_CheckParm("-novideo"))	// if true, stay in text mode for debugging
 	{
@@ -120,19 +164,10 @@ void I_InitGraphics(void)
 		return;
 	}
 
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
-		I_Error ("Couldn't init video: %s", SDL_GetError());
-	}
-
 	if (M_CheckParm("-f") || M_CheckParm("--fullscreen"))
-		flags |= SDL_FULLSCREEN;
+		fullscreen_mode = true;
 	if (M_CheckParm("-w") || M_CheckParm("--windowed"))
-		flags &= ~SDL_FULLSCREEN;
-	if (flags & SDL_FULLSCREEN)
-		strcpy (mesa_env, "MESA_GLX_FX=fullscreen");
-	else
-		strcpy (mesa_env, "MESA_GLX_FX=disable");
-	putenv (mesa_env);	/* SDL_putenv is problematic in versions <= 1.2.9 */
+		fullscreen_mode = false;
 
 	p = M_CheckParm ("-height");
 	if (p && p < myargc - 1)
@@ -146,17 +181,11 @@ void I_InitGraphics(void)
 	}
 	printf("Screen size: %dx%d\n",screenWidth, screenHeight);
 
-	if (SDL_SetVideoMode(screenWidth, screenHeight, 8, flags) == NULL)
-	{
-		I_Error("Couldn't set video mode %dx%d: %s\n",
-			screenWidth, screenHeight, SDL_GetError());
-	}
+	/* Switch to compatibility profile */
+	SDL_GL_SetAttribute (SDL_GL_CONTEXT_PROFILE_MASK,
+		SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 
-	vid_initialized = true;
-
-	OGL_InitRenderer ();
-
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	I_UpdateVideoMode ();
 
 	// Print some OpenGL information.
 	printf ("I_InitGraphics: OpenGL information:\n");
@@ -184,13 +213,10 @@ void I_InitGraphics(void)
 	if (!M_CheckParm ("--nograb") && !M_CheckParm ("-g"))
 	{
 		grabMouse = 1;
-		SDL_WM_GrabInput (SDL_GRAB_ON);
+		SDL_SetRelativeMouseMode (SDL_TRUE);
 	}
 
 	SDL_ShowCursor (0);
-	snprintf (text, sizeof(text), "HHeretic v%d.%d.%d",
-		  VERSION_MAJ, VERSION_MIN, VERSION_PATCH);
-	SDL_WM_SetCaption (text, "HHERETIC" );
 }
 
 //--------------------------------------------------------------------------
@@ -206,7 +232,12 @@ void I_ShutdownGraphics(void)
 	vid_initialized = false;
 	OGL_ResetData ();
 	OGL_ResetLumpTexData ();
-	SDL_Quit ();
+
+	if (sdl_gl_context != NULL)
+		SDL_GL_DeleteContext (sdl_gl_context);
+
+	if (sdl_window != NULL)
+		SDL_DestroyWindow (sdl_window);
 }
 
 //===========================================================================
@@ -214,7 +245,7 @@ void I_ShutdownGraphics(void)
 //
 //  Translates the key
 //
-static int xlatekey (SDL_keysym *key)
+static int xlatekey (SDL_Keysym *key)
 {
 	switch (key->sym)
 	{
@@ -270,54 +301,53 @@ static int xlatekey (SDL_keysym *key)
 		return KEY_RCTRL;
 
 	case SDLK_LALT:
-	case SDLK_LMETA:
+		return KEY_LALT;
 	case SDLK_RALT:
-	case SDLK_RMETA:
 		return KEY_RALT;
 
-	case SDLK_KP0:
+	case SDLK_KP_0:
 		if (key->mod & KMOD_NUM)
 			return SDLK_0;
 		else
 			return KEY_INS;
-	case SDLK_KP1:
+	case SDLK_KP_1:
 		if (key->mod & KMOD_NUM)
 			return SDLK_1;
 		else
 			return KEY_END;
-	case SDLK_KP2:
+	case SDLK_KP_2:
 		if (key->mod & KMOD_NUM)
 			return SDLK_2;
 		else
 			return KEY_DOWNARROW;
-	case SDLK_KP3:
+	case SDLK_KP_3:
 		if (key->mod & KMOD_NUM)
 			return SDLK_3;
 		else
 			return KEY_PGDN;
-	case SDLK_KP4:
+	case SDLK_KP_4:
 		if (key->mod & KMOD_NUM)
 			return SDLK_4;
 		else
 			return KEY_LEFTARROW;
-	case SDLK_KP5:
+	case SDLK_KP_5:
 		return SDLK_5;
-	case SDLK_KP6:
+	case SDLK_KP_6:
 		if (key->mod & KMOD_NUM)
 			return SDLK_6;
 		else
 			return KEY_RIGHTARROW;
-	case SDLK_KP7:
+	case SDLK_KP_7:
 		if (key->mod & KMOD_NUM)
 			return SDLK_7;
 		else
 			return KEY_HOME;
-	case SDLK_KP8:
+	case SDLK_KP_8:
 		if (key->mod & KMOD_NUM)
 			return SDLK_8;
 		else
 			return KEY_UPARROW;
-	case SDLK_KP9:
+	case SDLK_KP_9:
 		if (key->mod & KMOD_NUM)
 			return SDLK_9;
 		else
@@ -340,12 +370,20 @@ static int xlatekey (SDL_keysym *key)
 	}
 }
 
+/* Shamelessly stolen from PrBoom+ */
+static int I_SDLtoHereticMouseState(Uint8 buttonstate)
+{
+	return 0
+		| (buttonstate & SDL_BUTTON(1) ? 1 : 0)
+		| (buttonstate & SDL_BUTTON(2) ? 2 : 0)
+		| (buttonstate & SDL_BUTTON(3) ? 4 : 0);
+}
+
 /* This processes SDL events */
 void I_GetEvent(SDL_Event *Event)
 {
-	Uint8 buttonstate;
 	event_t event;
-	SDLMod mod;
+	SDL_Keymod mod;
 
 	switch (Event->type)
 	{
@@ -355,15 +393,15 @@ void I_GetEvent(SDL_Event *Event)
 		{
 			if (Event->key.keysym.sym == 'g')
 			{
-				if (SDL_WM_GrabInput (SDL_GRAB_QUERY) == SDL_GRAB_OFF)
+				if (SDL_GetRelativeMouseMode () == SDL_FALSE)
 				{
 					grabMouse = 1;
-					SDL_WM_GrabInput (SDL_GRAB_ON);
+					SDL_SetRelativeMouseMode (SDL_TRUE);
 				}
 				else
 				{
 					grabMouse = 0;
-					SDL_WM_GrabInput (SDL_GRAB_OFF);
+					SDL_SetRelativeMouseMode (SDL_FALSE);
 				}
 				break;
 			}
@@ -372,7 +410,8 @@ void I_GetEvent(SDL_Event *Event)
 		{
 			if (Event->key.keysym.sym == SDLK_RETURN)
 			{
-				SDL_WM_ToggleFullScreen(SDL_GetVideoSurface());
+				fullscreen_mode = true;
+				I_UpdateVideoMode ();
 				break;
 			}
 		}
@@ -389,11 +428,8 @@ void I_GetEvent(SDL_Event *Event)
 
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
-		buttonstate = SDL_GetMouseState(NULL, NULL);
 		event.type = ev_mouse;
-		event.data1 = 0	| (buttonstate & SDL_BUTTON(1) ? 1 : 0)
-				| (buttonstate & SDL_BUTTON(2) ? 2 : 0)
-				| (buttonstate & SDL_BUTTON(3) ? 4 : 0);
+		event.data1 = I_SDLtoHereticMouseState(SDL_GetMouseState(NULL, NULL));
 		event.data2 = event.data3 = 0;
 		D_PostEvent(&event);
 		break;
@@ -403,14 +439,12 @@ void I_GetEvent(SDL_Event *Event)
 		if ((Event->motion.x != SCREENWIDTH/2) ||
 		    (Event->motion.y != SCREENHEIGHT/2) )
 		{
-		/* Warp the mouse back to the center */
+			/* Warp the mouse back to the center */
 			if (grabMouse) {
-				SDL_WarpMouse(SCREENWIDTH/2, SCREENHEIGHT/2);
+				SDL_WarpMouseInWindow(sdl_window, screenWidth/2, screenHeight/2);
 			}
 			event.type = ev_mouse;
-			event.data1 = 0	| (Event->motion.state & SDL_BUTTON(1) ? 1 : 0)
-					| (Event->motion.state & SDL_BUTTON(2) ? 2 : 0)
-					| (Event->motion.state & SDL_BUTTON(3) ? 4 : 0);
+			event.data1 = I_SDLtoHereticMouseState(Event->motion.state);
 			event.data2 = Event->motion.xrel << 3;
 			event.data3 = -Event->motion.yrel << 3;
 			D_PostEvent(&event);
@@ -419,6 +453,10 @@ void I_GetEvent(SDL_Event *Event)
 
 	case SDL_QUIT:
 		I_Quit();
+		break;
+
+	default:
+		break;
 	}
 }
 

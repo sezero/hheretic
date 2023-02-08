@@ -414,7 +414,7 @@ static void P_ChickenPlayerThink(player_t *player)
 	pmo = player->mo;
 	if (!(pmo->momx + pmo->momy) && P_Random() < 160)
 	{ // Twitch view angle
-		pmo->angle += (P_Random() - P_Random())<<19;
+		pmo->angle += P_SubRandom()<<19;
 	}
 	if ((pmo->z <= pmo->floorz) && (P_Random() < 32))
 	{ // Jump and noise
@@ -660,17 +660,10 @@ void P_PlayerThink(player_t *player)
 	{
 		if (!--player->powers[pw_flight])
 		{
-#if defined(__WATCOMC__) && defined(_DOS)
-			if (player->mo->z != player->mo->floorz && !useexterndriver)
-			{
-				player->centering = true;
-			}
-#else
 			if (player->mo->z != player->mo->floorz)
 			{
 				player->centering = true;
 			}
-#endif
 
 			player->mo->flags2 &= ~MF2_FLY;
 			player->mo->flags &= ~MF_NOGRAVITY;

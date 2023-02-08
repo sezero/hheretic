@@ -109,7 +109,7 @@ void V_Init(void)
 
 #else	/* RENDER3D */
 
-byte	*screen;
+byte	*screen = NULL;
 int	dirtybox[4];
 
 //---------------------------------------------------------------------------
@@ -120,8 +120,6 @@ int	dirtybox[4];
 
 void V_Init(void)
 {
-	// I_AllocLow will put screen in low dos memory on PCs.
-	screen = I_AllocLow(SCREENWIDTH*SCREENHEIGHT);
 }
 
 //---------------------------------------------------------------------------

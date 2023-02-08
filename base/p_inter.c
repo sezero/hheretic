@@ -972,9 +972,9 @@ static void P_TouchWhirlwind(mobj_t *target)
 {
 	int randVal;
 
-	target->angle += (P_Random() - P_Random()) <<20;
-	target->momx  += (P_Random() - P_Random()) <<10;
-	target->momy  += (P_Random() - P_Random()) <<10;
+	target->angle += P_SubRandom() <<20;
+	target->momx  += P_SubRandom() <<10;
+	target->momy  += P_SubRandom() <<10;
 	if (leveltime & 16 && !(target->flags2 & MF2_BOSS))
 	{
 		randVal = P_Random();
@@ -1410,10 +1410,6 @@ void P_DamageMobj (mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage
 		}
 		if (player == &players[consoleplayer])
 		{
-#if defined(__WATCOMC__) && defined(_DOS)
-			int temp = damage < 100 ? damage : 100;
-			I_Tactile(40, 10, 40 + temp*2);
-#endif	/* externdriver, DOS */
 			SB_PaletteFlash();
 		}
 	}

@@ -790,9 +790,6 @@ void R_SetupFrame(player_t *player)
 		UpdateState |= I_MESSAGES;
 	}
 
-#if defined(__WATCOMC__) && defined(_DOS)
-	destview = destscreen + (viewwindowx>>2) + viewwindowy*80;
-#endif
 #if 0
 	{
 		static int frame;

@@ -180,6 +180,7 @@ void I_Error (const char *error, ...)
 //
 //--------------------------------------------------------------------------
 
+#ifndef __MINT__
 static void put_dos2ansi (byte attrib)
 {
 	byte	fore, back, blink = 0, intens = 0;
@@ -236,13 +237,16 @@ static void I_ENDTEXT (void)
 	}
 	printf ("\033[m");	/* Cleanup */
 }
+#endif
 
 void I_Quit (void)
 {
 	D_QuitNetGame();
 	M_SaveDefaults();
 	I_Shutdown();
+#ifndef __MINT__	// this looks ugly when executed only from plain TOS
 	I_ENDTEXT ();
+#endif
 
 	exit(0);
 }

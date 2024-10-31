@@ -35,7 +35,7 @@ void D_AdvanceDemo(void);
 
 static struct
 {
-	mobjtype_t type;
+	int type; /* mobjtype_t */
 	int speed[2];
 } MonsterMissileInfo[] =
 {
@@ -737,8 +737,6 @@ static void G_DoLoadLevel (void)
 	joyxmove = joyymove = 0;
 	mousex = mousey = 0;
 	sendpause = sendsave = paused = false;
-//	memset (mousebuttons, 0, sizeof(mousebuttons));
-//	memset (joybuttons, 0, sizeof(joybuttons));
 	memset (joyarray, 0, sizeof(joyarray));
 	memset (mousearray, 0, sizeof(mousearray));
 }

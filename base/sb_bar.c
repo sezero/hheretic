@@ -1404,7 +1404,7 @@ static void CheatArtifact3Func(player_t *player, Cheat_t *cheat)
 {
 	int i;
 	int j;
-	artitype_t type;
+	int type; // artitype_t
 	int count;
 
 	type = cheat->args[0] - 'a' + 1;

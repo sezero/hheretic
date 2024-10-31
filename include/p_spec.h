@@ -18,7 +18,7 @@ typedef struct
 /* source animation definition */
 typedef struct
 {
-	boolean	istexture;	/* if false, it's a flat */
+	int	istexture;	/* boolean, if false, it's a flat */
 	const char	endname[9];
 	const char	startname[9];
 	int		speed;

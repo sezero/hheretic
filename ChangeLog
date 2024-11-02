@@ -3,7 +3,10 @@ HHeretic ChangeLog
 v0.2.4
  - fixed a heap buffer overrun which was introduced back in v0.2.0.
  - new mus2midi converter code by Bret Curtis.
+ - double-buffering support and double-buffered rectangle rendering in
+   software renderer, by Miro Kropacek.
  - Atari (FreeMint) support, by Miro Kropacek.
+ - miscellaneous cleanups and build fixes
 
 v0.2.3
  - verified successful compilation using gcc-4.6 to 4.8 and clang-3.x.

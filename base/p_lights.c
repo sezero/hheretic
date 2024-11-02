@@ -20,8 +20,10 @@
 //
 //============================================================================
 
-void T_LightFlash (lightflash_t *flash)
+void T_LightFlash (void *arg)
 {
+	lightflash_t *flash = (lightflash_t *)arg;
+
 	if (--flash->count)
 		return;
 
@@ -78,8 +80,10 @@ void P_SpawnLightFlash (sector_t *sector)
 //
 //============================================================================
 
-void T_StrobeFlash (strobe_t *flash)
+void T_StrobeFlash (void *arg)
 {
+	strobe_t *flash = (strobe_t *)arg;
+
 	if (--flash->count)
 		return;
 
@@ -230,8 +234,10 @@ void EV_LightTurnOn(line_t *line, int bright)
 //
 //============================================================================
 
-void T_Glow(glow_t *g)
+void T_Glow(void *arg)
 {
+	glow_t *g = (glow_t *)arg;
+
 	switch (g->direction)
 	{
 	case -1: // DOWN

@@ -26,6 +26,8 @@ void P_SpawnMapThing(mapthing_t *mthing);
 
 extern fixed_t	attackrange;
 
+extern int	playerkeys;
+
 // PUBLIC DATA DEFINITIONS -------------------------------------------------
 
 mobjtype_t	PuffType;
@@ -81,7 +83,7 @@ boolean P_SetMobjState(mobj_t *mobj, statenum_t state)
 	mobj->frame = st->frame;
 	if (st->action)
 	{ // Call action function
-		st->action(mobj);
+		st->action(mobj, NULL);
 	}
 	return true;
 }
@@ -667,8 +669,10 @@ static void P_NightmareRespawn (mobj_t *mobj)
 //
 //----------------------------------------------------------------------------
 
-void P_BlasterMobjThinker(mobj_t *mobj)
+void P_BlasterMobjThinker(void *arg)
 {
+	mobj_t *mobj = (mobj_t *)arg;
+
 	int i;
 	fixed_t xfrac;
 	fixed_t yfrac;
@@ -739,8 +743,9 @@ void P_BlasterMobjThinker(mobj_t *mobj)
 //
 //----------------------------------------------------------------------------
 
-void P_MobjThinker(mobj_t *mobj)
+void P_MobjThinker(void *arg)
 {
+	mobj_t *mobj = (mobj_t *)arg;
 	mobj_t *onmo;
 
 	// Handle X and Y momentums
@@ -958,7 +963,6 @@ void P_SpawnPlayer(mapthing_t *mthing)
 	fixed_t x, y, z;
 	mobj_t *mobj;
 	int i;
-	extern int playerkeys;
 
 	if (!playeringame[mthing->type - 1])
 	{ // Not playing
@@ -1608,8 +1612,9 @@ mobj_t *P_SPMAngle(mobj_t *source, mobjtype_t type, angle_t angle)
 //
 //---------------------------------------------------------------------------
 
-void A_ContMobjSound(mobj_t *actor)
+void A_ContMobjSound(void *arg1, void *arg2)
 {
+	mobj_t *actor = (mobj_t *)arg1;
 	switch (actor->type)
 	{
 	case MT_KNIGHTAXE:

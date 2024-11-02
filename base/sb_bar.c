@@ -77,6 +77,7 @@ static void CheatIDDQDFunc(player_t *player, Cheat_t *cheat);
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
+extern int DisplayTicker;
 extern byte *screen;
 
 // PUBLIC DATA DECLARATIONS ------------------------------------------------
@@ -1377,8 +1378,6 @@ static void CheatSoundFunc(player_t *player, Cheat_t *cheat)
 
 static void CheatTickerFunc(player_t *player, Cheat_t *cheat)
 {
-	extern int DisplayTicker;
-
 	DisplayTicker = !DisplayTicker;
 	if (DisplayTicker)
 	{
@@ -1459,9 +1458,9 @@ static void CheatWarpFunc(player_t *player, Cheat_t *cheat)
 	}
 }
 
+extern boolean P_UndoPlayerChicken(player_t*);
 static void CheatChickenFunc(player_t *player, Cheat_t *cheat)
 {
-	extern boolean P_UndoPlayerChicken(player_t *player);
 
 	if (player->chickenTics)
 	{

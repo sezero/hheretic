@@ -164,8 +164,9 @@ result_e T_MovePlane(sector_t *sector,fixed_t speed, fixed_t dest,
 //
 //==================================================================
 
-void T_MoveFloor(floormove_t *floor)
+void T_MoveFloor(void *arg)
 {
+	floormove_t *floor = (floormove_t *)arg;
 	result_e	res;
 
 	res = T_MovePlane(floor->sector,floor->speed,

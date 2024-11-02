@@ -56,6 +56,8 @@ static struct
 	{ -1, {-1, -1} } // Terminator
 };
 
+extern boolean MenuActive;
+
 gameaction_t	gameaction;
 gamestate_t	gamestate;
 skill_t		gameskill;
@@ -65,7 +67,6 @@ int		gamemap;
 int		prevmap;
 
 boolean		paused;
-
 boolean		usergame;		// ok to save / end game
 
 static boolean	sendpause;		// send a pause event next tic
@@ -755,7 +756,6 @@ static void G_DoLoadLevel (void)
 boolean G_Responder(event_t *ev)
 {
 	player_t *plr;
-	extern boolean MenuActive;
 
 	plr = &players[consoleplayer];
 	if (ev->type == ev_keyup && ev->data1 == key_useartifact)

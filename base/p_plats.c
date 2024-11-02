@@ -14,8 +14,9 @@ plat_t	*activeplats[MAXPLATS];
 //
 //==================================================================
 
-void T_PlatRaise(plat_t *plat)
+void T_PlatRaise(void *arg)
 {
+	plat_t *plat = (plat_t *)arg;
 	result_e res;
 
 	switch (plat->status)

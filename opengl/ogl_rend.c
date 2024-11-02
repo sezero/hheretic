@@ -42,6 +42,7 @@ static void DL_Clear(void);
 
 extern fadeout_t	fadeOut[2];	/* For both skies. */
 extern int	skyhemispheres;
+extern int	screenblocks;
 
 extern subsector_t	*currentssec;
 
@@ -221,7 +222,6 @@ void OGL_Restore2DState(int step)
 {
 	if (step == 1)
 	{
-		extern int screenblocks;
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(0, 320, (screenblocks < 11) ? 161 : 200, 0, -1, 1);
@@ -1132,7 +1132,6 @@ void OGL_DrawPSprite(int x, int y, float scale, int flip, int lump)
 
 	glEnd();
 }
-
 
 /*
 ================

@@ -1434,14 +1434,14 @@ static boolean SCAlwaysRun(int option)
 //
 //---------------------------------------------------------------------------
 
+extern void G_CheckDemoStatus(void);
+extern void D_StartTitle(void);
 boolean MN_Responder(event_t *event)
 {
 	int key;
 	int i;
 	MenuItem_t *item;
 	static boolean shiftdown;
-	extern void D_StartTitle(void);
-	extern void G_CheckDemoStatus(void);
 	char *textBuffer;
 
 	if (askforkey && event->type == ev_keydown)
@@ -1517,7 +1517,7 @@ boolean MN_Responder(event_t *event)
 				switch (typeofask)
 				{
 				case 1:
-					G_CheckDemoStatus(); 
+					G_CheckDemoStatus();
 					I_Quit();
 					break;
 				case 2:

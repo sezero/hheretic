@@ -347,7 +347,7 @@ typedef struct
 */
 
 /* think_t is a function pointer to a routine to handle an actor */
-typedef void (*think_t) ();
+typedef void (*think_t) (void *arg);
 
 typedef struct thinker_s
 {

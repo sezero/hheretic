@@ -56,7 +56,7 @@ static void CloseStreamOut(const char *fileName);
 static void StreamOutBuffer(const void *buffer, int size);
 static void StreamOutByte(byte val);
 static void StreamOutWord(unsigned short val);
-//static void StreamOutLong(unsigned int val);
+/* static void StreamOutLong(uint32_t val); */
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
@@ -212,7 +212,7 @@ static void UnarchivePlayers(void)
 		for (j = 0; j < NUMPSPRITES; j++)
 		{
 			if (players[i]. psprites[j].state)
-				players[i].psprites[j].state = &states[(int)players[i].psprites[j].state];
+				players[i].psprites[j].state = &states[(intptr_t)players[i].psprites[j].state];
 		}
 	}
 }
@@ -392,11 +392,11 @@ static void UnarchiveThinkers(void)
 			mobj = (mobj_t *) Z_Malloc (sizeof(*mobj), PU_LEVEL, NULL);
 			memcpy (mobj, SavePtr, sizeof(*mobj));
 			SavePtr += sizeof(*mobj);
-			mobj->state = &states[(int)mobj->state];
+			mobj->state = &states[(intptr_t)mobj->state];
 			mobj->target = NULL;
 			if (mobj->player)
 			{
-				mobj->player = &players[(int)mobj->player - 1];
+				mobj->player = &players[(intptr_t)mobj->player - 1];
 				mobj->player->mo = mobj;
 			}
 			P_SetThingPosition (mobj);
@@ -532,7 +532,7 @@ static void UnarchiveSpecials(void)
 			ceiling = (ceiling_t *) Z_Malloc (sizeof(*ceiling), PU_LEVEL, NULL);
 			memcpy (ceiling, SavePtr, sizeof(*ceiling));
 			SavePtr += sizeof(*ceiling);
-			ceiling->sector = &sectors[(int)ceiling->sector];
+			ceiling->sector = &sectors[(intptr_t)ceiling->sector];
 			ceiling->sector->specialdata = T_MoveCeiling;
 			if (ceiling->thinker.function)
 				ceiling->thinker.function = T_MoveCeiling;
@@ -544,7 +544,7 @@ static void UnarchiveSpecials(void)
 			door = (vldoor_t *) Z_Malloc (sizeof(*door), PU_LEVEL, NULL);
 			memcpy (door, SavePtr, sizeof(*door));
 			SavePtr += sizeof(*door);
-			door->sector = &sectors[(int)door->sector];
+			door->sector = &sectors[(intptr_t)door->sector];
 			door->sector->specialdata = door;
 			door->thinker.function = T_VerticalDoor;
 			P_AddThinker (&door->thinker);
@@ -554,7 +554,7 @@ static void UnarchiveSpecials(void)
 			floor = (floormove_t *) Z_Malloc (sizeof(*floor), PU_LEVEL, NULL);
 			memcpy (floor, SavePtr, sizeof(*floor));
 			SavePtr += sizeof(*floor);
-			floor->sector = &sectors[(int)floor->sector];
+			floor->sector = &sectors[(intptr_t)floor->sector];
 			floor->sector->specialdata = T_MoveFloor;
 			floor->thinker.function = T_MoveFloor;
 			P_AddThinker (&floor->thinker);
@@ -564,7 +564,7 @@ static void UnarchiveSpecials(void)
 			plat = (plat_t *) Z_Malloc (sizeof(*plat), PU_LEVEL, NULL);
 			memcpy (plat, SavePtr, sizeof(*plat));
 			SavePtr += sizeof(*plat);
-			plat->sector = &sectors[(int)plat->sector];
+			plat->sector = &sectors[(intptr_t)plat->sector];
 			plat->sector->specialdata = T_PlatRaise;
 			if (plat->thinker.function)
 				plat->thinker.function = T_PlatRaise;
@@ -576,7 +576,7 @@ static void UnarchiveSpecials(void)
 			flash = (lightflash_t *) Z_Malloc (sizeof(*flash), PU_LEVEL, NULL);
 			memcpy (flash, SavePtr, sizeof(*flash));
 			SavePtr += sizeof(*flash);
-			flash->sector = &sectors[(int)flash->sector];
+			flash->sector = &sectors[(intptr_t)flash->sector];
 			flash->thinker.function = T_LightFlash;
 			P_AddThinker (&flash->thinker);
 			break;
@@ -585,7 +585,7 @@ static void UnarchiveSpecials(void)
 			strobe = (strobe_t *) Z_Malloc (sizeof(*strobe), PU_LEVEL, NULL);
 			memcpy (strobe, SavePtr, sizeof(*strobe));
 			SavePtr += sizeof(*strobe);
-			strobe->sector = &sectors[(int)strobe->sector];
+			strobe->sector = &sectors[(intptr_t)strobe->sector];
 			strobe->thinker.function = T_StrobeFlash;
 			P_AddThinker (&strobe->thinker);
 			break;
@@ -594,7 +594,7 @@ static void UnarchiveSpecials(void)
 			glow = (glow_t *) Z_Malloc (sizeof(*glow), PU_LEVEL, NULL);
 			memcpy (glow, SavePtr, sizeof(*glow));
 			SavePtr += sizeof(*glow);
-			glow->sector = &sectors[(int)glow->sector];
+			glow->sector = &sectors[(intptr_t)glow->sector];
 			glow->thinker.function = T_Glow;
 			P_AddThinker (&glow->thinker);
 			break;
@@ -686,9 +686,9 @@ static void StreamOutWord(unsigned short val)
 }
 
 /*
-static void StreamOutLong(unsigned int val)
+static void StreamOutLong(uint32_t val)
 {
-	StreamOutBuffer(&val, sizeof(int));
+	StreamOutBuffer(&val, sizeof(uint32_t));
 }
 */
 

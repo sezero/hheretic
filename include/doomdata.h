@@ -31,13 +31,17 @@ typedef struct
 } mapvertex_t;
 COMPILE_TIME_ASSERT(mapvertex_t, sizeof(mapvertex_t) == 4);
 
+#if defined(__GNUC__) || defined(__clang__)
+#elif defined(_MSC_VER) || defined(__WATCOMC__)
+#pragma pack(push,1)
+#endif
 typedef struct
 {
 	short		textureoffset;
 	short		rowoffset;
 	char		toptexture[8], bottomtexture[8], midtexture[8];
 	short		sector;		/* on viewer's side */
-} __attribute__((__packed__)) mapsidedef_t;
+} STRUCT_PACKED mapsidedef_t;
 COMPILE_TIME_ASSERT(mapsidedef_t, sizeof(mapsidedef_t) == 30);
 
 typedef struct
@@ -46,7 +50,7 @@ typedef struct
 	short		flags;
 	short		special, tag;
 	short		sidenum[2];	/* sidenum[1] will be -1 if one sided */
-} __attribute__((__packed__)) maplinedef_t;
+} STRUCT_PACKED maplinedef_t;
 COMPILE_TIME_ASSERT(maplinedef_t, sizeof(maplinedef_t) == 14);
 
 #define	ML_BLOCKING			1
@@ -74,8 +78,12 @@ typedef	struct
 	char		floorpic[8], ceilingpic[8];
 	short		lightlevel;
 	short		special, tag;
-} __attribute__((__packed__)) mapsector_t;
+} STRUCT_PACKED mapsector_t;
 COMPILE_TIME_ASSERT(mapsector_t, sizeof(mapsector_t) == 26);
+#if defined(__GNUC__) || defined(__clang__)
+#elif defined(_MSC_VER) || defined(__WATCOMC__)
+#pragma pack(pop)
+#endif
 
 typedef struct
 {
@@ -111,13 +119,17 @@ typedef struct
 } mapnode_t;
 COMPILE_TIME_ASSERT(mapnode_t, sizeof(mapnode_t) == 28);
 
+#if defined(__GNUC__) || defined(__clang__)
+#elif defined(_MSC_VER) || defined(__WATCOMC__)
+#pragma pack(push,1)
+#endif /**/
 typedef struct
 {
 	short		x, y;
 	short		angle;
 	short		type;
 	short		options;
-} __attribute__((__packed__)) mapthing_t;
+} STRUCT_PACKED mapthing_t;
 COMPILE_TIME_ASSERT(mapthing_t, sizeof(mapthing_t) == 10);
 
 #define	MTF_EASY		1
@@ -135,19 +147,19 @@ typedef struct
 	short		patch;
 	short		stepdir;
 	short		colormap;
-} __attribute__((__packed__)) mappatch_t;
+} STRUCT_PACKED mappatch_t;
 COMPILE_TIME_ASSERT(mappatch_t, sizeof(mappatch_t) == 10);
 
 typedef struct
 {
 	char		name[8];
-	boolean		masked;	
+	boolean		masked;
 	short		width;
 	short		height;
 	int32_t		columndirectory;	/* OBSOLETE */
 	short		patchcount;
 	mappatch_t	patches[1];
-} __attribute__((__packed__)) maptexture_t;
+} STRUCT_PACKED maptexture_t;
 COMPILE_TIME_ASSERT(maptexture_t, sizeof(maptexture_t) == 32);
 
 
@@ -159,8 +171,13 @@ typedef struct
 	byte		topdelta;	/* -1 is the last post in a column */
 	byte		length;
 	/* length data bytes follows */
-} __attribute__((__packed__)) post_t;
+} STRUCT_PACKED post_t;
 COMPILE_TIME_ASSERT(post_t, sizeof(post_t) == 2);
+
+#if defined(__GNUC__) || defined(__clang__)
+#elif defined(_MSC_VER) || defined(__WATCOMC__)
+#pragma pack(pop)
+#endif /**/
 
 /* column_t is a list of 0 or more post_t, (byte)-1 terminated */
 typedef post_t	column_t;
@@ -180,4 +197,3 @@ typedef struct
 COMPILE_TIME_ASSERT(patch_t, sizeof(patch_t) == 40);
 
 #endif	/* __DOOMDATA__ */
-

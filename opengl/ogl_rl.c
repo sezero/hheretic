@@ -65,8 +65,7 @@ void RL_Init(void)
 void RL_DestroyList(rendlist_t *rl)
 {
 	// All the list data will be destroyed.
-	if (rl->quads)
-		free(rl->quads);
+	free(rl->quads);
 	memset(rl, 0, sizeof(rendlist_t));
 }
 
@@ -83,8 +82,7 @@ void RL_DeleteLists(void)
 	RL_DestroyList(&dlwall_rlist);
 	RL_DestroyList(&dlflat_rlist);
 
-	if (rlists)
-		free(rlists);
+	free(rlists);
 	rlists = NULL;
 	numrlists = 0;
 }

@@ -671,8 +671,7 @@ void R_HandleSectorSpecials(sector_t *sect)
 
 static void DL_Clear(void)
 {
-	if (luminousList)
-		free(luminousList);
+	free(luminousList);
 	luminousList = NULL;
 	maxLuminous = numLuminous = 0;
 }
@@ -1169,14 +1168,8 @@ void R_DrawViewBorder (void)
 
 	// View background.
 	OGL_SetColorAndAlpha(1, 1, 1, 1);
-	if (shareware)
-	{
-		OGL_SetFlat(W_GetNumForName("FLOOR04") - firstflat);
-	}
-	else
-	{
-		OGL_SetFlat(W_GetNumForName("FLAT513") - firstflat);
-	}
+	lump = W_GetNumForName(shareware ? "FLOOR04" : "FLAT513");
+	OGL_SetFlat(lump - firstflat);
 
 //	OGL_DrawRectTiled(0, 0, SCREENWIDTH, SCREENHEIGHT-SBARHEIGHT, 64, 64);
 //	OGL_DrawCutRectTiled(0, 0, 320, 200 - (sbarscale == 20 ? SBARHEIGHT : 0)
@@ -1218,23 +1211,18 @@ void R_DrawViewBorder (void)
 */
 void R_DrawTopBorder (void)
 {
+	int lump;
+
 	if (scaledviewwidth == SCREENWIDTH)
 		return;
 
 	OGL_SetColorAndAlpha(1, 1, 1, 1);
-	if (shareware)
-	{
-		OGL_SetFlat(W_GetNumForName("FLOOR04") - firstflat);
-	}
-	else
-	{
-		OGL_SetFlat(W_GetNumForName("FLAT513") - firstflat);
-	}
+	lump = W_GetNumForName(shareware ? "FLOOR04" : "FLAT513");
+	OGL_SetFlat(lump - firstflat);
 
 	OGL_DrawRectTiled(0, 0, 320, 64, 64, 64);
 	if (viewwindowy < 65)
 	{
-		int	lump;
 		OGL_SetPatch(lump = W_GetNumForName("bordt"));
 		OGL_DrawRectTiled(viewwindowx, viewwindowy - 4, viewwidth,
 				  lumptexsizes[lump].h, 16, lumptexsizes[lump].h);

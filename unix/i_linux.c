@@ -180,7 +180,11 @@ void I_Error (const char *error, ...)
 //
 //--------------------------------------------------------------------------
 
-#ifndef __MINT__
+#ifdef __MINT__
+static void I_ENDTEXT (void) {
+/* dos2ansi code looks ugly when executed only from plain TOS.. */
+}
+#else
 static void put_dos2ansi (byte attrib)
 {
 	byte	fore, back, blink = 0, intens = 0;
@@ -244,9 +248,7 @@ void I_Quit (void)
 	D_QuitNetGame();
 	M_SaveDefaults();
 	I_Shutdown();
-#ifndef __MINT__	// this looks ugly when executed only from plain TOS
 	I_ENDTEXT ();
-#endif
 
 	exit(0);
 }

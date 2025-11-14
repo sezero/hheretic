@@ -125,7 +125,7 @@ void OGL_TexInit(void)
 	memset(lumptexsizes, 0, numlumps * sizeof(texsize_t));
 
 	// Raw screen lump book keeping.
-	rawlumps = 0;
+	rawlumps = NULL;
 	numrawlumps = 0;
 
 	// The dynamic light map.
@@ -565,7 +565,7 @@ unsigned int OGL_PrepareSprite(int pnum)
 		int	p2width = FindNextPower2(w),
 			p2height = OGL_ValidTexHeight2(w, h);
 		int	flatsize = p2width*p2height;
-		byte	*rgbaflat = (byte *) calloc (1, 4* flatsize);
+		byte	*rgbaflat = (byte *) calloc (1, 4*flatsize);
 
 		OGL_DEBUG("orig: %d x %d => %d x %d\n", w, h, p2width, p2height);
 

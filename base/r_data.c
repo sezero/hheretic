@@ -160,7 +160,7 @@ void R_GenerateLookup (int texnum)
 
 	texture = textures[texnum];
 
-	texturecomposite[texnum] = 0;	// composited not created yet
+	texturecomposite[texnum] = NULL;	// composited not created yet
 	texturecompositesize[texnum] = 0;
 	collump = texturecolumnlump[texnum];
 	colofs = texturecolumnofs[texnum];

@@ -292,8 +292,8 @@ static void UnarchiveWorld(void)
 		sec->lightlevel = *get++;
 		sec->special = *get++;	// needed?
 		sec->tag = *get++;	// needed?
-		sec->specialdata = 0;
-		sec->soundtarget = 0;
+		sec->specialdata = NULL;
+		sec->soundtarget = NULL;
 	}
 
 //

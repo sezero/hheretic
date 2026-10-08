@@ -490,6 +490,7 @@ static const struct
 {
 	{ MUS_OGG, "ogg" },
 	{ MUS_MP3, "mp3" },
+	{ MUS_WAV, "wav" },
 	{ MUS_MID, "mid" },	/* midi must be the last before NULL	*/
 	{ MUS_NONE, NULL }	/* the last entry must be NULL		*/
 };

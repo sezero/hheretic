@@ -36,16 +36,9 @@
 #include "i_sound.h"
 
 
-#define SAMPLE_FORMAT	AUDIO_S16SYS
-#define SAMPLE_ZERO	0
+#define SAMPLE_FORMAT	AUDIO_S16SYS	/* requested, see set_sample_format() */
 #define SAMPLE_RATE	11025	/* Hz */
 #define SAMPLE_CHANNELS	2
-
-#if 0
-#define SAMPLE_TYPE	char
-#else
-#define SAMPLE_TYPE	short
-#endif
 
 
 /*
@@ -67,8 +60,8 @@ typedef struct
 	unsigned char	*begin;		/* pointers into Sample.firstSample */
 	unsigned char	*end;
 
-	SAMPLE_TYPE	*lvol_table;	/* point into vol_lookup */
-	SAMPLE_TYPE	*rvol_table;
+	short		*lvol_table;	/* point into vol_lookup */
+	short		*rvol_table;
 
 	unsigned int	pitch_step;
 	unsigned int	step_remainder;	/* 0.16 bit remainder of last step. */
@@ -93,84 +86,144 @@ COMPILE_TIME_ASSERT(Sample, offsetof(Sample,firstSample) == 8);
 static Channel	channel[CHAN_COUNT];
 
 #define MAX_VOL		64	/* 64 keeps our table down to 16Kb */
-static SAMPLE_TYPE	vol_lookup[MAX_VOL * 256];
+static short	vol_lookup[MAX_VOL * 256];
 
 static int	steptable[256];		/* Pitch to stepping lookup */
 
 static boolean	snd_initialized;
 static int	SAMPLECOUNT = 512;
 int	snd_samplerate = SAMPLE_RATE;
+static int	snd_outrate = SAMPLE_RATE;	/* rate the device actually runs at */
+
+static Uint16	snd_format;		/* output format, see audio_loop() */
+
+static boolean set_sample_format (Uint16 format)
+{
+	switch (format)
+	{
+	case AUDIO_U8:
+	case AUDIO_S8:
+	case AUDIO_U16SYS:
+	case AUDIO_S16SYS:
+		snd_format = format;
+		return true;
+	}
+	return false;
+}
 
 
-static void audio_loop (void *unused, Uint8 *stream, int len)
+// Adds the current sample of every active channel to *pdl / *pdr,
+// advances the channels and clamps the sums to signed 16-bit.
+static inline void mix_channels (int *pdl, int *pdr)
 {
 	Channel* chan;
 	Channel* cend;
-	SAMPLE_TYPE *begin;
-	SAMPLE_TYPE *end;
 	unsigned int sample;
-	register int dl;
-	register int dr;
+	register int dl = *pdl;
+	register int dr = *pdr;
 
-	end = (SAMPLE_TYPE *) (stream + len);
 	cend = channel + CHAN_COUNT;
 
-	begin = (SAMPLE_TYPE *) stream;
-	while (begin < end)
+	chan = channel;
+	for ( ; chan < cend; chan++)
 	{
-	// Mix all the channels together.
-		dl = SAMPLE_ZERO;
-		dr = SAMPLE_ZERO;
-
-		chan = channel;
-		for ( ; chan < cend; chan++)
+		// Check channel, if active.
+		if (chan->begin)
 		{
-			// Check channel, if active.
-			if (chan->begin)
+			// Get the sample from the channel.
+			sample = *chan->begin;
+
+			// Adjust volume accordingly.
+			dl += chan->lvol_table[sample];
+			dr += chan->rvol_table[sample];
+
+			// Increment sample pointer with pitch adjustment.
+			chan->step_remainder += chan->pitch_step;
+			chan->begin += chan->step_remainder >> 16;
+			chan->step_remainder &= 65535;
+
+			// Check whether we are done.
+			if (chan->begin >= chan->end)
 			{
-				// Get the sample from the channel.
-				sample = *chan->begin;
-
-				// Adjust volume accordingly.
-				dl += chan->lvol_table[sample];
-				dr += chan->rvol_table[sample];
-
-				// Increment sample pointer with pitch adjustment.
-				chan->step_remainder += chan->pitch_step;
-				chan->begin += chan->step_remainder >> 16;
-				chan->step_remainder &= 65535;
-
-				// Check whether we are done.
-				if (chan->begin >= chan->end)
-				{
-					chan->begin = NULL;
-				//	printf ("  channel done %d\n", chan);
-				}
+				chan->begin = NULL;
+			//	printf ("  channel done %d\n", chan);
 			}
 		}
+	}
 
-#if 0	/* SAMPLE_FORMAT */
-		if (dl > 127)
-			dl = 127;
-		else if (dl < -128)
-			dl = -128;
-		if (dr > 127)
-			dr = 127;
-		else if (dr < -128)
-			dr = -128;
-#else
-		if (dl > 0x7fff)
-			dl = 0x7fff;
-		else if (dl < -0x8000)
-			dl = -0x8000;
-		if (dr > 0x7fff)
-			dr = 0x7fff;
-		else if (dr < -0x8000)
-			dr = -0x8000;
-#endif
+	if (dl > 0x7fff)
+		dl = 0x7fff;
+	else if (dl < -0x8000)
+		dl = -0x8000;
+	if (dr > 0x7fff)
+		dr = 0x7fff;
+	else if (dr < -0x8000)
+		dr = -0x8000;
 
-		*begin++ = dl;
-		*begin++ = dr;
+	*pdl = dl;
+	*pdr = dr;
+}
+
+// The channels are mixed as signed 16-bit and converted to the output
+// format while writing the stream.  Unsigned formats differ from signed
+// ones only in the inverted sign bit (signflip).
+static inline void mix_stream (Uint8 *stream, int len,
+				boolean bits8, int signflip)
+{
+	int dl, dr;
+
+	if (bits8)
+	{
+		Uint8 *begin = stream;
+		Uint8 *end = stream + len;
+
+		while (begin < end)
+		{
+			dl = 0;
+			dr = 0;
+			mix_channels(&dl, &dr);
+
+			begin[0] = (dl >> 8) ^ signflip;
+			begin[1] = (dr >> 8) ^ signflip;
+			begin += 2;
+		}
+	}
+	else
+	{
+		Uint16 *begin = (Uint16 *) stream;
+		Uint16 *end = (Uint16 *) (stream + len);
+
+		while (begin < end)
+		{
+			dl = 0;
+			dr = 0;
+			mix_channels(&dl, &dr);
+
+			begin[0] = dl ^ signflip;
+			begin[1] = dr ^ signflip;
+			begin += 2;
+		}
+	}
+}
+
+static void audio_loop (void *unused, Uint8 *stream, int len)
+{
+	// Constant arguments make the compiler build a separate loop
+	// for each format, without per-sample format checks.
+	switch (snd_format)
+	{
+	case AUDIO_U8:
+		mix_stream(stream, len, true, 0x80);
+		break;
+	case AUDIO_S8:
+		mix_stream(stream, len, true, 0);
+		break;
+	case AUDIO_U16SYS:
+		mix_stream(stream, len, false, 0x8000);
+		break;
+	case AUDIO_S16SYS:
+		mix_stream(stream, len, false, 0);
+		break;
 	}
 }
 
@@ -358,9 +411,17 @@ void I_StartupSound (void)
 		fprintf(stderr, "Couldn't open audio with desired format\n");
 		return;
 	}
+	if (!set_sample_format(obtained.format))
+	{
+		fprintf(stderr, "Unsupported audio format 0x%04x\n", obtained.format);
+		SDL_CloseAudio();
+		return;
+	}
 	snd_initialized = true;
+	snd_outrate = obtained.freq;
 	SAMPLECOUNT = obtained.samples;
-	fprintf(stdout, "Configured audio device with %d samples/slice\n", SAMPLECOUNT);
+	fprintf(stdout, "Configured audio device with %d Hz, %d samples/slice\n",
+		snd_outrate, SAMPLECOUNT);
 	snd_SfxAvail = true;
 	SDL_PauseAudio(0);
 }
@@ -391,11 +452,13 @@ void I_SetChannels(int channels)
 		channel[j].time = 0;
 	}
 
-	// This table provides step widths for pitch parameters.
+	// This table provides step widths for pitch parameters, scaled
+	// from the sound effect rate to the output rate.
 	steptablemid = steptable + 128;
 	for (j = -128; j < 128; j++)
 	{
-		steptablemid[j] = (int) (pow(2.0, (j/64.0)) * 65536.0);
+		steptablemid[j] = (int) (pow(2.0, (j/64.0)) * 65536.0 *
+					 SND_SAMPLERATE / snd_outrate);
 	}
 
 	// Generate the volume lookup tables.
@@ -404,11 +467,7 @@ void I_SetChannels(int channels)
 		// Turn the unsigned samples into signed samples.
 		for (j = 0; j < 256; j++)
 		{
-			#if 0	/* SAMPLE_FORMAT */
-			vol_lookup[v*256+j] = (v * (j-128)) / (MAX_VOL-1);
-			#else
 			vol_lookup[v*256+j] = (v * (j-128) * 256) / (MAX_VOL-1);
-			#endif
 			//printf ("vol_lookup[%d*256+%d] = %d\n", v, j, vol_lookup[v*256+j]);
 		}
 	}
